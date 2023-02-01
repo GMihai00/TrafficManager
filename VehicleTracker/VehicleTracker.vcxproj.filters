@@ -13,5 +13,24 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\model">
+      <UniqueIdentifier>{956ada1e-ae88-493c-b21a-a85e509d2d87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\model">
+      <UniqueIdentifier>{027f2108-2357-4078-906a-1c69b3a288cb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="model\SystemClient.hpp">
+      <Filter>Header Files\model</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="model\SystemClient.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
+    <ClCompile Include="VehicleTracker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

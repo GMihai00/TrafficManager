@@ -256,7 +256,13 @@ namespace net
             while (!outgoingMessages_.empty())
             {
                 mutexWrite_.lock();
-                const auto& outgoingMessage = outgoingMessages_.pop().first;
+                auto outgoingMsg = outgoingMessages_.pop();
+                if (!outgoingMsg)
+                {
+                    LOG_ERR << "Failed to get image from queue";
+                    return;
+                }
+                const auto& outgoingMessage = outgoingMsg.value().first;
                 writeHeader(outgoingMessage);
                 if (outgoingMessage.header.size > 0)
                 {
