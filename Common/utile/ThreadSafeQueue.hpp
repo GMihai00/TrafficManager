@@ -37,7 +37,7 @@ namespace common
                     return {};
                 }
                 std::scoped_lock lock(mutexQueue_);
-                auto t = std::move(queue_.top());
+                auto t = std::move(queue_.front());
                 queue_.pop();
                 return t;
             }

@@ -8,7 +8,7 @@
 
 namespace cvision
 {
-	Camera::Camera(const uint16_t id) :
+	Camera::Camera(const int16_t id) :
 		id_{ id }
 	{
 		LOG_SET_NAME("CAMERA-" + std::to_string(id));

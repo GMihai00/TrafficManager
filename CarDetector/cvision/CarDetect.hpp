@@ -5,6 +5,7 @@
 #include <queue>
 #include "Utils.hpp"
 #include "opencv2/objdetect.hpp"
+#include "MovingObjectGroup.hpp"
 
 namespace cvision
 {

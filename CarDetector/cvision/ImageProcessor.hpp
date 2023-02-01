@@ -2,6 +2,7 @@
 #ifndef CARDETECT_CVISION_IMAGEPROCESSOR_HPP
 #define CARDETECT_CVISION_IMAGEPROCESSOR_HPP
 
+#include "MovingObject.hpp"
 #include "Utils.hpp"
 
 namespace cvision

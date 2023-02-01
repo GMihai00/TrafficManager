@@ -68,11 +68,11 @@ namespace utile
         friend std::ostream& operator << (Logger& logger, T data)
         {
              // TODO: SOMEHOW FLAG NOT SET 
-             if (logger.type_ == LogTypes::DBG &&
+             /*if (logger.type_ == LogTypes::DBG &&
                  !(std::getenv("LOGGER_DEBUG") && std::getenv("LOGGER_DEBUG") == "TRUE"))
              {
                  return logger.os_;
-             }
+             }*/
 
             if (logger.type_ == LogTypes::ERR)
             {

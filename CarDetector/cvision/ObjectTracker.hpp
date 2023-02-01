@@ -10,7 +10,7 @@
 #include <chrono>
 #include <string>
 #include <list>
-#include <boost/optional.hpp>
+#include <optional>
 #include <condition_variable>
 
 #include <opencv2/core/core.hpp>
@@ -38,8 +38,8 @@ namespace cvision
 		MovingObjGroupPtrList movingObjects_;
 		std::shared_ptr<CarDetect> carDetector_;
 		MovingObjGroupPtrList cars_;
-		boost::optional<cv::Mat> firstImageFrame_;
-		boost::optional<cv::Mat> secondImageFrame_;
+		std::optional<cv::Mat> firstImageFrame_;
+		std::optional<cv::Mat> secondImageFrame_;
 		int horizontalLinePosition_;
 		cv::Point crossingLineRight_[2];
 		cv::Point crossingLineLeft_[2];
@@ -50,16 +50,17 @@ namespace cvision
 		Camera camera_;
 		std::mutex mutexProcess_;
 		std::condition_variable condVarProcess_;
+		bool shouldRender_ = false;
 		LOGGER("CAR-TRACKER");
 
 		void setupLines();
 		void processImages();
 		void waitForFirstFrameApperance();
 
-		void addNewMovingObject(const std::shared_ptr<MovingObject>& currentFrameMovingObj);
+		void addNewMovingObject(const MovingObjectPtr& currentFrameMovingObj);
 		void matchFoundObjToExistingOnes(MovingObjPtrList& currentFrameMovingObj);
-		std::pair<std::shared_ptr<MovingObjectGroup>, double> getClosestMovingObject(
-			const MovingObjGroupPtrList& movingObjGroupList, const std::shared_ptr<MovingObject>& targetMovingObject);
+		std::pair<MovingObjectGroupPtr, double> getClosestMovingObject(
+			const MovingObjGroupPtrList& movingObjGroupList, const MovingObjectPtr& targetMovingObject);
 		bool checkIfCarsCrossedRight();
 		bool checkIfCarsCrossedLeft();
 
@@ -72,7 +73,7 @@ namespace cvision
 		ObjectTracker(const std::string videoPath);
 		ObjectTracker(const ObjectTracker&) = delete;
 		virtual ~ObjectTracker() noexcept;
-		bool startTracking();
+		bool startTracking(bool shouldRender = false);
 		void stopTracking();
 	};
 } // namespace cvision

@@ -26,9 +26,12 @@ namespace cvision
 					std::unique_lock<std::mutex> ulock(mutexRender_);
 					condVarRender_.wait(ulock, [this] { return !imageQueue_.empty(); });
 
-					const cv::Mat& img = imageQueue_.pop().first;
-					cv::imshow("FRAME", img);
-					cv::waitKey(1);
+					auto img = imageQueue_.pop();
+					if (img)
+					{
+						cv::imshow("FRAME", img.value());
+						cv::waitKey(1);
+					}
 				}
 			});
 		return true;

@@ -4,7 +4,11 @@
 
 #include <list>
 #include <vector>
-#include "MovingObjectGroup.hpp"
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 
 #define SCALAR_BLACK cv::Scalar(0.0, 0.0, 0.0)
 #define SCALAR_PINK cv::Scalar(255.0, 102.0, 255.0)
@@ -14,8 +18,6 @@
 
 namespace cvision
 {
-	typedef std::list<MovingObjectGroupPtr> MovingObjGroupPtrList;
-	typedef std::list<MovingObjectPtr> MovingObjPtrList;
 	typedef std::vector<std::vector<cv::Point> > PointMatrix;
 	double distanceBetweenPoints(cv::Point point1, cv::Point point2);
 

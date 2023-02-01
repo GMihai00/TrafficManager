@@ -32,5 +32,6 @@ namespace cvision
 		cv::Rect getBoudingRect() const;
 	};
 	typedef std::shared_ptr<MovingObject> MovingObjectPtr;
+	typedef std::list<MovingObjectPtr> MovingObjPtrList;
 } // namespace cvision
 #endif // #MODEL_CVISION_MOVINGOBJECT_HPP

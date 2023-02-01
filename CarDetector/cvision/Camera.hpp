@@ -32,7 +32,7 @@ namespace cvision
 		boost::optional<cv::Mat> currentImage_;
 		LOGGER("Camera");
 	public:
-		Camera(const uint16_t id);
+		Camera(const int16_t id);
 		Camera(const std::string pathVideo);
 		Camera(const Camera&) = delete;
 		virtual ~Camera();

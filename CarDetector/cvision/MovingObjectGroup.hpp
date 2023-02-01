@@ -50,6 +50,7 @@ namespace cvision
 		size_t nrCars();
 	};
 	typedef std::shared_ptr<MovingObjectGroup> MovingObjectGroupPtr;
+	typedef std::list<MovingObjectGroupPtr> MovingObjGroupPtrList;
 } // namespace cvision
 
 #endif // #MODEL_CVISION_MOVINGOBJECTGROUP_HPP
