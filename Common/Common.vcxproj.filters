@@ -13,6 +13,20 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\utile">
+      <UniqueIdentifier>{9573ac7e-3a3e-4cff-9ce0-d1f35ad5bd52}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="utile\Logger.hpp">
+      <Filter>Header Files\utile</Filter>
+    </ClInclude>
+    <ClInclude Include="utile\ThreadSafePriorityQueue.hpp">
+      <Filter>Header Files\utile</Filter>
+    </ClInclude>
+    <ClInclude Include="utile\ThreadSafeQueue.hpp">
+      <Filter>Header Files\utile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib.cpp">
