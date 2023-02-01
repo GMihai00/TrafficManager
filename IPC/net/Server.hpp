@@ -1,5 +1,5 @@
-#ifndef IPC_NET_SERVER
-#define IPC_NET_SERVER
+#ifndef IPC_NET_SERVER_HPP
+#define IPC_NET_SERVER_HPP
 
 #include <algorithm>
 #include <memory>
@@ -173,4 +173,4 @@ namespace net
     };
 } // namespace net
 } // namespace ipc
-#endif // #IPC_NET_SERVER
+#endif // #IPC_NET_SERVER_HPP

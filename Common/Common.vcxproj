@@ -152,7 +152,7 @@
     <ClInclude Include="utile\ThreadSafeQueue.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="lib.cpp" />
+    <ClCompile Include="Common.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

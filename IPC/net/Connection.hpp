@@ -1,5 +1,5 @@
-#ifndef IPC_NET_CONNECTION
-#define IPC_NET_CONNECTION
+#ifndef IPC_NET_CONNECTION_HPP
+#define IPC_NET_CONNECTION_HPP
 
 #include <iostream>
 #include <memory>
@@ -321,4 +321,4 @@ namespace net
     };
 }   // namespace net
 }   // namespace ipc
-#endif // #IPC_NET_CONNECTION
+#endif // #IPC_NET_CONNECTION_HPP

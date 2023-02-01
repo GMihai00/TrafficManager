@@ -1,5 +1,5 @@
-#ifndef IPC_NET_CLIENT
-#define IPC_NET_CLIENT
+#ifndef IPC_NET_CLIENT_HPP
+#define IPC_NET_CLIENT_HPP
 
 #include <iostream>
 #include <memory>
@@ -111,4 +111,4 @@ namespace net
     };
 } // namespace net
 } // namespace ipc
-#endif // #IPC_NET_CLIENT
+#endif // #IPC_NET_CLIENT_HPP

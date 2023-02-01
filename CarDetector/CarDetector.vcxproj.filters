@@ -13,10 +13,71 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\cvision">
+      <UniqueIdentifier>{d0dfb92a-cb09-429d-99c9-8128ce74b2fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\cvision">
+      <UniqueIdentifier>{afe97c45-f16f-4d61-b61c-8aab953574e9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="lib.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="CarDetector.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cvision\Camera.cpp">
+      <Filter>Source Files\cvision</Filter>
+    </ClCompile>
+    <ClCompile Include="cvision\CarDetect.cpp">
+      <Filter>Source Files\cvision</Filter>
+    </ClCompile>
+    <ClCompile Include="cvision\ImageProcessor.cpp">
+      <Filter>Source Files\cvision</Filter>
+    </ClCompile>
+    <ClCompile Include="cvision\ImageRender.cpp">
+      <Filter>Source Files\cvision</Filter>
+    </ClCompile>
+    <ClCompile Include="cvision\MovingObject.cpp">
+      <Filter>Source Files\cvision</Filter>
+    </ClCompile>
+    <ClCompile Include="cvision\MovingObjectGroup.cpp">
+      <Filter>Source Files\cvision</Filter>
+    </ClCompile>
+    <ClCompile Include="cvision\ObjectTracker.cpp">
+      <Filter>Source Files\cvision</Filter>
+    </ClCompile>
+    <ClCompile Include="cvision\Utils.cpp">
+      <Filter>Source Files\cvision</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\resources\carsTrainedData.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cvision\Utils.hpp">
+      <Filter>Header Files\cvision</Filter>
+    </ClInclude>
+    <ClInclude Include="cvision\ObjectTracker.hpp">
+      <Filter>Header Files\cvision</Filter>
+    </ClInclude>
+    <ClInclude Include="cvision\MovingObjectGroup.hpp">
+      <Filter>Header Files\cvision</Filter>
+    </ClInclude>
+    <ClInclude Include="cvision\MovingObject.hpp">
+      <Filter>Header Files\cvision</Filter>
+    </ClInclude>
+    <ClInclude Include="cvision\ImageRender.hpp">
+      <Filter>Header Files\cvision</Filter>
+    </ClInclude>
+    <ClInclude Include="cvision\ImageProcessor.hpp">
+      <Filter>Header Files\cvision</Filter>
+    </ClInclude>
+    <ClInclude Include="cvision\CarDetect.hpp">
+      <Filter>Header Files\cvision</Filter>
+    </ClInclude>
+    <ClInclude Include="cvision\Camera.hpp">
+      <Filter>Header Files\cvision</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
-#ifndef COMMON_UTILE_THREADSAFEQUEUE
-#define COMMON_UTILE_THREADSAFEQUEUE
+#ifndef COMMON_UTILE_THREADSAFEQUEUE_HPP
+#define COMMON_UTILE_THREADSAFEQUEUE_HPP
 
 #include <mutex>
 #include <thread>
@@ -71,4 +71,4 @@ namespace common
         };
     } // namespace utile
 } // namespace common
-#endif // #COMMON_UTILE_THREADSAFEQUEUE
+#endif // #COMMON_UTILE_THREADSAFEQUEUE_HPP

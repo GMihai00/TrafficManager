@@ -1,5 +1,5 @@
-#ifndef IPC_UTILE_MESSAGEIDPROVIDER
-#define IPC_UTILE_MESSAGEIDPROVIDER
+#ifndef IPC_UTILE_MESSAGEIDPROVIDER_HPP
+#define IPC_UTILE_MESSAGEIDPROVIDER_HPP
 
 #include "../MessageTypes.hpp"
 #include <map>
@@ -27,4 +27,4 @@ namespace utile
     };
 } // namespace utile
 } // namespace ipc
-#endif // #IPC_UTILE_MESSAGEIDPROVIDER
+#endif // #IPC_UTILE_MESSAGEIDPROVIDER_HPP

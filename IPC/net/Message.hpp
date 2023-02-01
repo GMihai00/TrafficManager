@@ -1,5 +1,5 @@
-#ifndef IPC_NET_MESSAGE
-#define IPC_NET_MESSAGE
+#ifndef IPC_NET_MESSAGE_HPP
+#define IPC_NET_MESSAGE_HPP
 
 #include <iostream>
 #include <vector>
@@ -142,4 +142,4 @@ namespace net
     };
 } // namespace net
 } // namespace ipc
-#endif // #IPC_NET_MESSAGE
+#endif // #IPC_NET_MESSAGE_HPP

@@ -1,5 +1,5 @@
-#ifndef IPC_NET_MESSAGETYPES
-#define IPC_NET_MESSAGETYPES
+#ifndef IPC_NET_MESSAGETYPES_HPP
+#define IPC_NET_MESSAGETYPES_HPP
 
 #include <iostream>
 
@@ -13,4 +13,4 @@ namespace ipc
         VCDR // Vehicle Client Detection Result - number of vehicles detected
     };
 } // namespace ipc
-#endif // #IPC_NET_MESSAGETYPES
+#endif // #IPC_NET_MESSAGETYPES_HPP

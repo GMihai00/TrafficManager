@@ -1,5 +1,5 @@
-#ifndef COMMON_UTILS_LOGGER
-#define COMMON_UTILS_LOGGER
+#ifndef COMMON_UTILS_LOGGER_HPP
+#define COMMON_UTILS_LOGGER_HPP
 
 #include <iostream>
 #include <string>
@@ -115,4 +115,4 @@ namespace utile
     }
 } // namespace utile
 } // namespace common
-#endif
+#endif // #COMMON_UTILS_LOGGER_HPP
