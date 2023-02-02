@@ -2,4 +2,4 @@
 #include "utile/ThreadSafePriorityQueue.hpp"
 #include "utile/ThreadSafeQueue.hpp"
 #include "utile/Timer.hpp"
-#include "utile/IObserver.hpp"
+#include "utile/Observer.hpp"

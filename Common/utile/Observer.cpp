@@ -12,5 +12,10 @@ namespace common
 			callback_();
 		}
 
+		bool Observer::operator== (const IObserver& rhs)
+		{
+
+		}
+
 	}
 }
