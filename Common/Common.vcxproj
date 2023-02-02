@@ -147,13 +147,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="utile\IObserver.hpp" />
     <ClInclude Include="utile\Logger.hpp" />
+    <ClInclude Include="utile\Observer.hpp" />
     <ClInclude Include="utile\ThreadSafePriorityQueue.hpp" />
     <ClInclude Include="utile\ThreadSafeQueue.hpp" />
     <ClInclude Include="utile\Timer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp" />
+    <ClCompile Include="utile\Observer.cpp" />
     <ClCompile Include="utile\Timer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
