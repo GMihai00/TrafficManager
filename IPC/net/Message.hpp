@@ -19,7 +19,7 @@ namespace net
         T type{};
         uint16_t id{};
         bool hasPriority = false;
-        uint32_t size = 0;
+        size_t size = 0;
     };
     
     template <typename T>

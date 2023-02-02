@@ -4,40 +4,49 @@ namespace common
 {
 	namespace utile
 	{
+		void Timer::startTimer()
+		{
+			threadTimer_ = std::thread([this]() {
+				while (true)
+				{
+					std::unique_lock<std::mutex> ulock(mutexTimer_);
+					condVarTimer_.wait(ulock, [this]() { return (expired_ == false) && (frozen_ == false); });
+					ulock.unlock();
+					while (timeLeft_ > 0)
+					{
+						ulock.lock();
+						std::this_thread::sleep_for(std::chrono::seconds(1));
+						timeLeft_--;
+						if (frozen_)
+						{
+							condVarTimer_.wait(ulock, [this]() { return (frozen_ == false); });
+						}
+						ulock.unlock();
+					}
+					ulock.lock();
+					expired_ = true;
+					if (observer_)
+					{
+						observer_->notify();
+					}
+					ulock.unlock();
+				}
+				});
+		}
+		Timer::Timer()
+		{
+			startTimer();
+		}
+
 		Timer::Timer(const uint16_t& sec) : timeLeft_(sec)
 		{
+			startTimer();
 			if (timeLeft_ != 0)
 			{
 				expired_ = false;
 				frozen_ = false;
+				condVarTimer_.notify_one();
 			}
-			threadTimer_ = std::thread([this]() {
-					while (true)
-					{
-						std::unique_lock<std::mutex> ulock(mutexTimer_);
-						condVarTimer_.wait(ulock, [this]() { return (expired_ == false) && (frozen_ == false); });
-						ulock.unlock();
-						while (timeLeft_ > 0)
-						{
-							ulock.lock();
-							std::this_thread::sleep_for(std::chrono::seconds(1));
-							timeLeft_--;
-							if (frozen_)
-							{
-								condVarTimer_.wait(ulock, [this]() { return (frozen_ == false); });
-							}
-							ulock.unlock();
-						}
-						ulock.lock();
-						expired_ = true;
-						if (observer_)
-						{
-							observer_->notify();
-						}
-						ulock.unlock();
-					}
-				});
-			condVarTimer_.notify_one();
 		}
 
 		Timer::~Timer()

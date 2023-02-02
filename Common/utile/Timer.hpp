@@ -26,9 +26,11 @@ namespace common
 			std::mutex mutexTimer_;
 			std::condition_variable condVarTimer_;
 			IObserverPtr observer_;
+
+			void startTimer();
 		public:
-			Timer() = delete;
-			Timer(const uint16_t& sec = 0);
+			Timer();
+			Timer(const uint16_t& sec);
 			Timer(const Timer&) = delete;
 			virtual ~Timer() noexcept;
 			void decreaseTimer(const uint16_t& sec);
