@@ -1,0 +1,16 @@
+{
+  "lanes": {
+    "top": "IP1",
+    "down": "IP2",
+    "left": "IP3",
+    "right": "IP4"
+  },
+  "usingRightLane": true,
+  "maxWaitingTime": 120,
+  "latitude": "45° 02' 60.0\" N",
+  "longitude": "23° 16' 59.99\" E",
+  "localServer": "IP_SERVER",
+  "comment": " SHOULD KNOW THE NUMBER OF SEMAPHORS IN THE JUNCTION...",
+  "commnet": "missingLane is optional",
+  "missingLane": "top"
+}

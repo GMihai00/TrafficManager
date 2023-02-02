@@ -96,6 +96,11 @@ namespace net
             return id_;
         }
     
+        std::string getIpAdress() const
+        {
+            return socket_.remote_endpoint().address().to_string();
+        }
+
         // ASYNC OK
         void connectToServer(const boost::asio::ip::tcp::resolver::results_type& endpoints)
         {

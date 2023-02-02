@@ -27,10 +27,16 @@
     <ClInclude Include="utile\ThreadSafeQueue.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
+    <ClInclude Include="utile\Timer.hpp">
+      <Filter>Header Files\utile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utile\Timer.cpp">
+      <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
