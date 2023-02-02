@@ -16,6 +16,9 @@
     <Filter Include="Header Files\utile">
       <UniqueIdentifier>{9573ac7e-3a3e-4cff-9ce0-d1f35ad5bd52}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\utile">
+      <UniqueIdentifier>{38731901-bd61-46e2-ba3a-e26fdd7b48f3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utile\Logger.hpp">
@@ -30,13 +33,22 @@
     <ClInclude Include="utile\Timer.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
+    <ClInclude Include="utile\IObserver.hpp">
+      <Filter>Header Files\utile</Filter>
+    </ClInclude>
+    <ClInclude Include="utile\Observer.hpp">
+      <Filter>Header Files\utile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utile\Timer.cpp">
-      <Filter>Resource Files</Filter>
+      <Filter>Source Files\utile</Filter>
+    </ClCompile>
+    <ClCompile Include="utile\Observer.cpp">
+      <Filter>Source Files\utile</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
