@@ -22,7 +22,10 @@
 
 #include "../Config.hpp"
 #include "utile/Logger.hpp"
+#include "utile/ThreadSafeQueue.hpp"
 #include "utile/Timer.hpp"
+#include "utile/Observer.hpp"
+#include "utile/IPCDataTypes.hpp"
 
 namespace sc = boost::statechart;
 namespace mpl = boost::mpl;
@@ -36,24 +39,21 @@ namespace model
 		// EVENTS
 		struct Start : sc::event<Start>
 		{
-
 		};
 
 		struct NormalTransition : sc::event<NormalTransition>
 		{
-
-		};
-
-		struct JumpTransition;
-		struct Transition // JUST TO HAVE A BASE CLASS FOR ALL OF THEM
-		{
-			static std::shared_ptr<Transition> nextTransition_;
-			virtual sc::result react(const JumpTransition& ev) = 0; // FOR NOW LIKE THIS BUT COULD IMPLEMENT IN HERE FOR ALL
-			virtual ~Transition();
 		};
 
 		struct JumpTransition : sc::event<JumpTransition>
 		{
+		};
+
+		struct Transition
+		{
+			static std::shared_ptr<Transition> nextTransition_;
+			virtual sc::result react(const JumpTransition& ev) = 0;
+			virtual ~Transition() noexcept { nextTransition_.reset(); };
 		};
 
 		struct Stopped;
@@ -65,33 +65,36 @@ namespace model
 		struct WTransition;
 		struct TrafficLightStateMachine : sc::state_machine<TrafficLightStateMachine, Stopped>
 		{
-		public:
-			std::mutex mutexQueue_;
-			std::map<uint8_t, uint16_t> trafficLoadMap_;
-			std::map <uint8_t, common::utile::Timer> laneToTimerMap_;
-			std::map<uint8_t, std::set<uint32_t>> vtsConnected_;
-			std::queue<std::pair<uint32_t, uint8_t>> queuedEmergencyVehicles_;
-			std::set<uint32_t> emergencyVehiclesWaiting_;
-			const uint16_t maximumWaitingTime_;
-			boost::optional<uint8_t> missingLane_;
+		private:
+			// CONFIG DATA
+			const uint16_t maximumWaitingTime_; // THIS IS USED FOR TIMERS 
+			boost::optional<utile::LANE> missingLane_;
+
+			std::mutex mutexClients_;
+			std::map<utile::LANE, ipc::utile::IP_ADRESSES> clientsConnected_;
+			std::map<utile::LANE, common::utile::Timer> laneToTimerMap_;
+
+			// IS TREATED AS A CLIENT SO CAN CHECK INSIDE CLIENTSCONNECTED
+			common::utile::ThreadSafeQueue<std::pair<utile::LANE, ipc::utile::IP_ADRESS>> waitingEmergencyVehicles_;
+			
+			IObserverPtr greenLightObserver_;
 			common::utile::Timer greenLightTimer_;
-			const uint16_t changeAdditionalTime_ = 5;
 			LOGGER("TRAFFICLIGHT-STATEMACHINE");
 
-			TrafficLightStateMachine(const uint16_t maximumWaitingTime,const boost::optional<uint8_t>& missingRoad);
+			void greenLightExpireCallback();
+			bool isLaneMissing(const utile::LANE lane) const;
+		public:
+			TrafficLightStateMachine(const uint16_t maximumWaitingTime, const boost::optional<utile::LANE>& missingLane);
 			TrafficLightStateMachine(const TrafficLightStateMachine&) = delete;
 			~TrafficLightStateMachine() = default;
 
-			bool isLaneMissing(const uint8_t lane);
 			// BASED ON THE LANE WE WILL DETERMINE WHAT PHAZE TO START: CAN BE EITHER II, III, VI or VII
 			// as they are the only ones that allow the vehicles to move freely from one lane
-			bool startEmergencyState(const uint32_t connectionId, const uint8_t lane);
+			bool registreClient(const utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			bool unregistreCleint(const utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			bool startEmergencyState(const utile::LANE lane, ipc::utile::IP_ADRESS ip);
 			bool isInEmergencyState();
-			bool endEmergencyState(const uint32_t connectionId, const uint8_t lane);
-
-			void registerDectedCars(const uint16_t numberOfCars, const uint8_t lane);
-			bool registerVT(const uint32_t connectionId, const uint8_t lane, const bool incoming);
-			static std::shared_ptr<Transition> nextTransition;
+			bool endEmergencyState(const utile::LANE lane, ipc::utile::IP_ADRESS ip);
 		};
 
 		// STATES

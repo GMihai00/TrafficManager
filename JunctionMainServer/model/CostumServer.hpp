@@ -12,6 +12,7 @@
 #include "controller/TrafficLightStateMachine.hpp"
 #include <boost/optional/optional.hpp>
 
+// TO REFACTOR EVERYTHING IN HERE IT IS SO SO SOOOO WRONG
 namespace model
 {
 	class CostumServer : ipc::net::Server<ipc::VehicleDetectionMessages>
@@ -22,10 +23,10 @@ namespace model
 		controller::TrafficLightStateMachine trafficLightStateMachine_;
 		bool usingLeftLane_;
 		std::string localProxyServer_;
-		std::map<uint8_t, std::string> laneToIPAdress_;
+		std::map<utile::LANE, ipc::utile::IP_ADRESS> laneToIPAdress_;
 		Config config_;
 	public:
-		CostumServer(const uint16_t port, const Config& config);
+		CostumServer(const uint16_t port, const Config& config); // TO typedef for PORT
 		CostumServer(const CostumServer&) = delete;
 		~CostumServer();
 
@@ -36,10 +37,10 @@ namespace model
 		
 		boost::optional<uint8_t> getMessageSourceLane(const std::string& ip);
 
-		void handleTOMessage(
+		void handleTrafficObserverMessage(
 			std::shared_ptr<ipc::net::Connection<ipc::VehicleDetectionMessages>> client,
 			ipc::net::Message< ipc::VehicleDetectionMessages>& msg);
-		void handleVTMessage(
+		void handleVehicleTrackerMessage(
 			std::shared_ptr<ipc::net::Connection<ipc::VehicleDetectionMessages>> client,
 			ipc::net::Message< ipc::VehicleDetectionMessages>& msg);
 		virtual void onMessage(

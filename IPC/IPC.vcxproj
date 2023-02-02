@@ -164,6 +164,7 @@
     <ClInclude Include="net\Connection.hpp" />
     <ClInclude Include="net\Message.hpp" />
     <ClInclude Include="net\Server.hpp" />
+    <ClInclude Include="utile\IPCDataTypes.hpp" />
     <ClInclude Include="utile\MessageIdProvider.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -4,95 +4,85 @@ namespace model
 {
 	namespace controller
 	{
+		void TrafficLightStateMachine::greenLightExpireCallback()
+		{
+
+		}
 
 		TrafficLightStateMachine::TrafficLightStateMachine(const uint16_t maximumWaitingTime, const boost::optional<uint8_t>& missingLane) :
 			maximumWaitingTime_(maximumWaitingTime),
 			missingLane_(missingLane)
 		{
-
+			greenLightObserver_ = std::make_shared<Observer>(std::bind(&greenLightExpireCallback, this));
+			greenLightTimer_.subscribe(greenLightObserver_);
 		}
 
-		bool TrafficLightStateMachine::isLaneMissing(const uint8_t lane)
+		bool TrafficLightStateMachine::registreClient(const utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
-			return (this->missingLane_ == lane);
+			std::scoped_lock lock(mutexClients_);
+			if (clientsConnected_[lane].find(ip) != clientsConnected_[lane].end())
+			{
+				LOG_WARN << "Client already connected";
+				return false;
+			}
+			clientsConnected_[lane].insert(ip);
+			return true;
 		}
 
-		bool TrafficLightStateMachine::startEmergencyState(const uint32_t connectionId, const uint8_t lane)
+		bool TrafficLightStateMachine::unregistreCleint(const utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
-			std::scoped_lock lock(mutexQueue_);
-			if (emergencyVehiclesWaiting_.find(connectionId) != emergencyVehiclesWaiting_.end())
+			std::scoped_lock lock(mutexClients_);
+			if (clientsConnected_[lane].find(ip) == clientsConnected_[lane].end())
 			{
-				LOG_DBG << " Emergency vehicle already queued";
+				LOG_WARN << "Client was never connected. Nothing to do";
 				return false;
 			}
-
-			if (!queuedEmergencyVehicles_.empty())
-			{
-				LOG_DBG << " Already in emergency state";
-				return false;
-			}
-
-			queuedEmergencyVehicles_.push({connectionId, lane});
-			emergencyVehiclesWaiting_.insert(connectionId);
+			clientsConnected_[lane].erase(ip);
 			return true;
 		}
 
 		bool TrafficLightStateMachine::isInEmergencyState()
 		{
-			std::scoped_lock lock(mutexQueue_);
-			return !queuedEmergencyVehicles_.empty();
+			return !waitingEmergencyVehicles_.empty();
 		}
 
-		bool TrafficLightStateMachine::endEmergencyState(const uint32_t connectionId, const uint8_t lane)
+		bool TrafficLightStateMachine::startEmergencyState(const utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
-			std::scoped_lock lock(mutexQueue_);
-			if (!queuedEmergencyVehicles_.empty())
-			{
-				LOG_DBG << " Was not in emergency state. Nothing to do";
-				return false;
-			}
-			if (!(queuedEmergencyVehicles_.front().first == connectionId && queuedEmergencyVehicles_.front().second == lane))
+			std::scoped_lock lock(mutexClients_);
+			if (!registreClient(lane, ip))
 			{
 				return false;
 			}
 
-			emergencyVehiclesWaiting_.erase(queuedEmergencyVehicles_.front().first);
-			queuedEmergencyVehicles_.pop();
+			waitingEmergencyVehicles_.push({lane, ip});
 			return true;
 		}
 
-		void TrafficLightStateMachine::registerDectedCars(const uint16_t numberOfCars, const uint8_t lane)
+		bool TrafficLightStateMachine::endEmergencyState(const utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
-			if (numberOfCars >= 0)
+			std::scoped_lock lock(mutexClients_);
+			if (!unregistreCleint(lane, ip))
 			{
-				trafficLoadMap_[lane] = numberOfCars;
+				return false;
 			}
-			else
-			{
-				//UPDATE ML BASED ON THE DIFERENCE TO DO
-				// IN HERE SHOULD BE TAKEN FROM EVERY DIRECTION
-				int32_t dif = trafficLoadMap_[lane] - numberOfCars;
-			}
-		}
 
-		bool TrafficLightStateMachine::registerVT(const uint32_t connectionId, const uint8_t lane, const bool incoming)
-		{
-			if (incoming)
+			while (!waitingEmergencyVehicles_.empty())
 			{
-				if (vtsConnected_[lane].find(connectionId) != vtsConnected_[lane].end())
+				auto maybeLaneIpPair = waitingEmergencyVehicles_.pop();
+				if (!maybeLaneIpPair)
 				{
+					continue;
+				}
+				auto lastLane = maybeLaneIpPair.value().first;
+				auto lastIp = maybeLaneIpPair.value().second;
+				if (clientsConnected_[lastLane].find(lastIp) != clientsConnected_[lastLane].end())
+				{
+					auto valueToPushBack = maybeLaneIpPair.value();
+					waitingEmergencyVehicles_.push(valueToPushBack);
 					return false;
 				}
-				vtsConnected_[lane].insert(connectionId);
 			}
-			else
-			{
-				if (vtsConnected_[lane].find(connectionId) == vtsConnected_[lane].end())
-				{
-					return false;
-				}
-				vtsConnected_[lane].erase(connectionId);
-			}
+			
 			return true;
 		}
 

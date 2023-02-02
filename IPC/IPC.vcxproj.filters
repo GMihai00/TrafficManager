@@ -39,6 +39,9 @@
     <ClInclude Include="utile\MessageIdProvider.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
+    <ClInclude Include="utile\IPCDataTypes.hpp">
+      <Filter>Header Files\utile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IPC.cpp">
