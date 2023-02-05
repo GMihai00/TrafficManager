@@ -42,31 +42,41 @@ namespace model
 		{
 		};
 
-		struct NormalTransition : sc::event<NormalTransition>
+		struct BaseTransition
 		{
 			std::shared_ptr<TrafficLightStateMachine> stateMachine_;
+			BaseTransition() = delete;
+			BaseTransition(std::shared_ptr<TrafficLightStateMachine> stateMachine)	:
+				stateMachine_(stateMachine) 
+			{}
+			std::shared_ptr<TrafficLightStateMachine> getContextStateMachine() const
+			{
+				return stateMachine_;
+			}
+		};
+
+		struct NormalTransition : BaseTransition, sc::event<NormalTransition>
+		{
 			NormalTransition() = delete;
 			NormalTransition(std::shared_ptr<TrafficLightStateMachine> stateMachine) :
-				stateMachine_(stateMachine)
+				BaseTransition(stateMachine)
 			{}
 		};
 
-		struct JumpTransition : sc::event<JumpTransition>
+		struct JumpTransition : BaseTransition, sc::event<JumpTransition>
 		{
 			std::string nextTransition_;
-			std::shared_ptr<TrafficLightStateMachine> stateMachine_;
 			JumpTransition() = delete;
 			JumpTransition(const std::string nextTransition, std::shared_ptr<TrafficLightStateMachine> stateMachine) :
 				nextTransition_(nextTransition),
-				stateMachine_(stateMachine)
+				BaseTransition(stateMachine)
 			{}
 		};
 
 		struct Transition
 		{
-			static std::shared_ptr<TrafficLightStateMachine> stateMachine_; // REALLY BAD WORKAROUND TO MAKE THIS STATIC
-			// TO STUDY MORE ABOUR BOOST STATE MACHINE TO REMOVE THIS!!!
-			virtual sc::result react(const JumpTransition& jumpTransition);
+			std::shared_ptr<TrafficLightStateMachine> stateMachine_;
+			virtual sc::result react(const JumpTransition& jumpTransition) = 0;
 			virtual ~Transition() noexcept = default;
 		};
 
@@ -158,12 +168,23 @@ namespace model
 
 			EWTransition()
 			{
-				stateMachine_->freezeTimers("EW");
+				auto transitionBase = dynamic_cast<const BaseTransition*> (triggering_event());
+				if (transitionBase)
+				{
+					stateMachine_ = transitionBase->getContextStateMachine();
+				}
+				if (stateMachine_)
+				{
+					stateMachine_->freezeTimers("EW");
+				}
 			}
 
 			~EWTransition()
 			{
-				stateMachine_->resetTimers("EW");
+				if (stateMachine_)
+				{
+					stateMachine_->resetTimers("EW");
+				}
 			}
 		};
 
@@ -188,12 +209,21 @@ namespace model
 
 			NTransition()
 			{
-				stateMachine_->freezeTimers("N");
+				auto transitionBase = dynamic_cast<const BaseTransition*> (triggering_event());
+				if (transitionBase)
+				{
+					stateMachine_ = transitionBase->getContextStateMachine();
+				}
+				if (stateMachine_)
+				{
+					stateMachine_->freezeTimers("N");
+				}
 			}
 
 			~NTransition()
 			{
-				stateMachine_->resetTimers("N");
+				if (stateMachine_)
+					stateMachine_->resetTimers("N");
 			}
 		};
 
@@ -218,12 +248,23 @@ namespace model
 
 			STransition()
 			{
-				stateMachine_->freezeTimers("S");
+				auto transitionBase = dynamic_cast<const BaseTransition*> (triggering_event());
+				if (transitionBase)
+				{
+					stateMachine_ = transitionBase->getContextStateMachine();
+				}
+				if (stateMachine_)
+				{
+					stateMachine_->freezeTimers("S");
+				}
 			}
 
 			~STransition()
 			{
-				stateMachine_->resetTimers("S");
+				if (stateMachine_)
+				{
+					stateMachine_->resetTimers("S");
+				}
 			}
 		};
 
@@ -249,12 +290,23 @@ namespace model
 			// TO BETTER DO THIS ALL OF THIS IN BASE STATE, JUST SET STRING IN HERE
 			NSTransition()
 			{
-				stateMachine_->freezeTimers("NS");
+				auto transitionBase = dynamic_cast<const BaseTransition*> (triggering_event());
+				if (transitionBase)
+				{
+					stateMachine_ = transitionBase->getContextStateMachine();
+				}
+				if (stateMachine_)
+				{
+					stateMachine_->freezeTimers("NS");
+				}
 			}
 
 			~NSTransition()
 			{
-				stateMachine_->resetTimers("NS");
+				if (stateMachine_)
+				{
+					stateMachine_->resetTimers("NS");
+				}
 			}
 		};
 
@@ -279,12 +331,23 @@ namespace model
 
 			ETransition()
 			{
-				stateMachine_->freezeTimers("E");
+				auto transitionBase = dynamic_cast<const BaseTransition*> (triggering_event());
+				if (transitionBase)
+				{
+					stateMachine_ = transitionBase->getContextStateMachine();
+				}
+				if (stateMachine_)
+				{
+					stateMachine_->freezeTimers("E");
+				}
 			}
 
 			~ETransition()
 			{
-				stateMachine_->resetTimers("E");
+				if (stateMachine_)
+				{
+					stateMachine_->resetTimers("E");
+				}
 			}
 		};
 
@@ -309,12 +372,23 @@ namespace model
 
 			WTransition()
 			{
-				stateMachine_->freezeTimers("EW");
+				auto transitionBase = dynamic_cast<const BaseTransition*> (triggering_event());
+				if (transitionBase)
+				{
+					stateMachine_ = transitionBase->getContextStateMachine();
+				}
+				if (stateMachine_)
+				{
+					stateMachine_->freezeTimers("EW");
+				}
 			}
 
 			~WTransition()
 			{
-				stateMachine_->resetTimers("EW");
+				if (stateMachine_)
+				{
+					stateMachine_->resetTimers("EW");
+				}
 			}
 		};
 

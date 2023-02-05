@@ -13,8 +13,8 @@ namespace common
 		{
 			E = 0,
 			W,
-			S,
-			N
+			N,
+			S
 		};
 	}
 }

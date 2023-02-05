@@ -13,8 +13,6 @@ namespace model
 			usingLeftLane_(config.usingLeftLane),
 			laneToVehicleTrackerIPAdress_(config.laneToIPAdress)
 		{
-			// FOR THE REALLY BAD WORKAROUND TO BE REMOVED
-			Transition::stateMachine_ = shared_from_this();
 			greenLightObserver_ = std::make_shared<Observer>(
 				std::bind(&TrafficLightStateMachine::greenLightExpireCallback, this));
 			greenLightTimer_.subscribe(greenLightObserver_);
@@ -117,10 +115,10 @@ namespace model
 					continue;
 				}
 				auto lastLane = maybeLaneIpPair.value().first;
-				auto lastIp = maybeLaneIpPair.value().second;
+				auto& lastIp = maybeLaneIpPair.value().second;
 				if (clientsConnected_[lastLane].find(lastIp) != clientsConnected_[lastLane].end())
 				{
-					auto valueToPushBack = maybeLaneIpPair.value();
+					auto& valueToPushBack = maybeLaneIpPair.value();
 					waitingEmergencyVehicles_.push(valueToPushBack);
 					return false;
 				}
@@ -175,142 +173,36 @@ namespace model
 
 		void TrafficLightStateMachine::queueNextStatesWaiting()
 		{
-			// STUPIDEST IMPLEMENTATION I KNOW TO REFACTOR THIS
-			bool expiredN = false;
-			bool expiredS = false;
-			std::time_t expireTimeSN = LONG_MAX;
-			bool expiredE = false;
-			bool expiredW = false;
-			std::time_t expireTimeEW = LONG_MAX;
-
-			if (laneToTimerMap_.at(common::utile::LANE::N).hasExpired())
+			std::string stateTimer[] = {"", ""};
+			std::time_t expireTime[] = {LONG_MAX, LONG_MAX};
+			for (uint8_t laneNr = 0; laneNr < 4; laneNr++)
 			{
-				expiredN = true;
-				expireTimeSN = std::min(expireTimeSN, laneToTimerMap_.at(common::utile::LANE::N).getExpirationTime());
-			}
-
-			if (laneToTimerMap_.at(common::utile::LANE::S).hasExpired())
-			{
-				expiredS = true;
-				expireTimeSN = std::min(expireTimeSN, laneToTimerMap_.at(common::utile::LANE::S).getExpirationTime());
-			}
-
-			if (laneToTimerMap_.at(common::utile::LANE::E).hasExpired())
-			{
-				expiredE = true;
-				expireTimeEW = std::min(expireTimeSN, laneToTimerMap_.at(common::utile::LANE::E).getExpirationTime());
-			}
-
-			if (laneToTimerMap_.at(common::utile::LANE::W).hasExpired())
-			{
-				expiredW = true;
-				expireTimeEW = std::min(expireTimeSN, laneToTimerMap_.at(common::utile::LANE::W).getExpirationTime());
-			}
-
-			if ((expiredN && expiredS) && (expiredE && expiredW))
-			{
-				if (expireTimeEW < expireTimeSN)
+				common::utile::LANE lane = (common::utile::LANE)laneNr;
+				if (laneToTimerMap_.at(lane).hasExpired())
 				{
-					jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
-					jumpTransitionQueue_.push(JumpTransition("SN", shared_from_this()));
+					auto laneName = LaneToChar(common::utile::LANE(lane));
+					if (laneName.has_value())
+					{
+						stateTimer[laneNr % 2].push_back(laneName.value());
+						expireTime[laneNr % 2] = std::min(expireTime[laneNr % 2], laneToTimerMap_.at(lane).getExpirationTime());
+					}
 				}
-				else
+			}
+			
+			if (stateTimer[0].size() != 0 && stateTimer[1].size() != 0)
+			{
+				if (expireTime[0] < expireTime[1])
 				{
-					jumpTransitionQueue_.push(JumpTransition("SN", shared_from_this()));
-					jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
+					std::swap(stateTimer[0], stateTimer[1]);
 				}
-				return;
 			}
-
-			if (expiredN  && (expiredE && expiredW))
+			if (stateTimer[0].size() != 0)
 			{
-				if (expireTimeEW < expireTimeSN)
-				{
-					jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
-					jumpTransitionQueue_.push(JumpTransition("N", shared_from_this()));
-				}
-				else
-				{
-					jumpTransitionQueue_.push(JumpTransition("N", shared_from_this()));
-					jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
-				}
-				return;
+				jumpTransitionQueue_.push(JumpTransition(stateTimer[0], shared_from_this()));
 			}
-
-			if (expiredS && (expiredE && expiredW))
+			if (stateTimer[0].size() != 0)
 			{
-				if (expireTimeEW < expireTimeSN)
-				{
-					jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
-					jumpTransitionQueue_.push(JumpTransition("S", shared_from_this()));
-				}
-				else
-				{
-					jumpTransitionQueue_.push(JumpTransition("S", shared_from_this()));
-					jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
-				}
-				return;
-			}
-
-			if ((expiredN && expiredS) && expiredE)
-			{
-				if (expireTimeEW < expireTimeSN)
-				{
-					jumpTransitionQueue_.push(JumpTransition("E", shared_from_this()));
-					jumpTransitionQueue_.push(JumpTransition("NS", shared_from_this()));
-				}
-				else
-				{
-					jumpTransitionQueue_.push(JumpTransition("NS", shared_from_this()));
-					jumpTransitionQueue_.push(JumpTransition("E", shared_from_this()));
-				}
-				return;
-			}
-
-			if ((expiredN && expiredS) && expiredW)
-			{
-				if (expireTimeEW < expireTimeSN)
-				{
-					jumpTransitionQueue_.push(JumpTransition("W", shared_from_this()));
-					jumpTransitionQueue_.push(JumpTransition("NS", shared_from_this()));
-				}
-				else
-				{
-					jumpTransitionQueue_.push(JumpTransition("NS", shared_from_this()));
-					jumpTransitionQueue_.push(JumpTransition("W", shared_from_this()));
-				}
-				return;
-			}
-
-			if (expiredN && expiredS)
-			{
-				jumpTransitionQueue_.push(JumpTransition("SN", shared_from_this()));
-				return;
-			}
-
-			if (expiredE && expiredW)
-			{
-				jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
-				return;
-			}
-
-			if (expiredE)
-			{
-				jumpTransitionQueue_.push(JumpTransition("E", shared_from_this()));
-			}
-			if (expiredS)
-			{
-				jumpTransitionQueue_.push(JumpTransition("S", shared_from_this()));
-			}
-
-			if (expiredN)
-			{
-				jumpTransitionQueue_.push(JumpTransition("N", shared_from_this()));
-			}
-
-			if (expiredW)
-			{
-				jumpTransitionQueue_.push(JumpTransition("W", shared_from_this()));
+				jumpTransitionQueue_.push(JumpTransition(stateTimer[1], shared_from_this()));
 			}
 		}
 
