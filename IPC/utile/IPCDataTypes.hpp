@@ -4,7 +4,11 @@
 
 #include <string>
 #include <set>
+#include <memory>
 #include "../MessageTypes.hpp"
+#include "../net/Connection.hpp"
+#include "../net/Message.hpp"
+
 namespace ipc
 {
 	namespace utile

@@ -4,3 +4,5 @@
 #include "net/Server.hpp"
 #include "utile/MessageIdProvider.hpp"
 #include "MessageTypes.hpp"
+#include "utile/IPCDataTypes.hpp"
+#include "utile/MessageIdProvider.hpp"

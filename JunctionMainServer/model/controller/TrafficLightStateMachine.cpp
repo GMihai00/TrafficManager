@@ -14,13 +14,19 @@ namespace model
 			usingLeftLane_(config.usingLeftLane),
 			laneToVehicleTrackerIPAdress_(config.laneToIPAdress)
 		{
-			greenLightObserver_ = std::make_shared<Observer>(std::bind(&greenLightExpireCallback, this));
+			greenLightObserver_ = std::make_shared<Observer>(
+				std::bind(&TrafficLightStateMachine::greenLightExpireCallback, this));
 			greenLightTimer_.subscribe(greenLightObserver_);
 		}
 
 		bool TrafficLightStateMachine::isVehicleTracker(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip) const
 		{
 			return laneToVehicleTrackerIPAdress_.at(lane) == ip;
+		}
+
+		bool TrafficLightStateMachine::isLaneMissing(const common::utile::LANE lane) const
+		{
+			return !(missingLane_ != boost::none && lane == missingLane_.get());
 		}
 
 		boost::optional<common::utile::LANE> TrafficLightStateMachine::getVehicleTrackerLane(const ipc::utile::IP_ADRESS& ip)

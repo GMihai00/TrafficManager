@@ -15,7 +15,6 @@
 #include "Message.hpp"
 #include "utile/ThreadSafePriorityQueue.hpp"
 #include "utile/Logger.hpp"
-#include "utile/IPCDataTypes.hpp"
 
 namespace ipc
 {
@@ -97,7 +96,7 @@ namespace ipc
                 return id_;
             }
     
-            ipc::utile::IP_ADRESS getIpAdress() const
+            std::string getIpAdress() const
             {
                 return socket_.remote_endpoint().address().to_string();
             }

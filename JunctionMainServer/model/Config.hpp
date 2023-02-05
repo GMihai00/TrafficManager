@@ -5,7 +5,7 @@
 #include <map>
 #include <boost/optional.hpp>
 #include "GeoCoordinate.hpp"
-#include "utile/DataTypes.hpp";
+#include "utile/DataTypes.hpp"
 #include "utile/IPCDataTypes.hpp"
 
 namespace model

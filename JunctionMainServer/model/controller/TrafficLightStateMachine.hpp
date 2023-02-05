@@ -83,7 +83,6 @@ namespace model
 			common::utile::Timer greenLightTimer_;
 			LOGGER("TRAFFICLIGHT-STATEMACHINE");
 
-			void greenLightExpireCallback();
 		public:
 			TrafficLightStateMachine(const Config& config);
 			TrafficLightStateMachine(const TrafficLightStateMachine&) = delete;
@@ -104,6 +103,7 @@ namespace model
 			bool endEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
 
 			void decreaseTimer(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			void greenLightExpireCallback();
 		};
 
 		// STATES

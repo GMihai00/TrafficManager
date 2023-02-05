@@ -15,7 +15,7 @@
 #include "utile/ThreadSafePriorityQueue.hpp"
 #include "Connection.hpp"
 #include "utile/Logger.hpp"
-#include "../utile/IPCDataTypes.hpp";
+#include "../utile/IPCDataTypes.hpp"
 
 namespace ipc
 {
