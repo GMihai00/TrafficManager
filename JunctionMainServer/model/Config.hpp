@@ -5,20 +5,21 @@
 #include <map>
 #include <boost/optional.hpp>
 #include "GeoCoordinate.hpp"
-#include "../utile/DataTypes.hpp";
+#include "utile/DataTypes.hpp";
+#include "utile/IPCDataTypes.hpp"
 
 namespace model
 {
 	struct Config
 	{
 		// MANDATORY TO AVOID EXPLOITS
-		std::map<utile::LANE, std::string> laneToIPAdress;
+		std::map<common::utile::LANE, ipc::utile::IP_ADRESS> laneToIPAdress;
 		bool usingLeftLane;
 		uint16_t maxWaitingTime;
 		model::GeoCoordinate latitude;
 		model::GeoCoordinate longitude;
-		std::string localProxyServer;
-		boost::optional<utile::LANE> missingLane;
+		ipc::utile::IP_ADRESS localProxyServer;
+		boost::optional<common::utile::LANE> missingLane;
 	};
 }
 #endif // #MODEL_CONFIG_HPP

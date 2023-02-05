@@ -9,27 +9,63 @@ namespace model
 
 		}
 
-		TrafficLightStateMachine::TrafficLightStateMachine(const uint16_t maximumWaitingTime, const boost::optional<uint8_t>& missingLane) :
-			maximumWaitingTime_(maximumWaitingTime),
-			missingLane_(missingLane)
+		TrafficLightStateMachine::TrafficLightStateMachine(const Config& config) :
+			maximumWaitingTime_(config.maxWaitingTime),
+			usingLeftLane_(config.usingLeftLane),
+			laneToVehicleTrackerIPAdress_(config.laneToIPAdress)
 		{
 			greenLightObserver_ = std::make_shared<Observer>(std::bind(&greenLightExpireCallback, this));
 			greenLightTimer_.subscribe(greenLightObserver_);
 		}
 
-		bool TrafficLightStateMachine::registreClient(const utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		bool TrafficLightStateMachine::isVehicleTracker(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip) const
+		{
+			return laneToVehicleTrackerIPAdress_.at(lane) == ip;
+		}
+
+		boost::optional<common::utile::LANE> TrafficLightStateMachine::getVehicleTrackerLane(const ipc::utile::IP_ADRESS& ip)
+		{
+			for (const auto& entry : laneToVehicleTrackerIPAdress_)
+			{
+				if (entry.second == ip)
+				{
+					return entry.first;
+				}
+			}
+			return boost::none;
+		}
+
+		bool TrafficLightStateMachine::isClientValid(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
 			std::scoped_lock lock(mutexClients_);
-			if (clientsConnected_[lane].find(ip) != clientsConnected_[lane].end())
+			if (!isVehicleTracker(lane, ip))
 			{
-				LOG_WARN << "Client already connected";
-				return false;
+				for (const auto& laneToIPs : clientsConnected_)
+				{
+					if (laneToIPs.second.find(ip) != laneToIPs.second.end())
+					{
+						LOG_WARN << "Client already connected";
+						return false;
+					}
+				}
+				clientsConnected_[lane].insert(ip);
 			}
-			clientsConnected_[lane].insert(ip);
 			return true;
 		}
 
-		bool TrafficLightStateMachine::unregistreCleint(const utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		bool TrafficLightStateMachine::registreClient(
+			const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		{
+			std::scoped_lock lock(mutexClients_);
+			if (!isClientValid(lane, ip))
+			{
+				return false;
+			}
+			decreaseTimer(lane, ip);
+			return true;
+		}
+
+		bool TrafficLightStateMachine::unregisterClient(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
 			std::scoped_lock lock(mutexClients_);
 			if (clientsConnected_[lane].find(ip) == clientsConnected_[lane].end())
@@ -46,7 +82,7 @@ namespace model
 			return !waitingEmergencyVehicles_.empty();
 		}
 
-		bool TrafficLightStateMachine::startEmergencyState(const utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		bool TrafficLightStateMachine::startEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
 			std::scoped_lock lock(mutexClients_);
 			if (!registreClient(lane, ip))
@@ -58,10 +94,10 @@ namespace model
 			return true;
 		}
 
-		bool TrafficLightStateMachine::endEmergencyState(const utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		bool TrafficLightStateMachine::endEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
 			std::scoped_lock lock(mutexClients_);
-			if (!unregistreCleint(lane, ip))
+			if (!unregisterClient(lane, ip))
 			{
 				return false;
 			}
@@ -86,5 +122,17 @@ namespace model
 			return true;
 		}
 
+		void TrafficLightStateMachine::decreaseTimer(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		{
+			// TO DO: DECREASE TIMER BASED ON SOURCE, WILL HAVE TO THINK ABOUT AN ALGORITHM 
+			if (isVehicleTracker(lane, ip))
+			{
+
+			}
+			else
+			{
+
+			}
+		}
 	} // namespace controller
 } // namespace model

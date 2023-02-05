@@ -16,6 +16,7 @@
 #include "Message.hpp"
 #include "Connection.hpp"
 #include "utile/Logger.hpp"
+#include "../utile/IPCDataTypes.hpp";
 
 namespace ipc
 {
@@ -36,7 +37,7 @@ namespace ipc
             uint32_t idCounter_ = 0;
             LOGGER("SERVER");
         public:
-            Server(uint16_t port):
+            Server(ipc::utile::PORT port):
                 connectionAccepter_(context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v6(), port))
             {
             }

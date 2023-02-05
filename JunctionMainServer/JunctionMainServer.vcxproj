@@ -173,7 +173,6 @@
     <ClInclude Include="model\CostumServer.hpp" />
     <ClInclude Include="model\GeoCoordinate.hpp" />
     <ClInclude Include="utile\ConfigLoader.hpp" />
-    <ClInclude Include="utile\DataTypes.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

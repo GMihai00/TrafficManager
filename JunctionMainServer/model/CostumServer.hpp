@@ -21,34 +21,24 @@ namespace model
 		
 		//std::thread threadProcess_;
 		controller::TrafficLightStateMachine trafficLightStateMachine_;
-		bool usingLeftLane_;
-		std::string localProxyServer_;
-		std::map<utile::LANE, ipc::utile::IP_ADRESS> laneToIPAdress_;
+		ipc::utile::IP_ADRESS localProxyServer_;
 		Config config_;
+
+		boost::optional<common::utile::LANE> getMessageSourceLane(
+			ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
+		bool isMessageValid(
+			ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, boost::optional<common::utile::LANE> lane);
+		void aproveMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
+		void rejectMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 	public:
-		CostumServer(const uint16_t port, const Config& config); // TO typedef for PORT
+		CostumServer(const ipc::utile::PORT port, const Config& config);
 		CostumServer(const CostumServer&) = delete;
-		~CostumServer();
+		virtual ~CostumServer() noexcept = default;
 
-		virtual bool onClientConnect(
-			std::shared_ptr<ipc::net::Connection<ipc::VehicleDetectionMessages>> client);
-		virtual void onClientDisconnect(
-			std::shared_ptr<ipc::net::Connection<ipc::VehicleDetectionMessages>> client);
-		
-		boost::optional<uint8_t> getMessageSourceLane(const std::string& ip);
-
-		void handleTrafficObserverMessage(
-			std::shared_ptr<ipc::net::Connection<ipc::VehicleDetectionMessages>> client,
-			ipc::net::Message< ipc::VehicleDetectionMessages>& msg);
-		void handleVehicleTrackerMessage(
-			std::shared_ptr<ipc::net::Connection<ipc::VehicleDetectionMessages>> client,
-			ipc::net::Message< ipc::VehicleDetectionMessages>& msg);
-		virtual void onMessage(
-			std::shared_ptr<ipc::net::Connection<ipc::VehicleDetectionMessages>> client,
-			ipc::net::Message< ipc::VehicleDetectionMessages>& msg);
-		
-		void postNewJunctionLocation(GeoCoordinate latitude, GeoCoordinate longitude) const;
-		void deleteJunctionLocation() const;
+		virtual bool onClientConnect(ipc::utile::ConnectionPtr client);
+		virtual void onClientDisconnect(ipc::utile::ConnectionPtr client);
+		virtual void onMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
+		void handleMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, common::utile::LANE lane);
 	};
 } // namespace model
 #endif // #MODEL_COSTUMSERVER_HPP

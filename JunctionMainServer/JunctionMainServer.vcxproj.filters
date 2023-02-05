@@ -67,8 +67,5 @@
     <ClInclude Include="utile\ConfigLoader.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
-    <ClInclude Include="utile\DataTypes.hpp">
-      <Filter>Header Files\utile</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

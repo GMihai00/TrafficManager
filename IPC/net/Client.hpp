@@ -15,6 +15,7 @@
 #include "utile/ThreadSafePriorityQueue.hpp"
 #include "Connection.hpp"
 #include "utile/Logger.hpp"
+#include "../utile/IPCDataTypes.hpp";
 
 namespace ipc
 {
@@ -41,7 +42,7 @@ namespace ipc
                 disconnect();
             }
     
-            bool connect(const std::string& host, const uint16_t port)
+            bool connect(const std::string& host, const ipc::utile::PORT port)
             {
                 try
                 {

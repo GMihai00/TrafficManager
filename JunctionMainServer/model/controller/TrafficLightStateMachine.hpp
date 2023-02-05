@@ -67,34 +67,43 @@ namespace model
 		{
 		private:
 			// CONFIG DATA
+			bool usingLeftLane_;
 			const uint16_t maximumWaitingTime_; // THIS IS USED FOR TIMERS 
-			boost::optional<utile::LANE> missingLane_;
+			boost::optional<common::utile::LANE> missingLane_;
 
 			std::mutex mutexClients_;
-			std::map<utile::LANE, ipc::utile::IP_ADRESSES> clientsConnected_;
-			std::map<utile::LANE, common::utile::Timer> laneToTimerMap_;
+			std::map<common::utile::LANE, ipc::utile::IP_ADRESS> laneToVehicleTrackerIPAdress_;
+			std::map<common::utile::LANE, ipc::utile::IP_ADRESSES> clientsConnected_;
+			std::map<common::utile::LANE, common::utile::Timer> laneToTimerMap_;
 
 			// IS TREATED AS A CLIENT SO CAN CHECK INSIDE CLIENTSCONNECTED
-			common::utile::ThreadSafeQueue<std::pair<utile::LANE, ipc::utile::IP_ADRESS>> waitingEmergencyVehicles_;
+			common::utile::ThreadSafeQueue<std::pair<common::utile::LANE, ipc::utile::IP_ADRESS>> waitingEmergencyVehicles_;
 			
 			IObserverPtr greenLightObserver_;
 			common::utile::Timer greenLightTimer_;
 			LOGGER("TRAFFICLIGHT-STATEMACHINE");
 
 			void greenLightExpireCallback();
-			bool isLaneMissing(const utile::LANE lane) const;
 		public:
-			TrafficLightStateMachine(const uint16_t maximumWaitingTime, const boost::optional<utile::LANE>& missingLane);
+			TrafficLightStateMachine(const Config& config);
 			TrafficLightStateMachine(const TrafficLightStateMachine&) = delete;
-			~TrafficLightStateMachine() = default;
+			virtual ~TrafficLightStateMachine() noexcept = default;
 
 			// BASED ON THE LANE WE WILL DETERMINE WHAT PHAZE TO START: CAN BE EITHER II, III, VI or VII
 			// as they are the only ones that allow the vehicles to move freely from one lane
-			bool registreClient(const utile::LANE lane, ipc::utile::IP_ADRESS ip);
-			bool unregistreCleint(const utile::LANE lane, ipc::utile::IP_ADRESS ip);
-			bool startEmergencyState(const utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			bool isVehicleTracker(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip) const;
+			boost::optional<common::utile::LANE> getVehicleTrackerLane(const ipc::utile::IP_ADRESS& ip);
+			bool isLaneMissing(const common::utile::LANE lane) const;
+
+			bool isClientValid(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			bool registreClient(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			bool unregisterClient(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+
+			bool startEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
 			bool isInEmergencyState();
-			bool endEmergencyState(const utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			bool endEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+
+			void decreaseTimer(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
 		};
 
 		// STATES
