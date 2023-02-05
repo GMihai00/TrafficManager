@@ -1,19 +1,20 @@
 #include "TrafficLightStateMachine.hpp"
+#include "utile/Helpers.hpp"
+#include <algorithm>
 
 namespace model
 {
 	namespace controller
 	{
-		void TrafficLightStateMachine::greenLightExpireCallback()
-		{
-
-		}
 
 		TrafficLightStateMachine::TrafficLightStateMachine(const Config& config) :
-			maximumWaitingTime_(config.maxWaitingTime),
+			greenLightDuration_(config.maxWaitingTime),
+			regLightDuration_(120), // TO CHANGE THIS UPDATED BY ML
 			usingLeftLane_(config.usingLeftLane),
 			laneToVehicleTrackerIPAdress_(config.laneToIPAdress)
 		{
+			// FOR THE REALLY BAD WORKAROUND TO BE REMOVED
+			Transition::stateMachine_ = shared_from_this();
 			greenLightObserver_ = std::make_shared<Observer>(
 				std::bind(&TrafficLightStateMachine::greenLightExpireCallback, this));
 			greenLightTimer_.subscribe(greenLightObserver_);
@@ -128,9 +129,11 @@ namespace model
 			return true;
 		}
 
-		void TrafficLightStateMachine::decreaseTimer(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		uint16_t TrafficLightStateMachine::calculateTimeDecrease(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
-			// TO DO: DECREASE TIMER BASED ON SOURCE, WILL HAVE TO THINK ABOUT AN ALGORITHM 
+			std::scoped_lock lock(mutexClients_);
+			// TO DO: CALCULATE TIME BASED ON SOURCE, WILL HAVE TO THINK ABOUT AN ALGORITHM 
+			uint16_t rez = 0;
 			if (isVehicleTracker(lane, ip))
 			{
 
@@ -139,6 +142,202 @@ namespace model
 			{
 
 			}
+			return rez;
 		}
+
+		void TrafficLightStateMachine::freezeTimers(const std::string lanes)
+		{
+			for (const auto& lane : lanes)
+			{
+				laneToTimerMap_.at(common::utile::CharToLane(lane).value()).freezeTimer();
+			}
+		}
+
+		void TrafficLightStateMachine::resetTimers(const std::string lanes)
+		{
+			for (const auto& lane : lanes)
+			{
+				laneToTimerMap_.at(common::utile::CharToLane(lane).value()).resetTimer(regLightDuration_);
+			}
+		}
+
+		void TrafficLightStateMachine::decreaseTimer(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		{
+			std::scoped_lock lock(mutexClients_);
+			laneToTimerMap_.at(lane).decreaseTimer(calculateTimeDecrease(lane, ip));
+		}
+
+		void TrafficLightStateMachine::updateGreenLightDuration()
+		{
+			std::scoped_lock lock(mutexClients_);
+			// TO DO: THIS WILL BE THE ML PART 
+		}
+
+		void TrafficLightStateMachine::queueNextStatesWaiting()
+		{
+			// STUPIDEST IMPLEMENTATION I KNOW TO REFACTOR THIS
+			bool expiredN = false;
+			bool expiredS = false;
+			std::time_t expireTimeSN = LONG_MAX;
+			bool expiredE = false;
+			bool expiredW = false;
+			std::time_t expireTimeEW = LONG_MAX;
+
+			if (laneToTimerMap_.at(common::utile::LANE::N).hasExpired())
+			{
+				expiredN = true;
+				expireTimeSN = std::min(expireTimeSN, laneToTimerMap_.at(common::utile::LANE::N).getExpirationTime());
+			}
+
+			if (laneToTimerMap_.at(common::utile::LANE::S).hasExpired())
+			{
+				expiredS = true;
+				expireTimeSN = std::min(expireTimeSN, laneToTimerMap_.at(common::utile::LANE::S).getExpirationTime());
+			}
+
+			if (laneToTimerMap_.at(common::utile::LANE::E).hasExpired())
+			{
+				expiredE = true;
+				expireTimeEW = std::min(expireTimeSN, laneToTimerMap_.at(common::utile::LANE::E).getExpirationTime());
+			}
+
+			if (laneToTimerMap_.at(common::utile::LANE::W).hasExpired())
+			{
+				expiredW = true;
+				expireTimeEW = std::min(expireTimeSN, laneToTimerMap_.at(common::utile::LANE::W).getExpirationTime());
+			}
+
+			if ((expiredN && expiredS) && (expiredE && expiredW))
+			{
+				if (expireTimeEW < expireTimeSN)
+				{
+					jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
+					jumpTransitionQueue_.push(JumpTransition("SN", shared_from_this()));
+				}
+				else
+				{
+					jumpTransitionQueue_.push(JumpTransition("SN", shared_from_this()));
+					jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
+				}
+				return;
+			}
+
+			if (expiredN  && (expiredE && expiredW))
+			{
+				if (expireTimeEW < expireTimeSN)
+				{
+					jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
+					jumpTransitionQueue_.push(JumpTransition("N", shared_from_this()));
+				}
+				else
+				{
+					jumpTransitionQueue_.push(JumpTransition("N", shared_from_this()));
+					jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
+				}
+				return;
+			}
+
+			if (expiredS && (expiredE && expiredW))
+			{
+				if (expireTimeEW < expireTimeSN)
+				{
+					jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
+					jumpTransitionQueue_.push(JumpTransition("S", shared_from_this()));
+				}
+				else
+				{
+					jumpTransitionQueue_.push(JumpTransition("S", shared_from_this()));
+					jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
+				}
+				return;
+			}
+
+			if ((expiredN && expiredS) && expiredE)
+			{
+				if (expireTimeEW < expireTimeSN)
+				{
+					jumpTransitionQueue_.push(JumpTransition("E", shared_from_this()));
+					jumpTransitionQueue_.push(JumpTransition("NS", shared_from_this()));
+				}
+				else
+				{
+					jumpTransitionQueue_.push(JumpTransition("NS", shared_from_this()));
+					jumpTransitionQueue_.push(JumpTransition("E", shared_from_this()));
+				}
+				return;
+			}
+
+			if ((expiredN && expiredS) && expiredW)
+			{
+				if (expireTimeEW < expireTimeSN)
+				{
+					jumpTransitionQueue_.push(JumpTransition("W", shared_from_this()));
+					jumpTransitionQueue_.push(JumpTransition("NS", shared_from_this()));
+				}
+				else
+				{
+					jumpTransitionQueue_.push(JumpTransition("NS", shared_from_this()));
+					jumpTransitionQueue_.push(JumpTransition("W", shared_from_this()));
+				}
+				return;
+			}
+
+			if (expiredN && expiredS)
+			{
+				jumpTransitionQueue_.push(JumpTransition("SN", shared_from_this()));
+				return;
+			}
+
+			if (expiredE && expiredW)
+			{
+				jumpTransitionQueue_.push(JumpTransition("EW", shared_from_this()));
+				return;
+			}
+
+			if (expiredE)
+			{
+				jumpTransitionQueue_.push(JumpTransition("E", shared_from_this()));
+			}
+			if (expiredS)
+			{
+				jumpTransitionQueue_.push(JumpTransition("S", shared_from_this()));
+			}
+
+			if (expiredN)
+			{
+				jumpTransitionQueue_.push(JumpTransition("N", shared_from_this()));
+			}
+
+			if (expiredW)
+			{
+				jumpTransitionQueue_.push(JumpTransition("W", shared_from_this()));
+			}
+		}
+
+		void TrafficLightStateMachine::updateTrafficState()
+		{
+			std::scoped_lock lock(mutexClients_);
+			queueNextStatesWaiting();
+			if (!jumpTransitionQueue_.empty())
+			{
+				const auto nextTransition = jumpTransitionQueue_.pop();
+				if (!nextTransition.has_value())
+				{
+					LOG_ERR << "WE HAVE A BUG";
+					return;
+				}
+				this->process_event(nextTransition.value());
+				return;
+			}
+			this->process_event(NormalTransition(shared_from_this()));
+		}
+
+		void TrafficLightStateMachine::greenLightExpireCallback()
+		{
+			updateTrafficState();
+			updateGreenLightDuration();
+			greenLightTimer_.resetTimer(greenLightDuration_);
+		}
+
 	} // namespace controller
 } // namespace model

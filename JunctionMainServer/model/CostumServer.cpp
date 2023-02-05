@@ -7,6 +7,7 @@ namespace model
 		trafficLightStateMachine_(config)
 	{
 		this->localProxyServer_ = config.localProxyServer;
+		trafficLightStateMachine_.initiate();
 	}
 
 	bool CostumServer::onClientConnect(ipc::utile::ConnectionPtr client)

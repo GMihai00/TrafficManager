@@ -42,6 +42,9 @@
     <ClInclude Include="utile\DataTypes.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
+    <ClInclude Include="utile\Helpers.hpp">
+      <Filter>Header Files\utile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp">

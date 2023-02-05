@@ -9,7 +9,13 @@ namespace common
 {
 	namespace utile
 	{
-		typedef uint8_t LANE;
+		enum class LANE : uint8_t
+		{
+			E = 0,
+			W,
+			S,
+			N
+		};
 	}
 }
 #endif // #UTILE_DATATYPES_HPP

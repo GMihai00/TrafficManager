@@ -20,7 +20,7 @@ namespace utile
 			const auto& jsonTreeDir = jsonTree.get().get_child_optional(directions[poz]);
 			if (jsonTreeDir != boost::none && jsonTreeDir.get().get_value_optional<std::string>() != boost::none)
 			{
-				config.laneToIPAdress[poz] = jsonTreeDir.get().get_value<std::string>();
+				config.laneToIPAdress[common::utile::LANE(poz)] = jsonTreeDir.get().get_value<std::string>();
 				count++;
 			}
 		}
@@ -168,7 +168,7 @@ namespace utile
 			{
 				if (direction == directions[poz])
 				{
-					config.missingLane = poz;
+					config.missingLane = (common::utile::LANE)poz;
 					return;
 				}
 			}

@@ -8,6 +8,7 @@
 #include <condition_variable>
 #include <chrono>
 #include <vector>
+#include<ctime>
 
 #include "IObserver.hpp"
 
@@ -20,6 +21,7 @@ namespace common
 		{
 		protected:
 			std::atomic<uint16_t> timeLeft_ = 0;
+			std::atomic<std::time_t> expirationTime_;
 			std::atomic<bool> expired_ = true;
 			std::atomic<bool> frozen_ = true;
 			std::thread threadTimer_;
@@ -36,8 +38,9 @@ namespace common
 			void decreaseTimer(const uint16_t& sec);
 			void resetTimer(const uint16_t& sec = 60);
 			bool hasExpired();
+			std::time_t getExpirationTime();
 			void freezeTimer();
-			void unfreezeTimer();
+			void unfreezeTimer(); // NOT USED FOR ANITHING RIGHT NOW
 			void subscribe(const IObserverPtr obs);
 			void unsubscribe();
 		};

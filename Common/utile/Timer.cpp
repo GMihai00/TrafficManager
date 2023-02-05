@@ -25,6 +25,7 @@ namespace common
 					}
 					ulock.lock();
 					expired_ = true;
+					expirationTime_ = time(NULL);
 					if (observer_)
 					{
 						observer_->notify();
@@ -76,6 +77,12 @@ namespace common
 		{
 			std::scoped_lock lock(mutexTimer_);
 			return expired_;
+		}
+
+		std::time_t Timer::getExpirationTime()
+		{
+			std::scoped_lock lock(mutexTimer_);
+			return expirationTime_;
 		}
 
 		void Timer::freezeTimer()

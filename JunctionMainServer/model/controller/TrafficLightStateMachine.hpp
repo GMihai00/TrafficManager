@@ -35,6 +35,7 @@ namespace model
 	namespace controller
 	{
 		using namespace common::utile;
+		struct TrafficLightStateMachine;
 
 		// EVENTS
 		struct Start : sc::event<Start>
@@ -43,46 +44,66 @@ namespace model
 
 		struct NormalTransition : sc::event<NormalTransition>
 		{
+			std::shared_ptr<TrafficLightStateMachine> stateMachine_;
+			NormalTransition() = delete;
+			NormalTransition(std::shared_ptr<TrafficLightStateMachine> stateMachine) :
+				stateMachine_(stateMachine)
+			{}
 		};
 
 		struct JumpTransition : sc::event<JumpTransition>
 		{
+			std::string nextTransition_;
+			std::shared_ptr<TrafficLightStateMachine> stateMachine_;
+			JumpTransition() = delete;
+			JumpTransition(const std::string nextTransition, std::shared_ptr<TrafficLightStateMachine> stateMachine) :
+				nextTransition_(nextTransition),
+				stateMachine_(stateMachine)
+			{}
 		};
 
 		struct Transition
 		{
-			static std::shared_ptr<Transition> nextTransition_;
-			virtual sc::result react(const JumpTransition& ev) = 0;
-			virtual ~Transition() noexcept { nextTransition_.reset(); };
+			static std::shared_ptr<TrafficLightStateMachine> stateMachine_; // REALLY BAD WORKAROUND TO MAKE THIS STATIC
+			// TO STUDY MORE ABOUR BOOST STATE MACHINE TO REMOVE THIS!!!
+			virtual sc::result react(const JumpTransition& jumpTransition);
+			virtual ~Transition() noexcept = default;
 		};
 
 		struct Stopped;
-		struct EVTransition;
+		struct EWTransition;
 		struct NTransition;
 		struct STransition;
 		struct NSTransition;
 		struct ETransition;
 		struct WTransition;
-		struct TrafficLightStateMachine : sc::state_machine<TrafficLightStateMachine, Stopped>
+		struct TrafficLightStateMachine : 
+			sc::state_machine<TrafficLightStateMachine, Stopped>,
+			std::enable_shared_from_this<TrafficLightStateMachine>
 		{
 		private:
 			// CONFIG DATA
 			bool usingLeftLane_;
-			const uint16_t maximumWaitingTime_; // THIS IS USED FOR TIMERS 
 			boost::optional<common::utile::LANE> missingLane_;
 
 			std::mutex mutexClients_;
 			std::map<common::utile::LANE, ipc::utile::IP_ADRESS> laneToVehicleTrackerIPAdress_;
 			std::map<common::utile::LANE, ipc::utile::IP_ADRESSES> clientsConnected_;
 			std::map<common::utile::LANE, common::utile::Timer> laneToTimerMap_;
+			common::utile::ThreadSafeQueue<JumpTransition> jumpTransitionQueue_;
 
 			// IS TREATED AS A CLIENT SO CAN CHECK INSIDE CLIENTSCONNECTED
 			common::utile::ThreadSafeQueue<std::pair<common::utile::LANE, ipc::utile::IP_ADRESS>> waitingEmergencyVehicles_;
 			
+			uint16_t regLightDuration_;
+			uint16_t greenLightDuration_; // TO CHANGE INSIDE CONFID MAXWAITTIME TO GREENLIGHT DURATION
 			IObserverPtr greenLightObserver_;
 			common::utile::Timer greenLightTimer_;
 			LOGGER("TRAFFICLIGHT-STATEMACHINE");
 
+			uint16_t calculateTimeDecrease(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			void updateTrafficState();
+			void updateGreenLightDuration();
 		public:
 			TrafficLightStateMachine(const Config& config);
 			TrafficLightStateMachine(const TrafficLightStateMachine&) = delete;
@@ -102,36 +123,47 @@ namespace model
 			bool isInEmergencyState();
 			bool endEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
 
+			void freezeTimers(const std::string lanes);
+			void resetTimers(const std::string lanes);
 			void decreaseTimer(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
 			void greenLightExpireCallback();
+			void queueNextStatesWaiting();
 		};
 
 		// STATES
 		struct Stopped : sc::simple_state <Stopped, TrafficLightStateMachine>
 		{
-			typedef sc::transition<Start ,EVTransition> reactions;
+			typedef sc::transition<Start ,EWTransition> reactions;
 		};
 
+		// CONSTRUCTORS FOR ALL OF THEM DEFINED TO FREEZE AND UNFREEZE TIMERS
 		// STATE I/IV
-		struct EVTransition : public Transition, sc::simple_state <EVTransition, TrafficLightStateMachine>
+		struct EWTransition : public Transition, sc::simple_state <EWTransition, TrafficLightStateMachine>
 		{
 			typedef  mpl::list < 
 				sc::transition<NormalTransition, NTransition>,
 				sc::custom_reaction <JumpTransition> > reactions;
 
-			sc::result react(const JumpTransition& ev)
+			sc::result react(const JumpTransition& jumpTransition)
 			{
-				// TO FIND A WAY TO REMOVE DUBLICATES
-				if (!nextTransition_)
-				{
-					throw std::runtime_error("Tried to jump to undefined transition");
-				}
-				if (std::dynamic_pointer_cast<EVTransition>(nextTransition_) != nullptr) { return transit<EVTransition>(); }
-				if (std::dynamic_pointer_cast<NTransition>(nextTransition_) != nullptr) { return transit<NTransition>(); }
-				if (std::dynamic_pointer_cast<STransition>(nextTransition_) != nullptr) { return transit<STransition>(); }
-				if (std::dynamic_pointer_cast<NSTransition>(nextTransition_) != nullptr) { return transit<NSTransition>(); }
-				if (std::dynamic_pointer_cast<ETransition>(nextTransition_) != nullptr) { return transit<ETransition>(); }
-				if (std::dynamic_pointer_cast<WTransition>(nextTransition_) != nullptr) { return transit<WTransition>(); }
+				// TO FIND A WAY TO REMOVE DUBLICATE CODE
+				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
+				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
+				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
+				if (jumpTransition.nextTransition_ == "NS") { return transit<NSTransition>(); }
+				if (jumpTransition.nextTransition_ == "E") { return transit<ETransition>(); }
+				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
+				throw std::runtime_error("Tried to jump to undefined transition");
+			}
+
+			EWTransition()
+			{
+				stateMachine_->freezeTimers("EW");
+			}
+
+			~EWTransition()
+			{
+				stateMachine_->resetTimers("EW");
 			}
 		};
 
@@ -142,18 +174,26 @@ namespace model
 				sc::transition<NormalTransition, STransition>,
 				sc::custom_reaction <JumpTransition> > reactions;
 
-			sc::result react(const JumpTransition& ev)
+			sc::result react(const JumpTransition& jumpTransition)
 			{
-				if (!nextTransition_)
-				{
-					throw std::runtime_error("Tried to jump to undefined transition");
-				}
-				if (std::dynamic_pointer_cast<EVTransition>(nextTransition_) != nullptr) { return transit<EVTransition>(); }
-				if (std::dynamic_pointer_cast<NTransition>(nextTransition_) != nullptr) { return transit<NTransition>(); }
-				if (std::dynamic_pointer_cast<STransition>(nextTransition_) != nullptr) { return transit<STransition>(); }
-				if (std::dynamic_pointer_cast<NSTransition>(nextTransition_) != nullptr) { return transit<NSTransition>(); }
-				if (std::dynamic_pointer_cast<ETransition>(nextTransition_) != nullptr) { return transit<ETransition>(); }
-				if (std::dynamic_pointer_cast<WTransition>(nextTransition_) != nullptr) { return transit<WTransition>(); }
+				// TO FIND A WAY TO REMOVE DUBLICATE CODE
+				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
+				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
+				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
+				if (jumpTransition.nextTransition_ == "NS") { return transit<NSTransition>(); }
+				if (jumpTransition.nextTransition_ == "E") { return transit<ETransition>(); }
+				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
+				throw std::runtime_error("Tried to jump to undefined transition");
+			}
+
+			NTransition()
+			{
+				stateMachine_->freezeTimers("N");
+			}
+
+			~NTransition()
+			{
+				stateMachine_->resetTimers("N");
 			}
 		};
 
@@ -164,18 +204,26 @@ namespace model
 				sc::transition<NormalTransition, NSTransition>,
 				sc::custom_reaction <JumpTransition> > reactions;
 
-			sc::result react(const JumpTransition& ev)
+			sc::result react(const JumpTransition& jumpTransition)
 			{
-				if (!nextTransition_)
-				{
-					throw std::runtime_error("Tried to jump to undefined transition");
-				}
-				if (std::dynamic_pointer_cast<EVTransition>(nextTransition_) != nullptr) { return transit<EVTransition>(); }
-				if (std::dynamic_pointer_cast<NTransition>(nextTransition_) != nullptr) { return transit<NTransition>(); }
-				if (std::dynamic_pointer_cast<STransition>(nextTransition_) != nullptr) { return transit<STransition>(); }
-				if (std::dynamic_pointer_cast<NSTransition>(nextTransition_) != nullptr) { return transit<NSTransition>(); }
-				if (std::dynamic_pointer_cast<ETransition>(nextTransition_) != nullptr) { return transit<ETransition>(); }
-				if (std::dynamic_pointer_cast<WTransition>(nextTransition_) != nullptr) { return transit<WTransition>(); }
+				// TO FIND A WAY TO REMOVE DUBLICATE CODE
+				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
+				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
+				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
+				if (jumpTransition.nextTransition_ == "NS") { return transit<NSTransition>(); }
+				if (jumpTransition.nextTransition_ == "E") { return transit<ETransition>(); }
+				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
+				throw std::runtime_error("Tried to jump to undefined transition");
+			}
+
+			STransition()
+			{
+				stateMachine_->freezeTimers("S");
+			}
+
+			~STransition()
+			{
+				stateMachine_->resetTimers("S");
 			}
 		};
 
@@ -186,18 +234,27 @@ namespace model
 				sc::transition<NormalTransition, ETransition>,
 				sc::custom_reaction <JumpTransition> > reactions;
 
-			sc::result react(const JumpTransition& ev)
+			sc::result react(const JumpTransition& jumpTransition)
 			{
-				if (!nextTransition_)
-				{
-					throw std::runtime_error("Tried to jump to undefined transition");
-				}
-				if (std::dynamic_pointer_cast<EVTransition>(nextTransition_) != nullptr) { return transit<EVTransition>(); }
-				if (std::dynamic_pointer_cast<NTransition>(nextTransition_) != nullptr) { return transit<NTransition>(); }
-				if (std::dynamic_pointer_cast<STransition>(nextTransition_) != nullptr) { return transit<STransition>(); }
-				if (std::dynamic_pointer_cast<NSTransition>(nextTransition_) != nullptr) { return transit<NSTransition>(); }
-				if (std::dynamic_pointer_cast<ETransition>(nextTransition_) != nullptr) { return transit<ETransition>(); }
-				if (std::dynamic_pointer_cast<WTransition>(nextTransition_) != nullptr) { return transit<WTransition>(); }
+				// TO FIND A WAY TO REMOVE DUBLICATE CODE
+				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
+				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
+				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
+				if (jumpTransition.nextTransition_ == "NS") { return transit<NSTransition>(); }
+				if (jumpTransition.nextTransition_ == "E") { return transit<ETransition>(); }
+				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
+				throw std::runtime_error("Tried to jump to undefined transition");
+			}
+
+			// TO BETTER DO THIS ALL OF THIS IN BASE STATE, JUST SET STRING IN HERE
+			NSTransition()
+			{
+				stateMachine_->freezeTimers("NS");
+			}
+
+			~NSTransition()
+			{
+				stateMachine_->resetTimers("NS");
 			}
 		};
 
@@ -208,18 +265,26 @@ namespace model
 				sc::transition<NormalTransition, WTransition>,
 				sc::custom_reaction <JumpTransition> > reactions;
 
-			sc::result react(const JumpTransition& ev)
+			sc::result react(const JumpTransition& jumpTransition)
 			{
-				if (!nextTransition_)
-				{
-					throw std::runtime_error("Tried to jump to undefined transition");
-				}
-				if (std::dynamic_pointer_cast<EVTransition>(nextTransition_) != nullptr) { return transit<EVTransition>(); }
-				if (std::dynamic_pointer_cast<NTransition>(nextTransition_) != nullptr) { return transit<NTransition>(); }
-				if (std::dynamic_pointer_cast<STransition>(nextTransition_) != nullptr) { return transit<STransition>(); }
-				if (std::dynamic_pointer_cast<NSTransition>(nextTransition_) != nullptr) { return transit<NSTransition>(); }
-				if (std::dynamic_pointer_cast<ETransition>(nextTransition_) != nullptr) { return transit<ETransition>(); }
-				if (std::dynamic_pointer_cast<WTransition>(nextTransition_) != nullptr) { return transit<WTransition>(); }
+				// TO FIND A WAY TO REMOVE DUBLICATE CODE
+				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
+				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
+				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
+				if (jumpTransition.nextTransition_ == "NS") { return transit<NSTransition>(); }
+				if (jumpTransition.nextTransition_ == "E") { return transit<ETransition>(); }
+				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
+				throw std::runtime_error("Tried to jump to undefined transition");
+			}
+
+			ETransition()
+			{
+				stateMachine_->freezeTimers("E");
+			}
+
+			~ETransition()
+			{
+				stateMachine_->resetTimers("E");
 			}
 		};
 
@@ -227,21 +292,29 @@ namespace model
 		struct WTransition : public Transition, sc::simple_state <WTransition, TrafficLightStateMachine>
 		{
 			typedef  mpl::list <
-				sc::transition<NormalTransition, EVTransition>,
+				sc::transition<NormalTransition, EWTransition>,
 				sc::custom_reaction <JumpTransition> > reactions;
 
-			sc::result react(const JumpTransition& ev)
+			sc::result react(const JumpTransition& jumpTransition)
 			{
-				if (!nextTransition_)
-				{
-					throw std::runtime_error("Tried to jump to undefined transition");
-				}
-				if (std::dynamic_pointer_cast<EVTransition>(nextTransition_) != nullptr) { return transit<EVTransition>(); }
-				if (std::dynamic_pointer_cast<NTransition>(nextTransition_) != nullptr) { return transit<NTransition>(); }
-				if (std::dynamic_pointer_cast<STransition>(nextTransition_) != nullptr) { return transit<STransition>(); }
-				if (std::dynamic_pointer_cast<NSTransition>(nextTransition_) != nullptr) { return transit<NSTransition>(); }
-				if (std::dynamic_pointer_cast<ETransition>(nextTransition_) != nullptr) { return transit<ETransition>(); }
-				if (std::dynamic_pointer_cast<WTransition>(nextTransition_) != nullptr) { return transit<WTransition>(); }
+				// TO FIND A WAY TO REMOVE DUBLICATE CODE
+				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
+				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
+				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
+				if (jumpTransition.nextTransition_ == "NS") { return transit<NSTransition>(); }
+				if (jumpTransition.nextTransition_ == "E") { return transit<ETransition>(); }
+				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
+				throw std::runtime_error("Tried to jump to undefined transition");
+			}
+
+			WTransition()
+			{
+				stateMachine_->freezeTimers("EW");
+			}
+
+			~WTransition()
+			{
+				stateMachine_->resetTimers("EW");
 			}
 		};
 
