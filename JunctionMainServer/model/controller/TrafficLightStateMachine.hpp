@@ -73,22 +73,9 @@ namespace model
 			{}
 		};
 
-		struct Transition
-		{
-			std::shared_ptr<TrafficLightStateMachine> stateMachine_;
-			virtual sc::result react(const JumpTransition& jumpTransition) = 0;
-			virtual ~Transition() noexcept = default;
-		};
-
-		struct Stopped;
-		struct EWTransition;
-		struct NTransition;
-		struct STransition;
-		struct NSTransition;
-		struct ETransition;
-		struct WTransition;
+		struct BaseState;
 		struct TrafficLightStateMachine : 
-			sc::state_machine<TrafficLightStateMachine, Stopped>,
+			sc::state_machine<TrafficLightStateMachine, BaseState>,
 			std::enable_shared_from_this<TrafficLightStateMachine>
 		{
 		private:
@@ -140,23 +127,24 @@ namespace model
 			void queueNextStatesWaiting();
 		};
 
-		// STATES
-		struct Stopped : sc::simple_state <Stopped, TrafficLightStateMachine>
+		struct ContextContainer
 		{
-			typedef sc::transition<Start ,EWTransition> reactions;
+			std::shared_ptr<TrafficLightStateMachine> stateMachine_;
 		};
 
-		// CONSTRUCTORS FOR ALL OF THEM DEFINED TO FREEZE AND UNFREEZE TIMERS
-		// STATE I/IV
-		struct EWTransition : public Transition, sc::simple_state <EWTransition, TrafficLightStateMachine>
+		// STATES
+		struct Stopped;
+		struct EWTransition;
+		struct NTransition;
+		struct STransition;
+		struct NSTransition;
+		struct ETransition;
+		struct WTransition;
+		struct BaseState : sc::simple_state <BaseState, TrafficLightStateMachine, Stopped>
 		{
-			typedef  mpl::list < 
-				sc::transition<NormalTransition, NTransition>,
-				sc::custom_reaction <JumpTransition> > reactions;
-
-			sc::result react(const JumpTransition& jumpTransition)
+			typedef  mpl::list <sc::custom_reaction <JumpTransition> > reactions;
+			virtual sc::result react(const JumpTransition& jumpTransition)
 			{
-				// TO FIND A WAY TO REMOVE DUBLICATE CODE
 				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
 				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
 				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
@@ -165,10 +153,24 @@ namespace model
 				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
 				throw std::runtime_error("Tried to jump to undefined transition");
 			}
+			virtual ~BaseState() noexcept = default;
+		};
+
+		struct Stopped : sc::simple_state <Stopped, BaseState>
+		{
+			typedef sc::transition<Start ,EWTransition> reactions;
+		};
+
+	
+		// STATE I/IV
+		struct EWTransition : ContextContainer, sc::simple_state <EWTransition, BaseState>
+		{
+			typedef  mpl::list < sc::transition<NormalTransition, NTransition> > reactions;
 
 			EWTransition()
 			{
-				auto transitionBase = dynamic_cast<const BaseTransition*> (triggering_event());
+				auto transitionBase = dynamic_cast<const BaseTransition*> (
+					sc::simple_state <EWTransition, BaseState>::triggering_event());
 				if (transitionBase)
 				{
 					stateMachine_ = transitionBase->getContextStateMachine();
@@ -189,27 +191,14 @@ namespace model
 		};
 
 		// STATE II
-		struct NTransition : public Transition, sc::simple_state <NTransition, TrafficLightStateMachine>
+		struct NTransition : ContextContainer, sc::simple_state <NTransition, BaseState>
 		{
-			typedef  mpl::list <
-				sc::transition<NormalTransition, STransition>,
-				sc::custom_reaction <JumpTransition> > reactions;
-
-			sc::result react(const JumpTransition& jumpTransition)
-			{
-				// TO FIND A WAY TO REMOVE DUBLICATE CODE
-				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
-				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
-				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
-				if (jumpTransition.nextTransition_ == "NS") { return transit<NSTransition>(); }
-				if (jumpTransition.nextTransition_ == "E") { return transit<ETransition>(); }
-				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
-				throw std::runtime_error("Tried to jump to undefined transition");
-			}
+			typedef  mpl::list < sc::transition<NormalTransition, STransition>> reactions;
 
 			NTransition()
 			{
-				auto transitionBase = dynamic_cast<const BaseTransition*> (triggering_event());
+				auto transitionBase = dynamic_cast<const BaseTransition*> (
+					sc::simple_state <NTransition, BaseState>::triggering_event());
 				if (transitionBase)
 				{
 					stateMachine_ = transitionBase->getContextStateMachine();
@@ -228,27 +217,14 @@ namespace model
 		};
 
 		// STATE III
-		struct STransition : public Transition, sc::simple_state <STransition, TrafficLightStateMachine>
+		struct STransition : ContextContainer, sc::simple_state <STransition, BaseState>
 		{
-			typedef  mpl::list <
-				sc::transition<NormalTransition, NSTransition>,
-				sc::custom_reaction <JumpTransition> > reactions;
-
-			sc::result react(const JumpTransition& jumpTransition)
-			{
-				// TO FIND A WAY TO REMOVE DUBLICATE CODE
-				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
-				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
-				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
-				if (jumpTransition.nextTransition_ == "NS") { return transit<NSTransition>(); }
-				if (jumpTransition.nextTransition_ == "E") { return transit<ETransition>(); }
-				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
-				throw std::runtime_error("Tried to jump to undefined transition");
-			}
+			typedef  mpl::list <sc::transition<NormalTransition, NSTransition>> reactions;
 
 			STransition()
 			{
-				auto transitionBase = dynamic_cast<const BaseTransition*> (triggering_event());
+				auto transitionBase = dynamic_cast<const BaseTransition*> (
+					sc::simple_state <STransition, BaseState>::triggering_event());
 				if (transitionBase)
 				{
 					stateMachine_ = transitionBase->getContextStateMachine();
@@ -269,28 +245,15 @@ namespace model
 		};
 
 		// STATE V/VIII
-		struct NSTransition : public Transition, sc::simple_state <NSTransition, TrafficLightStateMachine>
+		struct NSTransition : ContextContainer, sc::simple_state <NSTransition, BaseState>
 		{
-			typedef  mpl::list <
-				sc::transition<NormalTransition, ETransition>,
-				sc::custom_reaction <JumpTransition> > reactions;
-
-			sc::result react(const JumpTransition& jumpTransition)
-			{
-				// TO FIND A WAY TO REMOVE DUBLICATE CODE
-				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
-				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
-				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
-				if (jumpTransition.nextTransition_ == "NS") { return transit<NSTransition>(); }
-				if (jumpTransition.nextTransition_ == "E") { return transit<ETransition>(); }
-				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
-				throw std::runtime_error("Tried to jump to undefined transition");
-			}
+			typedef  mpl::list <sc::transition<NormalTransition, ETransition>> reactions;
 
 			// TO BETTER DO THIS ALL OF THIS IN BASE STATE, JUST SET STRING IN HERE
 			NSTransition()
 			{
-				auto transitionBase = dynamic_cast<const BaseTransition*> (triggering_event());
+				auto transitionBase = dynamic_cast<const BaseTransition*> (
+					sc::simple_state <NSTransition, BaseState>::triggering_event());
 				if (transitionBase)
 				{
 					stateMachine_ = transitionBase->getContextStateMachine();
@@ -311,27 +274,14 @@ namespace model
 		};
 
 		// STATE VI
-		struct ETransition : public Transition, sc::simple_state <ETransition, TrafficLightStateMachine>
+		struct ETransition : ContextContainer, sc::simple_state <ETransition, BaseState>
 		{
-			typedef  mpl::list <
-				sc::transition<NormalTransition, WTransition>,
-				sc::custom_reaction <JumpTransition> > reactions;
-
-			sc::result react(const JumpTransition& jumpTransition)
-			{
-				// TO FIND A WAY TO REMOVE DUBLICATE CODE
-				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
-				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
-				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
-				if (jumpTransition.nextTransition_ == "NS") { return transit<NSTransition>(); }
-				if (jumpTransition.nextTransition_ == "E") { return transit<ETransition>(); }
-				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
-				throw std::runtime_error("Tried to jump to undefined transition");
-			}
+			typedef  mpl::list <sc::transition<NormalTransition, WTransition>> reactions;
 
 			ETransition()
 			{
-				auto transitionBase = dynamic_cast<const BaseTransition*> (triggering_event());
+				auto transitionBase = dynamic_cast<const BaseTransition*> (
+					sc::simple_state <ETransition, BaseState>::triggering_event());
 				if (transitionBase)
 				{
 					stateMachine_ = transitionBase->getContextStateMachine();
@@ -352,27 +302,14 @@ namespace model
 		};
 
 		// STATE VII
-		struct WTransition : public Transition, sc::simple_state <WTransition, TrafficLightStateMachine>
+		struct WTransition : ContextContainer, sc::simple_state <WTransition, BaseState>
 		{
-			typedef  mpl::list <
-				sc::transition<NormalTransition, EWTransition>,
-				sc::custom_reaction <JumpTransition> > reactions;
-
-			sc::result react(const JumpTransition& jumpTransition)
-			{
-				// TO FIND A WAY TO REMOVE DUBLICATE CODE
-				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
-				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
-				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
-				if (jumpTransition.nextTransition_ == "NS") { return transit<NSTransition>(); }
-				if (jumpTransition.nextTransition_ == "E") { return transit<ETransition>(); }
-				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
-				throw std::runtime_error("Tried to jump to undefined transition");
-			}
+			typedef  mpl::list <sc::transition<NormalTransition, EWTransition>> reactions;
 
 			WTransition()
 			{
-				auto transitionBase = dynamic_cast<const BaseTransition*> (triggering_event());
+				auto transitionBase = dynamic_cast<const BaseTransition*> (
+					sc::simple_state <WTransition, BaseState>::triggering_event());
 				if (transitionBase)
 				{
 					stateMachine_ = transitionBase->getContextStateMachine();
