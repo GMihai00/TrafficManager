@@ -21,12 +21,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="model\SystemClient.hpp">
+    <ClInclude Include="model\VehicleTrackerClient.hpp">
       <Filter>Header Files\model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="model\SystemClient.cpp">
+    <ClCompile Include="model\VehicleTrackerClient.cpp">
       <Filter>Source Files\model</Filter>
     </ClCompile>
     <ClCompile Include="VehicleTracker.cpp">

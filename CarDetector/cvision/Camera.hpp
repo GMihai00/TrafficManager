@@ -30,6 +30,7 @@ namespace cvision
 		std::mutex mutexRead_;
 		std::condition_variable condVarRead_;
 		boost::optional<cv::Mat> currentImage_;
+		
 		LOGGER("Camera");
 	public:
 		Camera(const int16_t id);

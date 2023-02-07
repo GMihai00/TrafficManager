@@ -1,8 +1,8 @@
-#include "CostumServer.hpp"
+#include "JunctionServer.hpp"
 
 namespace model
 {
-	CostumServer::CostumServer(const ipc::utile::PORT port,const Config& config):
+	JunctionServer::JunctionServer(const ipc::utile::PORT port,const Config& config):
 		ipc::net::Server<ipc::VehicleDetectionMessages>(port),
 		trafficLightStateMachine_(config)
 	{
@@ -10,19 +10,19 @@ namespace model
 		trafficLightStateMachine_.initiate();
 	}
 
-	bool CostumServer::onClientConnect(ipc::utile::ConnectionPtr client)
+	bool JunctionServer::onClientConnect(ipc::utile::ConnectionPtr client)
 	{
 		// TO THINK ABOUT THIS
 		return true;
 	}
 
-	void CostumServer::onClientDisconnect(ipc::utile::ConnectionPtr client)
+	void JunctionServer::onClientDisconnect(ipc::utile::ConnectionPtr client)
 	{
 		// TO THINK ABOUT THIS
 	}
 
 
-	void CostumServer::aproveMessage(
+	void JunctionServer::aproveMessage(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
 		ipc::net::Message<ipc::VehicleDetectionMessages> message;
@@ -31,7 +31,7 @@ namespace model
 		client->send(message);
 	}
 
-	void CostumServer::rejectMessage(
+	void JunctionServer::rejectMessage(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
 		LOG_WARN << "Rejecting invalid message";
@@ -41,7 +41,7 @@ namespace model
 		client->send(message);
 	}
 
-	boost::optional<common::utile::LANE> CostumServer::getMessageSourceLane(
+	boost::optional<common::utile::LANE> JunctionServer::getMessageSourceLane(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
 		switch (msg.header.type)
@@ -69,7 +69,7 @@ namespace model
 		}
 	}
 
-	bool CostumServer::isMessageValid(
+	bool JunctionServer::isMessageValid(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, boost::optional<common::utile::LANE> lane)
 	{
 		if (lane == boost::none || trafficLightStateMachine_.isLaneMissing(lane.get()))
@@ -80,7 +80,7 @@ namespace model
 		return true;
 	}
 
-	void CostumServer::handleMessage(
+	void JunctionServer::handleMessage(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, common::utile::LANE lane)
 	{
 		bool leaving;
@@ -108,7 +108,7 @@ namespace model
 		aproveMessage(client, msg);
 	}
 
-	void CostumServer::onMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
+	void JunctionServer::onMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
 		const auto lane = getMessageSourceLane(client, msg);
 		if (!isMessageValid(client, msg, lane))

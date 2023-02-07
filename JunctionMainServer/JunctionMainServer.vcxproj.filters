@@ -36,7 +36,7 @@
     <ClCompile Include="JunctionMainServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="model\CostumServer.cpp">
+    <ClCompile Include="model\JunctionServer.cpp">
       <Filter>Source Files\model</Filter>
     </ClCompile>
     <ClCompile Include="model\controller\TrafficLightStateMachine.cpp">
@@ -52,7 +52,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="model\CostumServer.hpp">
+    <ClInclude Include="model\JunctionServer.hpp">
       <Filter>Header Files\model</Filter>
     </ClInclude>
     <ClInclude Include="model\controller\TrafficLightStateMachine.hpp">

@@ -162,10 +162,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="model\SystemClient.hpp" />
+    <ClInclude Include="model\VehicleTrackerClient.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="model\SystemClient.cpp" />
+    <ClCompile Include="model\VehicleTrackerClient.cpp" />
     <ClCompile Include="VehicleTracker.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

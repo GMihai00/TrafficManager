@@ -1,5 +1,5 @@
-#ifndef MODEL_COSTUMSERVER_HPP
-#define MODEL_COSTUMSERVER_HPP
+#ifndef MODEL_JunctionServer_HPP
+#define MODEL_JunctionServer_HPP
 
 #include <thread>
 #include <mutex>
@@ -15,7 +15,7 @@
 // TO REFACTOR EVERYTHING IN HERE IT IS SO SO SOOOO WRONG
 namespace model
 {
-	class CostumServer : ipc::net::Server<ipc::VehicleDetectionMessages>
+	class JunctionServer : ipc::net::Server<ipc::VehicleDetectionMessages>
 	{
 	private:
 		
@@ -23,6 +23,7 @@ namespace model
 		controller::TrafficLightStateMachine trafficLightStateMachine_;
 		ipc::utile::IP_ADRESS localProxyServer_;
 		Config config_;
+		LOGGER("JUNCTION-SERVER");
 
 		boost::optional<common::utile::LANE> getMessageSourceLane(
 			ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
@@ -31,9 +32,9 @@ namespace model
 		void aproveMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 		void rejectMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 	public:
-		CostumServer(const ipc::utile::PORT port, const Config& config);
-		CostumServer(const CostumServer&) = delete;
-		virtual ~CostumServer() noexcept = default;
+		JunctionServer(const ipc::utile::PORT port, const Config& config);
+		JunctionServer(const JunctionServer&) = delete;
+		virtual ~JunctionServer() noexcept = default;
 
 		virtual bool onClientConnect(ipc::utile::ConnectionPtr client);
 		virtual void onClientDisconnect(ipc::utile::ConnectionPtr client);
@@ -41,5 +42,5 @@ namespace model
 		void handleMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, common::utile::LANE lane);
 	};
 } // namespace model
-#endif // #MODEL_COSTUMSERVER_HPP
+#endif // #MODEL_JunctionServer_HPP
 

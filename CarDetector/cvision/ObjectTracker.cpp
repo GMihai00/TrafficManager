@@ -4,7 +4,8 @@
 
 namespace cvision
 {
-    ObjectTracker::ObjectTracker(const uint16_t idCamera) :
+    ObjectTracker::ObjectTracker(const uint16_t idCamera, IObserverPtr observer) :
+        attachedObserver_(observer),
         camera_(idCamera),
         imageProcessor_(new ImageProcessor()),
         imageRender_(new ImageRender()),
@@ -12,7 +13,8 @@ namespace cvision
     {
     }
 
-    ObjectTracker::ObjectTracker(const std::string videoPath) :
+    ObjectTracker::ObjectTracker(const std::string videoPath, IObserverPtr observer) :
+        attachedObserver_(observer),
         camera_(videoPath),
         imageProcessor_(new ImageProcessor()),
         imageRender_(new ImageRender()),
@@ -257,6 +259,10 @@ namespace cvision
                     size_t carsToAdd = movingObjGroup->nrCars();
                     if (carsToAdd != 0)
                     {
+                        if (attachedObserver_)
+                        {
+                            attachedObserver_->notify();
+                        }
                         carCountRight_+=carsToAdd;
                         objCrossedRight = true;
                     }
@@ -296,6 +302,10 @@ namespace cvision
                     size_t carsToAdd = movingObjGroup->nrCars();
                     if (carsToAdd != 0)
                     {
+                        if (attachedObserver_)
+                        {
+                            attachedObserver_->notify();
+                        }
                         carCountLeft_+=carsToAdd;
                         objCrossedRightLeft = true;
                     }
@@ -378,5 +388,16 @@ namespace cvision
         cv::line(img, crossingLineLeft_[0], crossingLineLeft_[1], leftLaneColor, 2);
 
         drawObjCountOnImage(img);
+    }
+
+    std::pair<size_t, size_t> ObjectTracker::getCarCount()
+    {
+        std::scoped_lock<std::mutex> lock(mutexProcess_);
+        return { carCountLeft_, carCountRight_ };
+    }
+
+    void ObjectTracker::subscribe(IObserverPtr observer)
+    {
+        attachedObserver_ = observer;
     }
 } // namespace cvision

@@ -26,6 +26,7 @@
 #include "Utils.hpp"
 #include "ImageProcessor.hpp"
 #include "ImageRender.hpp"
+#include "utile/Observer.hpp"
 
 namespace cvision
 {
@@ -51,6 +52,8 @@ namespace cvision
 		std::mutex mutexProcess_;
 		std::condition_variable condVarProcess_;
 		bool shouldRender_ = false;
+
+		common::utile::IObserverPtr attachedObserver_;
 		LOGGER("CAR-TRACKER");
 
 		void setupLines();
@@ -69,12 +72,15 @@ namespace cvision
 		void drawRezultsOnImage(cv::Mat& img);
 
 	public:
-		ObjectTracker(const uint16_t idCamera);
-		ObjectTracker(const std::string videoPath);
+		ObjectTracker(const uint16_t idCamera, IObserverPtr observer = nullptr);
+		ObjectTracker(const std::string videoPath, IObserverPtr observer = nullptr);
 		ObjectTracker(const ObjectTracker&) = delete;
 		virtual ~ObjectTracker() noexcept;
 		bool startTracking(bool shouldRender = false);
 		void stopTracking();
+
+		std::pair<size_t, size_t> getCarCount();
+		void subscribe(IObserverPtr observer);
 	};
 } // namespace cvision
 #endif // #MODEL_CVISION_OBJECTTRACKER_HPP
