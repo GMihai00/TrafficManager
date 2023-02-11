@@ -47,7 +47,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\resources\config.json">
+    <None Include="..\resources\JunctionConfig.json">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -57,9 +57,6 @@
     </ClInclude>
     <ClInclude Include="model\controller\TrafficLightStateMachine.hpp">
       <Filter>Header Files\model\controller</Filter>
-    </ClInclude>
-    <ClInclude Include="model\GeoCoordinate.hpp">
-      <Filter>Header Files\model</Filter>
     </ClInclude>
     <ClInclude Include="model\Config.hpp">
       <Filter>Header Files\model</Filter>

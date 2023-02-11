@@ -165,13 +165,12 @@
     <ClCompile Include="utile\ConfigLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\resources\config.json" />
+    <None Include="..\resources\JunctionConfig.json" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="model\Config.hpp" />
     <ClInclude Include="model\controller\TrafficLightStateMachine.hpp" />
     <ClInclude Include="model\JunctionServer.hpp" />
-    <ClInclude Include="model\GeoCoordinate.hpp" />
     <ClInclude Include="utile\ConfigLoader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

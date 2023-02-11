@@ -1,5 +1,6 @@
-#ifndef MODEL_COSTUMCLIENT
-#define MODEL_COSTUMCLIENT
+#pragma once
+#ifndef MODEL_COSTUMCLIENT_HPP
+#define MODEL_COSTUMCLIENT_HPP
 
 #include <utility>
 #include <condition_variable>
@@ -22,7 +23,7 @@ namespace model
         cvision::ObjectTracker carTracker_;
         common::utile::IObserverPtr observer_;
 
-        LOGGER("VEHICLETRAKER-CLIENT");
+        LOGGER("TRAFFICOBSERVER-CLIENT");
         bool startTrackingCars();
         void stopTrackingCars();
     public:
@@ -34,4 +35,4 @@ namespace model
         bool sendData(size_t numberOfCars, bool leaving = false);
     };
 } // namespace model
-#endif
+#endif // #MODEL_COSTUMCLIENT_HPP

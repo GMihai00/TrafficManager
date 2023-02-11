@@ -92,7 +92,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)CarDetector;$(SolutionDir)IPC;$(SolutionDir)Common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)IPC;$(SolutionDir)Common</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)CarDetector;$(SolutionDir)IPC;$(SolutionDir)Common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)IPC;$(SolutionDir)Common</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -124,7 +124,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)CarDetector;$(SolutionDir)IPC;$(SolutionDir)Common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)IPC;$(SolutionDir)Common</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -140,7 +140,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)CarDetector;$(SolutionDir)IPC;$(SolutionDir)Common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)IPC;$(SolutionDir)Common</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -157,6 +157,13 @@
     <ProjectReference Include="..\IPC\IPC.vcxproj">
       <Project>{df49742e-e610-4153-a5ca-dce52f361602}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="model\VehicleTrackerClient.cpp" />
+    <ClCompile Include="VehicleTracker.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="model\VehicleTrackerClient.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

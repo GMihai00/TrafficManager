@@ -7,7 +7,6 @@
 
 #include "net/Server.hpp"
 #include "MessageTypes.hpp"
-#include "GeoCoordinate.hpp"
 #include "Config.hpp"
 #include "controller/TrafficLightStateMachine.hpp"
 #include <boost/optional/optional.hpp>

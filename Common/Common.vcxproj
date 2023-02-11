@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="utile\DataTypes.hpp" />
+    <ClInclude Include="utile\GeoCoordinate.hpp" />
     <ClInclude Include="utile\Helpers.hpp" />
     <ClInclude Include="utile\IObserver.hpp" />
     <ClInclude Include="utile\Logger.hpp" />

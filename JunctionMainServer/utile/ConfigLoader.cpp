@@ -56,10 +56,10 @@ namespace utile
 		const auto& jsonTree = jsonRoot.get_child_optional("latitude");
 		if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
 		{
-			const auto& latitude = stringToCoordinates(jsonTree.get().get_value<std::string>());
+			const auto& latitude = stringToPositionalUnit(jsonTree.get().get_value<std::string>());
 			if (latitude != boost::none)
 			{
-				config.latitude = latitude.get();
+				config.coordinates.latitude = latitude.get();
 				return true;
 			}
 		}
@@ -72,10 +72,10 @@ namespace utile
 		const auto& jsonTree = jsonRoot.get_child_optional("longitude");
 		if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
 		{
-			const auto& longitude = stringToCoordinates(jsonTree.get().get_value<std::string>());
+			const auto& longitude = stringToPositionalUnit(jsonTree.get().get_value<std::string>());
 			if (longitude != boost::none)
 			{
-				config.longitude = longitude.get();
+				config.coordinates.longitude = longitude.get();
 				return true;
 			}
 		}
@@ -119,9 +119,9 @@ namespace utile
 		}
 	}
 
-	boost::optional<model::GeoCoordinate> ConfigLoader::stringToCoordinates(const std::string& coordinate)
+	boost::optional<common::utile::PositionalUnit> ConfigLoader::stringToPositionalUnit(const std::string& positionalUnit)
 	{
-		model::GeoCoordinate rez;
+		common::utile::PositionalUnit rez;
 		//EX: "45° 02' 60.0\" N"
 		std::vector<std::string> symbloToFind = { "°", "'", "\"" };
 		std::vector<double> numbersFound;
@@ -130,13 +130,13 @@ namespace utile
 		std::size_t next;
 		for (const auto& symbol : symbloToFind)
 		{
-			next = coordinate.find("°");
+			next = positionalUnit.find("°");
 			if (next == std::string::npos)
 			{
 				return boost::none;
 			}
 
-			auto value = coordinate.substr(last, next - last);
+			auto value = positionalUnit.substr(last, next - last);
 			const auto maybeValue = stringToDouble(value);
 			if (maybeValue == boost::none)
 			{
@@ -149,7 +149,7 @@ namespace utile
 		rez.minutues = numbersFound[1];
 		rez.seconds = numbersFound[2];
 		// read last character for direction
-		rez.direction = toupper(coordinate[coordinate.size() - 1]);
+		rez.direction = toupper(positionalUnit[positionalUnit.size() - 1]);
 		if (!(rez.direction == 'N' || rez.direction == 'S' || rez.direction == 'E' || rez.direction == 'W'))
 		{
 			return boost::none;

@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 #include <boost/optional.hpp>
-#include "GeoCoordinate.hpp"
+#include "utile/GeoCoordinate.hpp"
 #include "utile/DataTypes.hpp"
 #include "utile/IPCDataTypes.hpp"
 
@@ -16,8 +16,7 @@ namespace model
 		std::map<common::utile::LANE, ipc::utile::IP_ADRESS> laneToIPAdress;
 		bool usingLeftLane;
 		uint16_t maxWaitingTime;
-		model::GeoCoordinate latitude;
-		model::GeoCoordinate longitude;
+		common::utile::GeoCoordinate coordinates;
 		ipc::utile::IP_ADRESS localProxyServer;
 		boost::optional<common::utile::LANE> missingLane;
 	};

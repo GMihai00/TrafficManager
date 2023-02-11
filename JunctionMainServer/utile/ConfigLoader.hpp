@@ -8,7 +8,7 @@
 #include <boost/optional.hpp>
 
 #include "../model/Config.hpp"
-#include "../model/GeoCoordinate.hpp"
+#include "utile/GeoCoordinate.hpp"
 #include "../common/utile/Logger.hpp"
 
 namespace utile
@@ -28,7 +28,7 @@ namespace utile
 		bool loadLocalServer(const ptree& jsonRoot, model::Config& config);
 		void loadMissingRoadIfPresent(const ptree& jsonRoot, model::Config& config);
 		boost::optional<double> stringToDouble(std::string& real);
-		boost::optional<model::GeoCoordinate> stringToCoordinates(const std::string& corrdinate);
+		boost::optional<common::utile::PositionalUnit> stringToPositionalUnit(const std::string& positionalUnit);
 	public:
 		model::Config load(const std::string& pathToConfigFile);
 	};
