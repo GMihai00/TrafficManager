@@ -151,22 +151,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CarDetector\CarDetector.vcxproj">
-      <Project>{efebec33-8a3b-4997-9a46-62b82d5456da}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\Common\Common.vcxproj">
       <Project>{49c8f1b8-b740-417a-8e55-a729a6dfb496}</Project>
     </ProjectReference>
     <ProjectReference Include="..\IPC\IPC.vcxproj">
       <Project>{df49742e-e610-4153-a5ca-dce52f361602}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="model\VehicleTrackerClient.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="model\VehicleTrackerClient.cpp" />
-    <ClCompile Include="VehicleTracker.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

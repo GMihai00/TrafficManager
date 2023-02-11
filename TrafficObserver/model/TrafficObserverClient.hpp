@@ -15,7 +15,7 @@
 namespace model
 {
     // CONFIG TO DETERMINE LANE
-    class VehicleTrackerClient : public ipc::net::Client<ipc::VehicleDetectionMessages>
+    class TrafficObserverClient : public ipc::net::Client<ipc::VehicleDetectionMessages>
     {
     private:
         ipc::utile::MessageIdProvider<ipc::VehicleDetectionMessages> messageIdProvider_;
@@ -26,8 +26,8 @@ namespace model
         bool startTrackingCars();
         void stopTrackingCars();
     public:
-        VehicleTrackerClient();
-        ~VehicleTrackerClient();
+        TrafficObserverClient();
+        ~TrafficObserverClient();
 
         void handleNewCarData();
         // THIS METHOD SHOULD BE CALLED ONLY WHEN CARCOUNT IS UPDATED

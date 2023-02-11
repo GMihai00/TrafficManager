@@ -1,30 +1,30 @@
-#include "VehicleTrackerClient.hpp"
+#include "TrafficObserverClient.hpp"
 
 namespace model
 {
-    void VehicleTrackerClient::handleNewCarData()
+    void TrafficObserverClient::handleNewCarData()
     {
         auto carCount = carTracker_.getCarCount();
         sendData(carCount.first);
         sendData(carCount.second);
     }
 
-    VehicleTrackerClient::VehicleTrackerClient() :
+    TrafficObserverClient::TrafficObserverClient() :
         ipc::net::Client<ipc::VehicleDetectionMessages>(),
         carTracker_(0)
     {
-        observer_ = std::make_shared<common::utile::Observer>(std::bind(&VehicleTrackerClient::handleNewCarData, this));
+        observer_ = std::make_shared<common::utile::Observer>(std::bind(&TrafficObserverClient::handleNewCarData, this));
         carTracker_.subscribe(observer_);
         this->startTrackingCars();
     }
 
-    VehicleTrackerClient::~VehicleTrackerClient()
+    TrafficObserverClient::~TrafficObserverClient()
     {
         this->stopTrackingCars();
     }
 
     // NEED TO CHANGE THIS TO BE DONE ON SEPARATE THREAD(S)
-    bool VehicleTrackerClient::sendData(size_t numberOfCars, bool leaving)
+    bool TrafficObserverClient::sendData(size_t numberOfCars, bool leaving)
     {
         if (!connection_)
         {
@@ -45,12 +45,12 @@ namespace model
         return true;
     }
 
-    bool VehicleTrackerClient::startTrackingCars()
+    bool TrafficObserverClient::startTrackingCars()
     {
         return carTracker_.startTracking();
     }
 
-    void VehicleTrackerClient::stopTrackingCars()
+    void TrafficObserverClient::stopTrackingCars()
     {
         carTracker_.stopTracking();
     }

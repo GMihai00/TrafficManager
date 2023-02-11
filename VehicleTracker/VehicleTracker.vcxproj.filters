@@ -20,17 +20,4 @@
       <UniqueIdentifier>{027f2108-2357-4078-906a-1c69b3a288cb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="model\VehicleTrackerClient.hpp">
-      <Filter>Header Files\model</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="model\VehicleTrackerClient.cpp">
-      <Filter>Source Files\model</Filter>
-    </ClCompile>
-    <ClCompile Include="VehicleTracker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
 </Project>

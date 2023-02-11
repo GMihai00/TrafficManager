@@ -1,4 +1,4 @@
-#include "model/VehicleTrackerClient.hpp"
+#include "model/TrafficObserverClient.hpp"
 
 // TO MOVE THIS THINGS MAYBE
 constexpr auto TCP_IP = "127.0.0.1";
@@ -7,7 +7,7 @@ constexpr auto BUFFER_SIZE = 1024;
 
 int main()
 {
-    model::VehicleTrackerClient client;
+    model::TrafficObserverClient client;
     client.connect(TCP_IP, TCP_PORT);
     while (true)
     {

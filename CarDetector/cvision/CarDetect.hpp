@@ -9,7 +9,7 @@
 
 namespace cvision
 {
-	const std::string trainedDataPath = ".\\resources\\carsTrainedData.xml";
+	const std::string trainedDataPath = ".\\resources\\carsTrainedData.xml"; // THIS PATH SEEMS TO GO BAD NEED TO CHECK WHY
 	class CarDetect
 	{
 	private:
