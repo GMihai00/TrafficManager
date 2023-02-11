@@ -59,5 +59,8 @@
     <ClCompile Include="utile\Observer.cpp">
       <Filter>Source Files\utile</Filter>
     </ClCompile>
+    <ClCompile Include="utile\GeoCoordinate.cpp">
+      <Filter>Source Files\utile</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

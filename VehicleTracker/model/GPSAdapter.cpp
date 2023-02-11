@@ -1,6 +1,7 @@
 #include "GPSAdapter.hpp"
 
 #include <functional>
+#include <sstream>
 
 namespace model
 {
@@ -30,7 +31,7 @@ namespace model
 	}
 
 	GPSAdapter::GPSAdapter(std::istream& inputStream) :
-		inputStream_(inputStream_)
+		inputStream_(inputStream)
 	{
 		threadProcess_ = std::thread(std::bind(&GPSAdapter::process, this));
 	}
@@ -43,17 +44,7 @@ namespace model
 		}
 	}
 
-	bool GPSAdapter::start()
-	{
-
-	}
-
-	void GPSAdapter::stop()
-	{
-
-	}
-
-	common::utile::GeoCoordinate GPSAdapter::getCurrentCoordinates()
+	GeoCoordinate<DecimalCoordinate> GPSAdapter::getCurrentCoordinates()
 	{
 		condVarProcess_.notify_one();
 		std::unique_lock<std::mutex> ulock(mutexProcess_);
@@ -64,54 +55,92 @@ namespace model
 		return currentCoordinate;
 	}
 
-	std::string GPSAdapter::getNextValue(std::string & NMEAString, size_t& start)
+	std::string GPSAdapter::getNextValue(std::string& NMEAString, size_t& start)
 	{
 		std::string nexValue = "";
 		std::size_t end = NMEAString.find_first_of(",");
 		if (end != std::string::npos)
 		{
-
+			nexValue = NMEAString.substr(start, end - start);
 		}
-		start = end;
+		start = end + 1;
 		return nexValue;
 	}
 
-	// TO DO
-	std::optional<common::utile::GeoCoordinate> GPSAdapter::parseNMEAString(std::string& NMEAString)
+	int GPSAdapter::calculateCheckSum(std::string& NMEAString)
+	{
+		int checksum = 0;
+		for (auto character : NMEAString)
+		{
+			checksum ^= (int)character;
+		}
+		return checksum;
+	}
+	int GPSAdapter::hexStringToInt(std::string& value)
+	{
+		int rez;
+		std::istringstream(value) >> std::hex >> rez;
+		return rez;
+	}
+
+	std::optional<GeoCoordinate<DecimalCoordinate>> GPSAdapter::parseNMEAString(std::string& NMEAString)
 	{
 		//"$GPGLL", <lat>, "N/S", <lon>, "E/W", <utc>, "A/V", "A/D/E/M/N" "*" <checksum> "CR/LF"(ignored in our case)
-		common::utile::GeoCoordinate rez{};
+		GeoCoordinate<DecimalCoordinate> rez{};
 		size_t start = 0;
-		auto value =  getNextValue(NMEAString, start);
-		if (start == std::string::npos || value != "$GPGLL")
-		{
-			return {};
-		}
+        #define CHECK_IF_STILL_VALID_POSITION if (start == std::string::npos) { return {}; }
 
+		//$GPGLL
+		std::string value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION;
+		if (value != "$GPGLL") { return {}; }
 
-		long double decimalLatitude = std::stold();
-		auto latitude = common::utile::decimalToMinutesAndSeconds(decimalLatitude);
-		if (!latitude.has_value())
-			return {};
+		// <lat>
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION;
 
-		//take N/S
-		rez.latitude = latitude.value();
+		auto latitude = common::utile::StringToDecimalCoordinates(value);
+		if (!latitude.has_value()) { return {}; }
 
-		long double decimalLongitude = std::stold();
-		auto longitude = common::utile::decimalToMinutesAndSeconds(decimalLongitude);
-		if (!longitude.has_value())
-			return {};
+		// N/S
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION;
+		if (!(value == "N" || value == "S")) { return {}; }
+		if (value == "S") { latitude = -latitude.value(); }
+
+		// <lon>
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION;
+
+		auto longitude = common::utile::StringToDecimalCoordinates(value);
+		if (!longitude.has_value()) { return {}; }
 
 		//take E/W
-		rez.longitude = longitude.value();
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION;
+		if (!(value == "E" || value == "W")) { return {}; }
+		if (value == "W") { longitude = -longitude.value(); }
 
-		// utc useless 
+		// utc IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION;
 
 		// A/V if V return {}
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION;
+		if (value == "V" ) { return {}; }
 
 		// "A/D/E/M/N" useless
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION;
 
 		// "*" <checksum> if not matching return {}
+		if (NMEAString[start] != '*') { return {}; }
+		value = NMEAString.substr(++start, NMEAString.size() - start + 1);
+		if (calculateCheckSum(NMEAString) != hexStringToInt(value)) { return {}; }
+
+		rez.latitude = latitude.value();
+		rez.longitude = longitude.value();
 		return rez;
 	}
 }

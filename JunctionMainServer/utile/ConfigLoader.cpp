@@ -56,10 +56,10 @@ namespace utile
 		const auto& jsonTree = jsonRoot.get_child_optional("latitude");
 		if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
 		{
-			const auto& latitude = stringToPositionalUnit(jsonTree.get().get_value<std::string>());
-			if (latitude != boost::none)
+			auto latitude = common::utile::StringToDecimalCoordinates(jsonTree.get().get_value<std::string>());
+			if (latitude.has_value())
 			{
-				config.coordinates.latitude = latitude.get();
+				config.coordinates.latitude = latitude.value();
 				return true;
 			}
 		}
@@ -72,10 +72,10 @@ namespace utile
 		const auto& jsonTree = jsonRoot.get_child_optional("longitude");
 		if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
 		{
-			const auto& longitude = stringToPositionalUnit(jsonTree.get().get_value<std::string>());
-			if (longitude != boost::none)
+			auto longitude = common::utile::StringToDecimalCoordinates(jsonTree.get().get_value<std::string>());
+			if (longitude.has_value())
 			{
-				config.coordinates.longitude = longitude.get();
+				config.coordinates.longitude = longitude.value();
 				return true;
 			}
 		}
@@ -93,68 +93,6 @@ namespace utile
 		}
 
 		return false;
-	}
-
-	boost::optional<double> ConfigLoader::stringToDouble(std::string& real)
-	{
-		boost::algorithm::trim(real);
-		try
-		{
-			int integerPart = std::stoi(real);
-			const auto next = real.find(".");
-			if (next == std::string::npos)
-			{
-				return integerPart * 1.0;
-			}
-			const auto& nextValue = real.substr(next, real.size() - next);
-			double floatingPart = std::stoi(nextValue);
-			while (floatingPart >= 1.0)
-				floatingPart /= 10;
-			return integerPart * 1.0 + floatingPart;
-		}
-		catch (const std::exception& e)
-		{
-			LOG_ERR << e.what();
-			return boost::none;
-		}
-	}
-
-	boost::optional<common::utile::PositionalUnit> ConfigLoader::stringToPositionalUnit(const std::string& positionalUnit)
-	{
-		common::utile::PositionalUnit rez;
-		//EX: "45° 02' 60.0\" N"
-		std::vector<std::string> symbloToFind = { "°", "'", "\"" };
-		std::vector<double> numbersFound;
-		// FIND numeric values
-		std::size_t last = 0;
-		std::size_t next;
-		for (const auto& symbol : symbloToFind)
-		{
-			next = positionalUnit.find("°");
-			if (next == std::string::npos)
-			{
-				return boost::none;
-			}
-
-			auto value = positionalUnit.substr(last, next - last);
-			const auto maybeValue = stringToDouble(value);
-			if (maybeValue == boost::none)
-			{
-				return boost::none;
-			}
-
-			numbersFound.push_back(maybeValue.get());
-		}
-		rez.degrees = numbersFound[0];
-		rez.minutues = numbersFound[1];
-		rez.seconds = numbersFound[2];
-		// read last character for direction
-		rez.direction = toupper(positionalUnit[positionalUnit.size() - 1]);
-		if (!(rez.direction == 'N' || rez.direction == 'S' || rez.direction == 'E' || rez.direction == 'W'))
-		{
-			return boost::none;
-		}
-		return rez;
 	}
 
 	void ConfigLoader::loadMissingRoadIfPresent(const ptree& jsonRoot, model::Config& config)

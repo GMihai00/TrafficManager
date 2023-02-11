@@ -4,3 +4,4 @@
 #include "utile/Timer.hpp"
 #include "utile/Observer.hpp"
 #include "utile/Helpers.hpp"
+#include "utile/GeoCoordinate.hpp"

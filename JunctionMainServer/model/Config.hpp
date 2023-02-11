@@ -16,7 +16,7 @@ namespace model
 		std::map<common::utile::LANE, ipc::utile::IP_ADRESS> laneToIPAdress;
 		bool usingLeftLane;
 		uint16_t maxWaitingTime;
-		common::utile::GeoCoordinate coordinates;
+		common::utile::GeoCoordinate<common::utile::DecimalCoordinate> coordinates;
 		ipc::utile::IP_ADRESS localProxyServer;
 		boost::optional<common::utile::LANE> missingLane;
 	};

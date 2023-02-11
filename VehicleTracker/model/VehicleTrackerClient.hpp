@@ -13,6 +13,7 @@
 #include "utile/Logger.hpp"
 #include "utile/Observer.hpp"
 #include "utile/GeoCoordinate.hpp";
+#include "GPSAdapter.hpp"
 
 namespace model
 {
@@ -23,16 +24,21 @@ namespace model
     class VehicleTrackerClient : public ipc::net::Client<ipc::VehicleDetectionMessages>
     {
     private:
-        ipc::utile::MessageIdProvider<ipc::VehicleDetectionMessages> messageIdProvider_;
-
         // signature taken from registry
         // when installing app device registry values
         // are set based on type of account
-        std::optional<std::string> signature;
-        common::utile::GeoCoordinate nextJunctionCoordinates;
+        std::optional<std::string> signature_;
+        ipc::utile::MessageIdProvider<ipc::VehicleDetectionMessages> messageIdProvider_;
+        ipc::utile::IP_ADRESS proxyIp_;
+        ipc::utile::IP_ADRESS junctionIp_;
+        common::utile::GeoCoordinate<double> nextJunctionCoordinates_;
+        GPSAdapter gpsAdapter_;
         LOGGER("VEHICLETRAKER-CLIENT");
+
+        bool queryProxyServer();
     public:
-        VehicleTrackerClient();
+        VehicleTrackerClient() = delete;
+        VehicleTrackerClient(std::istream& inputStream);
         ~VehicleTrackerClient();
     };
 }

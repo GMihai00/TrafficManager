@@ -27,8 +27,6 @@ namespace utile
 		bool loadLongitude(const ptree& jsonRoot, model::Config& config);
 		bool loadLocalServer(const ptree& jsonRoot, model::Config& config);
 		void loadMissingRoadIfPresent(const ptree& jsonRoot, model::Config& config);
-		boost::optional<double> stringToDouble(std::string& real);
-		boost::optional<common::utile::PositionalUnit> stringToPositionalUnit(const std::string& positionalUnit);
 	public:
 		model::Config load(const std::string& pathToConfigFile);
 	};
