@@ -6,6 +6,8 @@
 #include <optional>
 #include <type_traits>
 
+constexpr auto PI = 3.14159265358979323846;
+
 namespace common
 {
 	namespace utile
@@ -45,19 +47,18 @@ namespace common
 			}
 
 			// https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
+			// https://analyse-gps.com/gps-equations/bearing-of-2-gps-coordinates/
 			std::optional<Bearing> calculateBearingToCoordinate(GeoCoordinate<T> coordinate)
 			{
 				try
 				{
-					Bearing bearing;
-					DecimalCoordinate decimalLatitude = latitude;
-					DecimalCoordinate decimalLongitude = longitude;
+					DecimalCoordinate latFirst = latitude;
+					DecimalCoordinate latSecond = coordinate.latitude;
+					DecimalCoordinate delta = coordinate.longitude - longitude;
+					double X = cos(latSecond) * sin(delta);
+					double Y = cos(latFirst) * sin(latSecond) - sin(latFirst) * cos(latSecond) * cos(delta);
 					
-					// TO CONTINUE BASED ON WEBSITE
-					double X = cos() * sin();
-					double Y = cos() * sin() - sin() * cos() * cos();
-					
-					return atan2(X, Y); // radians to degrees
+					return atan2(X, Y) * (180.0 / PI);
 				}
 				catch (...)
 				{

@@ -9,6 +9,7 @@
 #include "net/Client.hpp"
 #include "net/Message.hpp"
 #include "MessageTypes.hpp"
+#include "utile/DataTypes.hpp"
 #include "utile/MessageIdProvider.hpp"
 #include "utile/Logger.hpp"
 #include "utile/Observer.hpp"
@@ -17,6 +18,7 @@
 
 namespace model
 {
+    using namespace common::utile;
     // THIS CLIENT JUST CONNECTS TO THE PROXY
     // THE PROXY WILL SEND BACK THE COORDINATES OF THE JUNCTION
     // AFTER PASSING TROUGH JUNCTION COORDINATES, CLIENT WILL SEND "LEAVING MESSAGE" TO CLIENT
@@ -27,14 +29,19 @@ namespace model
         // signature taken from registry
         // when installing app device registry values
         // are set based on type of account
+        bool isEmergencyVehicle_;
         std::optional<std::string> signature_;
         ipc::utile::MessageIdProvider<ipc::VehicleDetectionMessages> messageIdProvider_;
         ipc::utile::IP_ADRESS proxyIp_;
         ipc::utile::IP_ADRESS junctionIp_;
-        common::utile::GeoCoordinate<double> nextJunctionCoordinates_;
+        GeoCoordinate<DecimalCoordinate> nextJunctionCoordinates_;
+        LANE followedLane_;
         GPSAdapter gpsAdapter_;
+
         LOGGER("VEHICLETRAKER-CLIENT");
 
+        std::optional<ipc::utile::IP_ADRESS> getIpFromMessage(ipc::net::Message<ipc::VehicleDetectionMessages>& message);
+        std::optional<LANE> getLaneFromMessage(ipc::net::Message<ipc::VehicleDetectionMessages>& message);
         bool queryProxyServer();
     public:
         VehicleTrackerClient() = delete;

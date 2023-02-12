@@ -27,15 +27,11 @@ namespace common
 		DecimalCoordinate DegreesMinutesSecondsToDecimalCoordinate(const DegreesMinutesSeconds& unit)
 		{
 			double rez = unit.degrees + unit.minutues / 60 + unit.seconds / 3600;
-			
 			return (unit.direction == 'N' || unit.direction == 'W') ? rez : -rez;
 		}
 
-		// TO REWRITE THIS LOTS OF BUGS
 		std::optional<DegreesMinutesSeconds> StringToDegreesMinutesAndSeconds(const std::string& value)
 		{
-			// really poorly done to remake
-			DegreesMinutesSeconds rez;
 			//EX: "45° 02' 60.0\" N"
 			std::vector<std::string> symbloToFind = { "°", "'", "\"" };
 			std::vector<double> numbersFound;
@@ -56,8 +52,9 @@ namespace common
 				{
 					return {};
 				}
-				last = next;
+				last = next + 1;
 			}
+			DegreesMinutesSeconds rez{};
 			rez.degrees = numbersFound[0];
 			rez.minutues = numbersFound[1];
 			rez.seconds = numbersFound[2];

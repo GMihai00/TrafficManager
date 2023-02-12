@@ -6,6 +6,7 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+#include <optional>
 
 #include <boost/asio.hpp>
 #include <boost/asio/ts/buffer.hpp>
@@ -17,6 +18,7 @@
 #include "utile/Logger.hpp"
 #include "../utile/IPCDataTypes.hpp"
 
+// A SOME KIND OF WAY TO GET NOTIFIED WHEN MESSAGE IS RECIEVED
 namespace ipc
 {
     namespace net
@@ -94,6 +96,16 @@ namespace ipc
                 return false;
             }
     
+            bool answearRecieved()
+            {
+                return !incomingMessages_.empty();
+            }
+
+            std::optional<std::pair<OwnedMessage<T>, bool>> getLastUnreadAnswear()
+            {
+                return incomingMessages_.pop();
+            }
+
             common::utile::ThreadSafePriorityQueue<OwnedMessage<T>>& getIncomingMessages()
             {
                 return incomingMessages_;
