@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <sstream>
+#include <boost/algorithm/string.hpp>
 
 namespace model
 {
@@ -62,6 +63,7 @@ namespace model
 		if (end != std::string::npos)
 		{
 			nexValue = NMEAString.substr(start, end - start);
+			boost::algorithm::trim(nexValue);
 		}
 		start = end + 1;
 		return nexValue;

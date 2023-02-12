@@ -1,5 +1,6 @@
 #include "GeoCoordinate.hpp"
 #include <vector>
+#include <boost/algorithm/string.hpp>
 
 namespace common
 {
@@ -47,7 +48,9 @@ namespace common
 				if (next == std::string::npos) { return {}; }
 				try
 				{
-					numbersFound.push_back(std::stod(value.substr(last, next - last)));
+					auto substring = value.substr(last, next - last);
+					boost::algorithm::trim(substring);
+					numbersFound.push_back(std::stod(substring));
 				}
 				catch (...)
 				{
@@ -71,6 +74,7 @@ namespace common
 		{
 			try
 			{
+				boost::algorithm::trim(value);
 				return std::stod(value);
 			}
 			catch (...)
