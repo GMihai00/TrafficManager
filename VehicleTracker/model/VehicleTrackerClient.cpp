@@ -46,7 +46,7 @@ namespace model
 					return {};
 				}
 			}
-		} while (chr);
+		} while (chr && cntSubNr);
 
 		return ((cntSubNr == 4) ? std::optional<ipc::utile::IP_ADRESS>{ipAdress} : std::nullopt);
 	}
@@ -85,6 +85,7 @@ namespace model
 
 		isEmergencyVehicle_ = answear.value().second;
 		junctionIp_ = maybeIpAdress.value();
+
 		return true;
 	}
 }

@@ -12,6 +12,7 @@ namespace common
 {
 	namespace utile
 	{
+		constexpr auto DECIMALCOORDINATE_INVALID_VALUE = 257.0;
 		typedef double DecimalCoordinate;
 		typedef double Bearing;
 		struct DegreesMinutesSeconds;

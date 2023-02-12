@@ -19,6 +19,12 @@
     <Filter Include="Header Files\utile">
       <UniqueIdentifier>{55c7a39d-b39d-40e4-a4ff-baa20afb6a3a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\net">
+      <UniqueIdentifier>{b6e258b2-e878-4775-8a7e-f0ef2a9d5e67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\utile">
+      <UniqueIdentifier>{69cc6b4a-3f65-4555-a622-355c93c5d682}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="net\Client.hpp">
@@ -42,10 +48,19 @@
     <ClInclude Include="utile\IPCDataTypes.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
+    <ClInclude Include="net\ProxyReply.hpp">
+      <Filter>Header Files\net</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IPC.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="net\ProxyReply.cpp">
+      <Filter>Source Files\net</Filter>
+    </ClCompile>
+    <ClCompile Include="utile\IPCDataTypes.cpp">
+      <Filter>Source Files\utile</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

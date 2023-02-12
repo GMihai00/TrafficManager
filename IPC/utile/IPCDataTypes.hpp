@@ -18,6 +18,9 @@ namespace ipc
 		typedef std::set<IP_ADRESS> IP_ADRESSES;
 		typedef std::shared_ptr < ipc::net::Connection<ipc::VehicleDetectionMessages>> ConnectionPtr;
 		typedef ipc::net::Message< ipc::VehicleDetectionMessages> VehicleDetectionMessage;
-	}
-}
+
+		bool IsIPV4(IP_ADRESS adress);
+		bool IsIPV6(IP_ADRESS adress);
+	} // namespace utile
+} // namespace ipc
 #endif // #IPC_UTILE_DATATYPES_HPP

@@ -35,5 +35,6 @@ namespace model
 		~GPSAdapter() noexcept;
 		GeoCoordinate<DecimalCoordinate> getCurrentCoordinates();
 	};
+
 }
 #endif // #MODEL_GPSADAPTER_HPP
