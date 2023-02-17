@@ -26,23 +26,21 @@ namespace model
     class VehicleTrackerClient : public ipc::net::Client<ipc::VehicleDetectionMessages>
     {
     private:
-        // signature taken from registry
-        // when installing app device registry values
-        // are set based on type of account
-        bool isEmergencyVehicle_;
-        std::optional<std::string> signature_;
         ipc::utile::MessageIdProvider<ipc::VehicleDetectionMessages> messageIdProvider_;
+        GPSAdapter gpsAdapter_;
+
+        std::optional<std::string> signature_; // MAYBE TAKEN FROM REGISTRY
         ipc::utile::IP_ADRESS proxyIp_;
+
+        bool isEmergency_;
         ipc::utile::IP_ADRESS junctionIp_;
         GeoCoordinate<DecimalCoordinate> nextJunctionCoordinates_;
         LANE followedLane_;
-        GPSAdapter gpsAdapter_;
 
         LOGGER("VEHICLETRAKER-CLIENT");
 
-        std::optional<ipc::utile::IP_ADRESS> getIpFromMessage(ipc::net::Message<ipc::VehicleDetectionMessages>& message);
-        std::optional<LANE> getLaneFromMessage(ipc::net::Message<ipc::VehicleDetectionMessages>& message);
         bool queryProxyServer();
+        bool setupData(ipc::net::Message<ipc::VehicleDetectionMessages> msg);
     public:
         VehicleTrackerClient() = delete;
         VehicleTrackerClient(std::istream& inputStream);

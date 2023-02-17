@@ -1,5 +1,6 @@
 #include "VehicleTrackerClient.hpp"
 #include <chrono>
+#include "net/ProxyReply.hpp"
 
 namespace model
 {
@@ -15,40 +16,25 @@ namespace model
 
 	}
 
-	std::optional<ipc::utile::IP_ADRESS> VehicleTrackerClient::getIpFromMessage(ipc::net::Message<ipc::VehicleDetectionMessages>& message)
+	bool VehicleTrackerClient::setupData(ipc::net::Message<ipc::VehicleDetectionMessages> msg)
 	{
-		// GET IP ADRESS OF SERVER
-		// Normal IPV4 255.255.253.0
-		// Server will send instead 255255253000
-		ipc::utile::IP_ADRESS ipAdress;
-		std::string subNr;
-		int cntSubNr = 0;
-		char chr = 0;
-		do
+		try
 		{
-			message >> chr;
-			subNr.push_back(chr);
-			if (subNr.size() == 3)
-			{
-				try
-				{
-					int nr = std::stoi(subNr);
-					if (!(nr >= 0 && nr <= 255)) { return {}; }
+			ipc::net::ProxyReply proxyReply{ msg };
 
-					subNr = std::to_string(nr);
-					subNr.push_back('.');
-					ipAdress += subNr;
-					subNr.clear();
-					cntSubNr++;
-				}
-				catch (...)
-				{
-					return {};
-				}
-			}
-		} while (chr && cntSubNr);
+			if (!proxyReply.isApproved()) { return false; }
 
-		return ((cntSubNr == 4) ? std::optional<ipc::utile::IP_ADRESS>{ipAdress} : std::nullopt);
+			junctionIp_ = proxyReply.getServerIPAdress();
+			nextJunctionCoordinates_ = proxyReply.getServerCoordinates();
+			isEmergency_ = proxyReply.isEmergency();
+			followedLane_ = proxyReply.getFollowedLane();
+		}
+		catch (const std::exception& err)
+		{
+			LOG_ERR << err.what();
+			return false;
+		}
+		return true;
 	}
 
 	// SEND 2 CONSECUTIVE COORDINATES
@@ -75,16 +61,7 @@ namespace model
 
 		// GET MESSAGE AND CHECK TYPE
 		auto answear = getLastUnreadAnswear();
-		if (!answear.has_value()) { return false; }
-
-		message = answear.value().first.msg;
-		if (message.header.id != msgId || message.header.type != ipc::VehicleDetectionMessages::ACK) { return false; }
-
-		auto maybeIpAdress = getIpFromMessage(message);
-		if (!maybeIpAdress.has_value()) { return false; }
-
-		isEmergencyVehicle_ = answear.value().second;
-		junctionIp_ = maybeIpAdress.value();
+		if (!answear.has_value() || !setupData(answear.value().first.msg)) { return false; }
 
 		return true;
 	}
