@@ -82,6 +82,29 @@ namespace model
 			return true;
 		}
 
+		bool TrafficLightStateMachine::unregisterClient(ipc::utile::IP_ADRESS ip)
+		{
+			std::scoped_lock lock(mutexClients_);
+			std::optional<common::utile::LANE> corespondingLane = {};
+			for (const auto& [lane, clientsConnected] : clientsConnected_)
+			{
+				if (clientsConnected.find(ip) != clientsConnected.end())
+				{
+					corespondingLane = lane;
+					break;
+				}
+			}
+
+			if (!corespondingLane.has_value()) 
+			{
+				LOG_WARN << "Client was never connected. Nothing to do";
+				return false;
+			}
+
+			clientsConnected_[corespondingLane.value()].erase(ip);
+			return true;
+		}
+
 		bool TrafficLightStateMachine::isInEmergencyState()
 		{
 			return !waitingEmergencyVehicles_.empty();

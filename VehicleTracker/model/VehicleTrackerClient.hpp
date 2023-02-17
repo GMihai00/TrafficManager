@@ -50,7 +50,8 @@ namespace model
 
         bool queryProxy();
         bool setupData(ipc::net::Message<ipc::VehicleDetectionMessages> msg);
-        bool notifyJunction(bool leaving = false);
+        bool notifyJunction();
+        void waitToPassJunction();
     public:
         VehicleTrackerClient() = delete;
         VehicleTrackerClient(std::istream& inputStream);

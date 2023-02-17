@@ -18,7 +18,7 @@ namespace model
 
 	void JunctionServer::onClientDisconnect(ipc::utile::ConnectionPtr client)
 	{
-		// TO THINK ABOUT THIS
+		trafficLightStateMachine_.unregisterClient(client->getIpAdress());
 	}
 
 
@@ -80,6 +80,7 @@ namespace model
 		return true;
 	}
 
+	//  THIS METHOD NEEDS TO BE CHANGED
 	void JunctionServer::handleMessage(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, common::utile::LANE lane)
 	{

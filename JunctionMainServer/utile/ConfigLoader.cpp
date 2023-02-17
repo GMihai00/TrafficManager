@@ -56,7 +56,8 @@ namespace utile
 		const auto& jsonTree = jsonRoot.get_child_optional("latitude");
 		if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
 		{
-			auto latitude = common::utile::StringToDecimalCoordinates(jsonTree.get().get_value<std::string>());
+			auto value = jsonTree.get().get_value<std::string>();
+			auto latitude = common::utile::StringToDecimalCoordinates(value);
 			if (latitude.has_value())
 			{
 				config.coordinates.latitude = latitude.value();
@@ -72,7 +73,8 @@ namespace utile
 		const auto& jsonTree = jsonRoot.get_child_optional("longitude");
 		if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
 		{
-			auto longitude = common::utile::StringToDecimalCoordinates(jsonTree.get().get_value<std::string>());
+			auto value = jsonTree.get().get_value<std::string>();
+			auto longitude = common::utile::StringToDecimalCoordinates(value);
 			if (longitude.has_value())
 			{
 				config.coordinates.longitude = longitude.value();

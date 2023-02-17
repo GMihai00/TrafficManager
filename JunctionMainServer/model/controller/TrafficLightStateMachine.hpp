@@ -115,6 +115,7 @@ namespace model
 			bool isClientValid(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
 			bool registreClient(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
 			bool unregisterClient(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			bool unregisterClient(ipc::utile::IP_ADRESS ip);
 
 			bool startEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
 			bool isInEmergencyState();

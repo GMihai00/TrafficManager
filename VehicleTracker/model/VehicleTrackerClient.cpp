@@ -41,13 +41,6 @@ namespace model
 
 				waitToPassJunction();
 
-				// COULD CHANGE ALL THIS LEAVING SHINNANIGANS WITH ONDISCONNECT ACTION MAYBE
-				if (!notifyJunction(true))
-				{
-					LOG_ERR << "FAILED TO COMMUNICATE WITH JUNCTION";
-					continue;
-				}
-
 				disconnect();
 			}
 		}
@@ -128,7 +121,7 @@ namespace model
 	}
 
 	// TO DO
-	bool VehicleTrackerClient::notifyJunction(bool leaving)
+	bool VehicleTrackerClient::notifyJunction()
 	{
 		if (!isConnected())
 		{
@@ -138,7 +131,7 @@ namespace model
 		ipc::net::Message<ipc::VehicleDetectionMessages> message;
 		message.header.id = msgId;
 		message.header.type = ipc::VehicleDetectionMessages::VDB;
-		message << followedLane_ << leaving;
+		message << followedLane_;
 		send(message);
 
 		return true;
