@@ -19,7 +19,7 @@ namespace common
 
 		DegreesMinutesSeconds DecimalToMinutesAndSeconds(const DecimalCoordinate& decimalDegrees);
 		DecimalCoordinate DegreesMinutesSecondsToDecimalCoordinate(const DegreesMinutesSeconds& unit);
-		std::optional<DecimalCoordinate> StringToDecimalCoordinates(const std::string& value);
+		std::optional<DecimalCoordinate> StringToDecimalCoordinates(std::string& value);
 		std::optional<DegreesMinutesSeconds> StringToDegreesMinutesAndSeconds(const std::string& value);
 
 		struct DegreesMinutesSeconds

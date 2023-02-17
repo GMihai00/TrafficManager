@@ -6,3 +6,4 @@
 #include "MessageTypes.hpp"
 #include "utile/IPCDataTypes.hpp"
 #include "utile/MessageIdProvider.hpp"
+#include "net/ProxyReply.hpp"

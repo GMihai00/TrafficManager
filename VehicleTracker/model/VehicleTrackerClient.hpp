@@ -4,6 +4,8 @@
 
 #include <optional>
 #include <string>
+#include <thread>
+#include <condition_variable>
 
 #include "net/Client.hpp"
 #include "net/Client.hpp"
@@ -28,19 +30,27 @@ namespace model
     private:
         ipc::utile::MessageIdProvider<ipc::VehicleDetectionMessages> messageIdProvider_;
         GPSAdapter gpsAdapter_;
+        std::thread threadProcess_;
+        std::mutex mutexProcess_;
+        std::condition_variable condVarProcess_;
+        std::atomic_bool shouldPause_ = true;
 
         std::optional<std::string> signature_; // MAYBE TAKEN FROM REGISTRY
-        ipc::utile::IP_ADRESS proxyIp_;
 
         bool isEmergency_;
-        ipc::utile::IP_ADRESS junctionIp_;
-        GeoCoordinate<DecimalCoordinate> nextJunctionCoordinates_;
+        std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT> junctionIpAndPort_;
+        GeoCoordinate<DecimalCoordinate> junctionCoordinates_;
         LANE followedLane_;
 
         LOGGER("VEHICLETRAKER-CLIENT");
 
-        bool queryProxyServer();
+        void process();
+        bool start();
+        void pause();
+
+        bool queryProxy();
         bool setupData(ipc::net::Message<ipc::VehicleDetectionMessages> msg);
+        bool notifyJunction(bool leaving = false);
     public:
         VehicleTrackerClient() = delete;
         VehicleTrackerClient(std::istream& inputStream);

@@ -20,6 +20,15 @@ namespace ipc
             }
         }
 
+        void ProxyReply::readPort(Message<ipc::VehicleDetectionMessages>& msg)
+        {
+            ipc::utile::PORT port = std::numeric_limits<std::uint16_t>::max();
+            msg >> port;
+
+            if (port == std::numeric_limits<std::uint16_t>::max()) { throw std::runtime_error("Invalid ProxyReply"); }
+            serverPort_ = port;
+        }
+
         void ProxyReply::readCoordinates(Message<ipc::VehicleDetectionMessages>& msg)
         {
             // COORDINATES { latitude, longitude } - double
@@ -46,6 +55,7 @@ namespace ipc
         ProxyReply::ProxyReply(Message<ipc::VehicleDetectionMessages>& msg)
         {   
             readIpAdress(msg);
+            readPort(msg);
             readCoordinates(msg);
             readLane(msg);
             this->header_ = msg.header;
@@ -53,9 +63,11 @@ namespace ipc
 
         ProxyReply::ProxyReply(MessageHeader<ipc::VehicleDetectionMessages> header,
             ipc::utile::IP_ADRESS serverIPAdress,
+            ipc::utile::PORT serverPort,
             GeoCoordinate<DecimalCoordinate> serverCoordinates,
             LANE followedLane) :
             serverIPAdress_(serverIPAdress),
+            serverPort_(serverPort),
             serverCoordinates_(serverCoordinates),
             followedLane_(followedLane),
             header_(header)
@@ -69,14 +81,15 @@ namespace ipc
             message.header = this->header_;
             std::vector<char> ip(serverIPAdress_.begin(), serverIPAdress_.end());
             message << ip;
+            message << serverPort_;
             message << serverCoordinates_.latitude << serverCoordinates_.longitude;
             message << followedLane_;
             return message;
         }
 
-        ipc::utile::IP_ADRESS ProxyReply::getServerIPAdress() const
+        std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT> ProxyReply::getServerIPAdressAndPort() const
         {
-            return serverIPAdress_;
+            return { serverIPAdress_, serverPort_ };
         }
 
         bool ProxyReply::isEmergency() const

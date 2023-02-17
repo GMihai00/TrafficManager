@@ -67,7 +67,7 @@ namespace common
 			return rez;
 		}
 
-		std::optional<DecimalCoordinate> StringToDecimalCoordinates(const std::string& value)
+		std::optional<DecimalCoordinate> StringToDecimalCoordinates(std::string& value)
 		{
 			try
 			{

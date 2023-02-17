@@ -13,6 +13,9 @@ namespace ipc
 {
 	namespace utile
 	{
+		#define G_PROXY_IP "255.255.255.255";
+		#define G_PROXY_PORT 900;
+
 		typedef uint16_t PORT;
 		typedef std::string IP_ADRESS;
 		typedef std::set<IP_ADRESS> IP_ADRESSES;
