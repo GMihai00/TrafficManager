@@ -170,11 +170,11 @@
   <ItemGroup>
     <ClCompile Include="model\ProxyServer.cpp" />
     <ClCompile Include="Proxy.cpp" />
-    <ClCompile Include="utile\DBManager.cpp" />
+    <ClCompile Include="utile\DBWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="model\ProxyServer.hpp" />
-    <ClInclude Include="utile\DBManager.hpp" />
+    <ClInclude Include="utile\DBWrapper.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

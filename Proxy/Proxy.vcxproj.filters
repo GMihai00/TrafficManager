@@ -33,7 +33,7 @@
     <ClCompile Include="model\ProxyServer.cpp">
       <Filter>Source Files\model</Filter>
     </ClCompile>
-    <ClCompile Include="utile\DBManager.cpp">
+    <ClCompile Include="utile\DBWrapper.cpp">
       <Filter>Source Files\utile</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,7 +41,7 @@
     <ClInclude Include="model\ProxyServer.hpp">
       <Filter>Header Files\model</Filter>
     </ClInclude>
-    <ClInclude Include="utile\DBManager.hpp">
+    <ClInclude Include="utile\DBWrapper.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
   </ItemGroup>
