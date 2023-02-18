@@ -7,6 +7,8 @@
 #include <thread>
 #include <condition_variable>
 
+#include "../utile/DBWrapper.hpp"
+
 #include "net/Server.hpp"
 #include "net/ProxyReply.hpp"
 #include "net/Message.hpp"
@@ -21,6 +23,7 @@ namespace model
 	class ProxyServer : ipc::net::Server<ipc::VehicleDetectionMessages>
 	{
 	private:
+		std::unique_ptr<utile::DBWrapper> dbWrapper_;
 		LOGGER("PROXY-SERVER");
 		bool isMessageValid(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 		void handleMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
@@ -31,6 +34,8 @@ namespace model
 		ProxyServer(const ProxyServer&) = delete;
 		virtual ~ProxyServer() noexcept = default;
 
+		void increaseLoad();
+		void decreaseLoad();
 		virtual bool onClientConnect(ipc::utile::ConnectionPtr client);
 		virtual void onClientDisconnect(ipc::utile::ConnectionPtr client);
 		virtual void onMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
