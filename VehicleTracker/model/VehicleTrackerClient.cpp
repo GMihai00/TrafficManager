@@ -7,7 +7,7 @@
 
 namespace model
 {
-	VehicleTrackerClient::process()
+	void VehicleTrackerClient::process()
 	{
 		while (true)
 		{
@@ -63,6 +63,7 @@ namespace model
 		std::unique_lock<std::mutex> ulock(mutexProcess_);
 		shouldPause_ = false;
 		condVarProcess_.notify_one();
+		return true;
 	}
 
 	void VehicleTrackerClient::pause()

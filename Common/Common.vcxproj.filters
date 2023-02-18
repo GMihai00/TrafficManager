@@ -42,10 +42,10 @@
     <ClInclude Include="utile\DataTypes.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
-    <ClInclude Include="utile\Helpers.hpp">
+    <ClInclude Include="utile\GeoCoordinate.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
-    <ClInclude Include="utile\GeoCoordinate.hpp">
+    <ClInclude Include="utile\SignatureHelpers.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
   </ItemGroup>
@@ -60,6 +60,12 @@
       <Filter>Source Files\utile</Filter>
     </ClCompile>
     <ClCompile Include="utile\GeoCoordinate.cpp">
+      <Filter>Source Files\utile</Filter>
+    </ClCompile>
+    <ClCompile Include="utile\SignatureHelpers.cpp">
+      <Filter>Source Files\utile</Filter>
+    </ClCompile>
+    <ClCompile Include="utile\DataTypes.cpp">
       <Filter>Source Files\utile</Filter>
     </ClCompile>
   </ItemGroup>

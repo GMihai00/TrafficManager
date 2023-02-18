@@ -91,6 +91,11 @@ namespace ipc
 
             virtual ~Connection() {}
     
+            Owner getOwner() const
+            {
+                return owner_;
+            }
+
             uint32_t getId() const
             {
                 return id_;

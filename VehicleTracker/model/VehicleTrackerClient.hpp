@@ -35,7 +35,7 @@ namespace model
         std::condition_variable condVarProcess_;
         std::atomic_bool shouldPause_ = true;
 
-        std::optional<std::string> signature_; // MAYBE TAKEN FROM REGISTRY
+        std::optional<std::string> signature_;
 
         bool isEmergency_;
         std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT> junctionIpAndPort_;

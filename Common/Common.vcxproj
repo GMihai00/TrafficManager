@@ -149,18 +149,20 @@
   <ItemGroup>
     <ClInclude Include="utile\DataTypes.hpp" />
     <ClInclude Include="utile\GeoCoordinate.hpp" />
-    <ClInclude Include="utile\Helpers.hpp" />
     <ClInclude Include="utile\IObserver.hpp" />
     <ClInclude Include="utile\Logger.hpp" />
     <ClInclude Include="utile\Observer.hpp" />
+    <ClInclude Include="utile\SignatureHelpers.hpp" />
     <ClInclude Include="utile\ThreadSafePriorityQueue.hpp" />
     <ClInclude Include="utile\ThreadSafeQueue.hpp" />
     <ClInclude Include="utile\Timer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp" />
+    <ClCompile Include="utile\DataTypes.cpp" />
     <ClCompile Include="utile\GeoCoordinate.cpp" />
     <ClCompile Include="utile\Observer.cpp" />
+    <ClCompile Include="utile\SignatureHelpers.cpp" />
     <ClCompile Include="utile\Timer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

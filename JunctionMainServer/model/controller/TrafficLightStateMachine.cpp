@@ -58,7 +58,7 @@ namespace model
 			return true;
 		}
 
-		bool TrafficLightStateMachine::registreClient(
+		bool TrafficLightStateMachine::registerClient(
 			const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
 			std::scoped_lock lock(mutexClients_);
@@ -67,18 +67,6 @@ namespace model
 				return false;
 			}
 			decreaseTimer(lane, ip);
-			return true;
-		}
-
-		bool TrafficLightStateMachine::unregisterClient(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
-		{
-			std::scoped_lock lock(mutexClients_);
-			if (clientsConnected_[lane].find(ip) == clientsConnected_[lane].end())
-			{
-				LOG_WARN << "Client was never connected. Nothing to do";
-				return false;
-			}
-			clientsConnected_[lane].erase(ip);
 			return true;
 		}
 
@@ -113,7 +101,7 @@ namespace model
 		bool TrafficLightStateMachine::startEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
 			std::scoped_lock lock(mutexClients_);
-			if (!registreClient(lane, ip))
+			if (!registerClient(lane, ip))
 			{
 				return false;
 			}
@@ -122,10 +110,10 @@ namespace model
 			return true;
 		}
 
-		bool TrafficLightStateMachine::endEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		bool TrafficLightStateMachine::endEmergencyState(ipc::utile::IP_ADRESS ip)
 		{
 			std::scoped_lock lock(mutexClients_);
-			if (!unregisterClient(lane, ip))
+			if (!unregisterClient(ip))
 			{
 				return false;
 			}

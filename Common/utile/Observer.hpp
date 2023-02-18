@@ -20,7 +20,7 @@ namespace common
 			~Observer() = default;
 			virtual void notify() override;
 		};
-	}
-}
+	} // namespace utile
+} // namespace common
 
 #endif // #COMMON_UTILE_OBSERVER_HPP

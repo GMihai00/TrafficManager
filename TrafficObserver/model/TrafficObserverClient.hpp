@@ -15,24 +15,26 @@
 
 namespace model
 {
-    // CONFIG TO DETERMINE LANE
+    // CONFIG FOR RIGHTLANE SCENARIO AND IP ADRESS
     class TrafficObserverClient : public ipc::net::Client<ipc::VehicleDetectionMessages>
     {
     private:
         ipc::utile::MessageIdProvider<ipc::VehicleDetectionMessages> messageIdProvider_;
         cvision::ObjectTracker carTracker_;
         common::utile::IObserverPtr observer_;
+        
+        bool usingRightLane_ = false; // FOR NOW JUST DEFAULTED
+        std::optional<std::string> signature_; // REALIZE THAT I NEED THIS FOR ALL CONNECTIONS!!!
 
         LOGGER("TRAFFICOBSERVER-CLIENT");
         bool startTrackingCars();
         void stopTrackingCars();
+        bool sendData(size_t numberOfCars);
     public:
         TrafficObserverClient();
         ~TrafficObserverClient();
 
         void handleNewCarData();
-        // THIS METHOD SHOULD BE CALLED ONLY WHEN CARCOUNT IS UPDATED
-        bool sendData(size_t numberOfCars, bool leaving = false);
     };
 } // namespace model
 #endif // #MODEL_COSTUMCLIENT_HPP

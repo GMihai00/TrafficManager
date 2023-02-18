@@ -38,7 +38,7 @@ namespace ipc
             LOGGER("SERVER");
         public:
             Server(ipc::utile::PORT port):
-                connectionAccepter_(context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v6(), port))
+                connectionAccepter_(context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
             {
             }
 

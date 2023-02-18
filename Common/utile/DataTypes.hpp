@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <memory>
+#include <optional>
 
 namespace common
 {
@@ -16,6 +17,9 @@ namespace common
 			N,
 			S
 		};
-	}
-}
-#endif // #UTILE_DATATYPES_HPP
+
+		std::optional<LANE> CharToLane(const char& lane);
+		std::optional<char> LaneToChar(const LANE& lane);
+	} // namespace utile
+} // namespace common
+#endif // #COMMON_UTILE_DATATYPES_HPP

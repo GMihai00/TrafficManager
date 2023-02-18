@@ -5,8 +5,14 @@ namespace model
     void TrafficObserverClient::handleNewCarData()
     {
         auto carCount = carTracker_.getCarCount();
-        sendData(carCount.first);
-        sendData(carCount.second);
+        if (!usingRightLane_)
+        {
+            sendData(carCount.first);
+        }
+        else
+        {
+            sendData(carCount.second);
+        }
     }
 
     TrafficObserverClient::TrafficObserverClient() :
@@ -23,8 +29,7 @@ namespace model
         this->stopTrackingCars();
     }
 
-    // NEED TO CHANGE THIS TO BE DONE ON SEPARATE THREAD(S)
-    bool TrafficObserverClient::sendData(size_t numberOfCars, bool leaving)
+    bool TrafficObserverClient::sendData(size_t numberOfCars)
     {
         if (!connection_)
         {
@@ -38,7 +43,6 @@ namespace model
             message.header.type = ipc::VehicleDetectionMessages::VCDR;
             message.header.id = messageIdProvider_.provideId(ipc::VehicleDetectionMessages::VCDR);
             message.header.hasPriority = false;
-            message << leaving;
             connection_->send(message);
         }
 

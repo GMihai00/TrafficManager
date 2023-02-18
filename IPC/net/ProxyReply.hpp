@@ -4,9 +4,10 @@
 
 #include "Message.hpp"
 #include "../MessageTypes.hpp"
-#include "../utile/IPCDataTypes.hpp"
-#include "utile/GeoCoordinate.hpp"
+#include "../utile/IPAdressHelpers.hpp"
+
 #include "utile/DataTypes.hpp"
+#include "utile/GeoCoordinate.hpp"
 
 namespace ipc
 {

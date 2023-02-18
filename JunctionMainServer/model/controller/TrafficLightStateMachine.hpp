@@ -93,7 +93,7 @@ namespace model
 			common::utile::ThreadSafeQueue<std::pair<common::utile::LANE, ipc::utile::IP_ADRESS>> waitingEmergencyVehicles_;
 			
 			uint16_t regLightDuration_;
-			uint16_t greenLightDuration_; // TO CHANGE INSIDE CONFID MAXWAITTIME TO GREENLIGHT DURATION
+			uint16_t greenLightDuration_; // TO CHANGE INSIDE CONFIG MAXWAITTIME TO GREENLIGHT DURATION
 			IObserverPtr greenLightObserver_;
 			common::utile::Timer greenLightTimer_;
 			LOGGER("TRAFFICLIGHT-STATEMACHINE");
@@ -113,14 +113,12 @@ namespace model
 			bool isLaneMissing(const common::utile::LANE lane) const;
 
 			bool isClientValid(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
-			bool registreClient(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
-			bool unregisterClient(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			bool registerClient(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
 			bool unregisterClient(ipc::utile::IP_ADRESS ip);
 
 			bool startEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
 			bool isInEmergencyState();
-			bool endEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
-
+			bool endEmergencyState(ipc::utile::IP_ADRESS ip);
 			void freezeTimers(const std::string lanes);
 			void resetTimers(const std::string lanes);
 			void decreaseTimer(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);

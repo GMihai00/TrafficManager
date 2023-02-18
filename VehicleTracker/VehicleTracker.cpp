@@ -1,4 +1,4 @@
-#include "model/GPSAdapter.hpp"
+#include "model/VehicleTrackerClient.hpp"
 
 int main()
 {

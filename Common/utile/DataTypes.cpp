@@ -1,9 +1,4 @@
-#pragma once
-#ifndef COMMON_UTILE_HELPERS
-#define COMMON_UTILE_HELPERS
-
 #include "DataTypes.hpp"
-#include <optional>
 
 namespace common
 {
@@ -26,6 +21,5 @@ namespace common
 			if (lane == LANE::N) { return 'N'; }
 			return {};
 		}
-	} // utile
-} // common
-#endif // #COMMON_UTILE_HELPERS
+	} // namespace utile
+} // namespace common

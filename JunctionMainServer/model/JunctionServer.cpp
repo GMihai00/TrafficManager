@@ -18,7 +18,10 @@ namespace model
 
 	void JunctionServer::onClientDisconnect(ipc::utile::ConnectionPtr client)
 	{
-		trafficLightStateMachine_.unregisterClient(client->getIpAdress());
+		if (!trafficLightStateMachine_.endEmergencyState(client->getIpAdress()))
+		{
+			trafficLightStateMachine_.unregisterClient(client->getIpAdress());
+		}
 	}
 
 
@@ -84,28 +87,15 @@ namespace model
 	void JunctionServer::handleMessage(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, common::utile::LANE lane)
 	{
-		bool leaving;
-		msg >> leaving;
 		if (msg.header.hasPriority)
 		{
-			if (leaving == false)
+			if (!trafficLightStateMachine_.startEmergencyState(lane, client->getIpAdress()))
 			{
-				if (!trafficLightStateMachine_.startEmergencyState(lane, client->getIpAdress()))
-				{
-					rejectMessage(client, msg);
-					return;
-				}
-			}
-			else
-			{
-				if (!trafficLightStateMachine_.endEmergencyState(lane, client->getIpAdress()))
-				{
-					rejectMessage(client, msg);
-					return;
-				}
+				rejectMessage(client, msg);
+				return;
 			}
 		}
-		trafficLightStateMachine_.registreClient(lane, client->getIpAdress());
+		trafficLightStateMachine_.registerClient(lane, client->getIpAdress());
 		aproveMessage(client, msg);
 	}
 
