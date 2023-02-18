@@ -19,4 +19,6 @@ FUNCTIONALITY
 
 MACHINE LEARNING 
     
-        
+    
+C:\PathPrograms\mysql-connector-c++-8.0.32-winx64\mysql-connector-c++-8.0.32-winx64\include\jdbc
+STATIC_CONCPP

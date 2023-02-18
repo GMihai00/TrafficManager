@@ -1,11 +1,20 @@
 #include "ProxyServer.hpp"
 
+#include <cppconn/exception.h>
 namespace model
 {
 	ProxyServer::ProxyServer(const ipc::utile::PORT port) : 
 		ipc::net::Server<ipc::VehicleDetectionMessages>(port)
 	{
-		// CONNECT TO DB
+		try
+		{
+			dbWrapper_ = std::make_unique<utile::DBWrapper>("", "", "");
+		}
+		catch (sql::SQLException e)
+		{
+			LOG_ERR << "FAILED TO CONNECT TO DB";
+			exit(1);
+		}
 	}
 
 	bool ProxyServer::onClientConnect(ipc::utile::ConnectionPtr client)

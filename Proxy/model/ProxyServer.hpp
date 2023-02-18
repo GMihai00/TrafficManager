@@ -7,6 +7,8 @@
 #include <thread>
 #include <condition_variable>
 
+#include "../utile/DBWrapper.hpp"
+
 #include "net/Server.hpp"
 #include "net/ProxyReply.hpp"
 #include "net/Message.hpp"
