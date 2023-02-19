@@ -43,33 +43,22 @@ namespace ipc
             serverCoordinates_.longitude = lon;
         }
 
-        void ProxyReply::readLane(Message<ipc::VehicleDetectionMessages>& msg)
-        {
-            // LANE - LANE
-            uint8_t lane;
-            msg >> lane;
-            if (!(lane >= (uint8_t) LANE::E && lane <= (uint8_t) LANE::S)) { throw std::runtime_error("Invalid ProxyReply"); }
-            followedLane_ = (LANE) lane;
-        }
 
         ProxyReply::ProxyReply(Message<ipc::VehicleDetectionMessages>& msg)
         {   
             readIpAdress(msg);
             readPort(msg);
             readCoordinates(msg);
-            readLane(msg);
             this->header_ = msg.header;
         }
 
         ProxyReply::ProxyReply(MessageHeader<ipc::VehicleDetectionMessages> header,
             ipc::utile::IP_ADRESS serverIPAdress,
             ipc::utile::PORT serverPort,
-            GeoCoordinate<DecimalCoordinate> serverCoordinates,
-            LANE followedLane) :
+            GeoCoordinate<DecimalCoordinate> serverCoordinates) :
             serverIPAdress_(serverIPAdress),
             serverPort_(serverPort),
             serverCoordinates_(serverCoordinates),
-            followedLane_(followedLane),
             header_(header)
         {
 
@@ -83,7 +72,6 @@ namespace ipc
             message << ip;
             message << serverPort_;
             message << serverCoordinates_.latitude << serverCoordinates_.longitude;
-            message << followedLane_;
             return message;
         }
 
@@ -100,11 +88,6 @@ namespace ipc
         GeoCoordinate<DecimalCoordinate> ProxyReply::getServerCoordinates() const
         {
             return serverCoordinates_;
-        }
-
-        LANE ProxyReply::getFollowedLane() const
-        {
-            return followedLane_;
         }
 
         bool ProxyReply::isApproved() const

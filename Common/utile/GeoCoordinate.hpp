@@ -6,6 +6,7 @@
 #include <optional>
 #include <type_traits>
 
+#include "DataTypes.hpp"
 constexpr auto PI = 3.14159265358979323846;
 
 namespace common
@@ -42,6 +43,13 @@ namespace common
 			T latitude;
 			T longitude;
 
+			GeoCoordinate() = default;
+			GeoCoordinate(const GeoCoordinate<T>& obj)
+			{
+				this->latitude = obj.latitude;
+				this->longitude = obj.longitude;
+			}
+
 			bool operator==(const GeoCoordinate& obj) const
 			{
 				return ((this->latitude == obj.latitude) && (this->longitude == obj.longitude));
@@ -49,7 +57,7 @@ namespace common
 
 			// https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
 			// https://analyse-gps.com/gps-equations/bearing-of-2-gps-coordinates/
-			std::optional<Bearing> calculateBearingToCoordinate(GeoCoordinate<T> coordinate)
+			std::optional<Bearing> calculateBearingToCoordinate(const GeoCoordinate<T>& coordinate) const
 			{
 				try
 				{
@@ -66,7 +74,39 @@ namespace common
 					return {};
 				}
 			}
+
+			LANE calculateDirection(const GeoCoordinate<T> coordinate)
+			{
+				DecimalCoordinate startlatitude = latitude;
+				DecimalCoordinate startlongitude = longitude;
+				DecimalCoordinate headinglatitude = coordinate.latitude;
+				DecimalCoordinate headinglongitude = coordinate.longitude;
+
+				return LANE::E;
+			}
 		};
+
+		// FOR SOME KIND OF REASON CAN NOT ADD IT INSIDE CLASS
+		template<typename T>
+		std::optional<LANE> calculateDirection(const GeoCoordinate<T>& startcoordinate, const GeoCoordinate<T>& coordinate)
+		{
+			if (startcoordinate == coordinate)
+			{
+				return {};
+			}
+
+			DecimalCoordinate startlatitude = startcoordinate.latitude;
+			DecimalCoordinate startlongitude = startcoordinate.longitude;
+			DecimalCoordinate headinglatitude = coordinate.latitude;
+			DecimalCoordinate headinglongitude = coordinate.longitude;
+			
+			DecimalCoordinate horizontalTraveledDistance = abs(headinglongitude - startlongitude);
+			LANE headingHorizontal = (startlongitude < headinglongitude) ? LANE::E : LANE::W;
+			DecimalCoordinate verticalTraveledDistance = abs(headinglatitude - startlatitude);
+			LANE headingVertical = (startlatitude < headinglatitude) ? LANE::N : LANE::S;
+
+			return ((horizontalTraveledDistance > verticalTraveledDistance) ? headingHorizontal : headingVertical);
+		}
 	} // namespace utile
 } // namespace common
 

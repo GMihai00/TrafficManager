@@ -21,19 +21,16 @@ namespace ipc
             ipc::utile::IP_ADRESS serverIPAdress_;
             ipc::utile::PORT serverPort_;
             GeoCoordinate<DecimalCoordinate> serverCoordinates_;
-            LANE followedLane_;
 
             void readIpAdress(Message<ipc::VehicleDetectionMessages>& msg);
             void readPort(Message<ipc::VehicleDetectionMessages>& msg);
             void readCoordinates(Message<ipc::VehicleDetectionMessages>& msg);
-            void readLane(Message<ipc::VehicleDetectionMessages>& msg);
         public:
             ProxyReply() = delete;
             ProxyReply(MessageHeader<ipc::VehicleDetectionMessages> header,
                 ipc::utile::IP_ADRESS serverIPAdress,
                 ipc::utile::PORT serverPort,
-                GeoCoordinate<DecimalCoordinate> serverCoordinates, 
-                LANE followedLane);
+                GeoCoordinate<DecimalCoordinate> serverCoordinates);
             ProxyReply(Message<ipc::VehicleDetectionMessages>& msg);
             operator Message<ipc::VehicleDetectionMessages>() const;
             ~ProxyReply() noexcept = default;
@@ -41,7 +38,6 @@ namespace ipc
             std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT> getServerIPAdressAndPort() const;
             bool isEmergency() const;
             GeoCoordinate<DecimalCoordinate> getServerCoordinates() const;
-            LANE getFollowedLane() const;
             bool isApproved() const;
         };
     } // namespace net

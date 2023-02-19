@@ -19,6 +19,12 @@
     <Filter Include="Source Files\utile">
       <UniqueIdentifier>{38731901-bd61-46e2-ba3a-e26fdd7b48f3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\db">
+      <UniqueIdentifier>{08f0eb19-8286-46e8-9316-41ac76c7664d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\db">
+      <UniqueIdentifier>{a0835558-17f8-4f75-9630-10b0cb0eb5e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utile\Logger.hpp">
@@ -48,6 +54,15 @@
     <ClInclude Include="utile\SignatureHelpers.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
+    <ClInclude Include="db\BoundingRect.hpp">
+      <Filter>Header Files\db</Filter>
+    </ClInclude>
+    <ClInclude Include="db\Junction.hpp">
+      <Filter>Header Files\db</Filter>
+    </ClInclude>
+    <ClInclude Include="db\Proxy.hpp">
+      <Filter>Header Files\db</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp">
@@ -67,6 +82,15 @@
     </ClCompile>
     <ClCompile Include="utile\DataTypes.cpp">
       <Filter>Source Files\utile</Filter>
+    </ClCompile>
+    <ClCompile Include="db\BoundingRect.cpp">
+      <Filter>Source Files\db</Filter>
+    </ClCompile>
+    <ClCompile Include="db\Junction.cpp">
+      <Filter>Source Files\db</Filter>
+    </ClCompile>
+    <ClCompile Include="db\Proxy.cpp">
+      <Filter>Source Files\db</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

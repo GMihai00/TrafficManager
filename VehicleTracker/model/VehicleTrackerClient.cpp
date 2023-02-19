@@ -27,7 +27,7 @@ namespace model
 				}
 				disconnect();
 
-				if (!connect(junctionIpAndPort_.first, junctionIpAndPort_.second))
+				if (!connect(nextJunction_->getIpAdress(), nextJunction_->getPort()))
 				{
 					LOG_ERR << "FAILED TO COMMUNICATE WITH JUNCTION";
 					continue;
@@ -81,7 +81,9 @@ namespace model
 
 		auto start = gpsAdapter_.getCurrentCoordinates();
 		auto current = gpsAdapter_.getCurrentCoordinates();
-		if (start == current) { return false; }
+		auto direction = calculateDirection(start, current);
+		if (!direction.has_value()) { return false; }
+		followedLane_ = direction.value();
 
 		auto msgId = messageIdProvider_.provideId(ipc::VehicleDetectionMessages::VDB);
 		ipc::net::Message<ipc::VehicleDetectionMessages> message;
@@ -108,10 +110,9 @@ namespace model
 
 			if (!proxyReply.isApproved()) { return false; }
 
-			junctionIpAndPort_ = proxyReply.getServerIPAdressAndPort();
-			junctionCoordinates_ = proxyReply.getServerCoordinates();
+			auto junctionIpAndPort = proxyReply.getServerIPAdressAndPort();
+			nextJunction_ = std::make_shared<common::db::Junction>(junctionIpAndPort.first, junctionIpAndPort.second, proxyReply.getServerCoordinates());
 			isEmergency_ = proxyReply.isEmergency();
-			followedLane_ = proxyReply.getFollowedLane();
 		}
 		catch (const std::exception& err)
 		{

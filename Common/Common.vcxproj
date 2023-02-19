@@ -155,6 +155,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="db\BoundingRect.hpp" />
+    <ClInclude Include="db\Junction.hpp" />
+    <ClInclude Include="db\Proxy.hpp" />
     <ClInclude Include="utile\DataTypes.hpp" />
     <ClInclude Include="utile\GeoCoordinate.hpp" />
     <ClInclude Include="utile\IObserver.hpp" />
@@ -167,6 +170,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp" />
+    <ClCompile Include="db\BoundingRect.cpp" />
+    <ClCompile Include="db\Junction.cpp" />
+    <ClCompile Include="db\Proxy.cpp" />
     <ClCompile Include="utile\DataTypes.cpp" />
     <ClCompile Include="utile\GeoCoordinate.cpp" />
     <ClCompile Include="utile\Observer.cpp" />

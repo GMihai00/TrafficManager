@@ -5,3 +5,6 @@
 #include "utile/Observer.hpp"
 #include "utile/SignatureHelpers.hpp"
 #include "utile/GeoCoordinate.hpp"
+#include "db/BoundingRect.hpp"
+#include "db/Junction.hpp"
+#include "db/Proxy.hpp"

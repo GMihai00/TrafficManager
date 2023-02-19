@@ -6,11 +6,13 @@
 #include <string>
 #include <thread>
 #include <condition_variable>
+#include <memory>
 
 #include "net/Client.hpp"
 #include "net/Client.hpp"
 #include "net/Message.hpp"
 #include "MessageTypes.hpp"
+#include "db/Junction.hpp"
 #include "utile/DataTypes.hpp"
 #include "utile/MessageIdProvider.hpp"
 #include "utile/Logger.hpp"
@@ -38,8 +40,7 @@ namespace model
         std::optional<std::string> signature_;
 
         bool isEmergency_;
-        std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT> junctionIpAndPort_;
-        GeoCoordinate<DecimalCoordinate> junctionCoordinates_;
+        std::shared_ptr<common::db::Junction> nextJunction_;
         LANE followedLane_;
 
         LOGGER("VEHICLETRAKER-CLIENT");
