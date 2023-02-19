@@ -55,6 +55,7 @@ namespace common
 				return ((this->latitude == obj.latitude) && (this->longitude == obj.longitude));
 			}
 
+			// SHOULD SWITCH TO BEARING IN THE END FOR NOW JUST USING S,E,N,W
 			// https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
 			// https://analyse-gps.com/gps-equations/bearing-of-2-gps-coordinates/
 			std::optional<Bearing> calculateBearingToCoordinate(const GeoCoordinate<T>& coordinate) const
