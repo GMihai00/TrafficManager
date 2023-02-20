@@ -3,6 +3,7 @@
 #define COMMON_DB_BOUNDINGRECT_HPP
 
 #include <stdint.h>
+#include <memory>
 #include "../utile/GeoCoordinate.hpp"
 
 namespace common
@@ -24,6 +25,7 @@ namespace common
 			GeoCoordinate<DecimalCoordinate> getCenter() const;
 			bool passedCenter(const GeoCoordinate<DecimalCoordinate>& pointA, const GeoCoordinate<DecimalCoordinate>& pointB) const;
 		};
+		typedef std::shared_ptr<BoundingRect> BoundingRectPtr;
 	} // namespace db
 } // namespace common
 #endif // #COMMON_DB_BOUNDINGRECT_HPP

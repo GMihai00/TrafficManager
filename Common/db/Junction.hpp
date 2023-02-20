@@ -6,6 +6,8 @@
 
 #include "BoundingRect.hpp"
 
+#include <memory>
+
 namespace common
 {
 	namespace db
@@ -15,7 +17,7 @@ namespace common
 		protected:
 			const std::string ipAdress_;
 			const uint16_t port_;
-			const std::shared_ptr<BoundingRect> coveredArea_;
+			const BoundingRectPtr coveredArea_;
 		public:
 			Junction() = delete;
 			Junction(const std::string& ipAdress, const uint16_t& port, const std::shared_ptr<BoundingRect> coveredArea);
@@ -26,6 +28,7 @@ namespace common
 			std::string getIpAdress() const;
 			uint16_t getPort() const;
 		};
+		typedef std::shared_ptr<Junction> JunctionPtr;
 	} // namespace db
 } // namespace common
 #endif // #COMMON_DB_JUNCTION_HPP

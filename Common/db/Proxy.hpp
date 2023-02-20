@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <memory>
 #include <vector>
+#include <memory>
 
 #include "BoundingRect.hpp"
 #include "Junction.hpp"
@@ -13,14 +14,17 @@ namespace common
 {
 	namespace db
 	{
+		class Proxy;
+		typedef std::shared_ptr<Proxy> ProxyPtr;
+
 		class Proxy
 		{
 		protected:
 			const uint32_t id_;
-			const std::shared_ptr<Proxy> parent_;
+			const ProxyPtr parent_;
 			uint32_t load_;
-			const std::shared_ptr<BoundingRect> coveredArea_;
-			std::vector<std::shared_ptr<Junction>> monitoredJunctions_;
+			const BoundingRectPtr coveredArea_;
+			std::vector<JunctionPtr> monitoredJunctions_;
 
 		public:
 			Proxy() = delete;
