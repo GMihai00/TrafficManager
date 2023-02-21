@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 #include <memory>
+#include <optional>
 
 #include "BoundingRect.hpp"
 #include "Junction.hpp"
@@ -21,22 +22,24 @@ namespace common
 		{
 		protected:
 			const uint32_t id_;
-			const ProxyPtr parent_;
 			uint32_t load_;
 			const BoundingRectPtr coveredArea_;
 			std::vector<JunctionPtr> monitoredJunctions_;
 
 		public:
 			Proxy() = delete;
-			Proxy(const std::shared_ptr<BoundingRect>& coveredArea,
-				const uint32_t& load = 0,
-				const std::vector<std::shared_ptr<Junction>>monitoredJunctions = {},
-				const uint32_t& id = 0,
-				const std::shared_ptr<Proxy> parent = nullptr);
+			Proxy(const uint32_t& id,
+				const uint32_t& load,
+				const std::shared_ptr<BoundingRect>& coveredArea,
+				const std::vector<std::shared_ptr<Junction>>monitoredJunctions = {});
 			~Proxy() noexcept = default;
+			uint32_t getId() const;
+			uint32_t getLoad() const;
+			uint32_t updateLoad(bool connecting);
+			BoundingRectPtr getCoveredArea() const;
 			bool isContained(const GeoCoordinate<DecimalCoordinate>& point) const;
-			std::shared_ptr<Proxy> getParent() const;
 			void setMonitoredJunctions(const std::vector< std::shared_ptr<Junction> >& monitoredJunctions);
+			std::vector<JunctionPtr> 
 		};
 	} // namespace db
 } // namespace common

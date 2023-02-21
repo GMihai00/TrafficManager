@@ -3,12 +3,18 @@
 #include <cppconn/exception.h>
 namespace model
 {
-	ProxyServer::ProxyServer(const ipc::utile::PORT port) : 
+	ProxyServer::ProxyServer(const ipc::utile::PORT port, const uint32_t proxyId) :
 		ipc::net::Server<ipc::VehicleDetectionMessages>(port)
 	{
 		try
 		{
 			dbWrapper_ = std::make_unique<utile::DBWrapper>("", "", "");
+			dbProxy_ = dbWrapper_->findProxyById(proxyId);
+			if (dbProxy_ == nullptr)
+			{
+				LOG_ERR << "FAILED TO GET CORRESPONDING DB PROXY";
+				exit(2);
+			}
 		}
 		catch (sql::SQLException e)
 		{
@@ -19,12 +25,12 @@ namespace model
 
 	void ProxyServer::increaseLoad()
 	{
-
+		dbWrapper_->updateProxyLoad(dbProxy_, true);
 	}
 
 	void ProxyServer::decreaseLoad()
 	{
-
+		dbWrapper_->updateProxyLoad(dbProxy_, false);
 	}
 
 	bool ProxyServer::onClientConnect(ipc::utile::ConnectionPtr client)

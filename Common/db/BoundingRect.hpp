@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <memory>
+
 #include "../utile/GeoCoordinate.hpp"
 
 namespace common
@@ -19,8 +20,9 @@ namespace common
 			const GeoCoordinate<DecimalCoordinate> boundNE_;
 		public:
 			BoundingRect() = delete;
-			BoundingRect(const GeoCoordinate<DecimalCoordinate>& boundSW, const GeoCoordinate<DecimalCoordinate>& boundNE,const uint32_t& id = 0);
+			BoundingRect(const uint32_t& id, const GeoCoordinate<DecimalCoordinate>& boundSW, const GeoCoordinate<DecimalCoordinate>& boundNE);
 			~BoundingRect() noexcept = default;
+			std::pair<GeoCoordinate<DecimalCoordinate>, GeoCoordinate<DecimalCoordinate>> getBounds() const;
 			bool isContained(const GeoCoordinate<DecimalCoordinate>& point) const;
 			GeoCoordinate<DecimalCoordinate> getCenter() const;
 			bool passedCenter(const GeoCoordinate<DecimalCoordinate>& pointA, const GeoCoordinate<DecimalCoordinate>& pointB) const;

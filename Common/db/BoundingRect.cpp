@@ -5,12 +5,17 @@ namespace common
 	namespace db
 	{
 
-		BoundingRect::BoundingRect(const GeoCoordinate<DecimalCoordinate>& boundSW, const GeoCoordinate<DecimalCoordinate>& boundNE, const uint32_t& id) :
+		BoundingRect::BoundingRect(const uint32_t& id, const GeoCoordinate<DecimalCoordinate>& boundSW, const GeoCoordinate<DecimalCoordinate>& boundNE) :
+			id_(id),
 			boundSW_(boundSW),
-			boundNE_(boundNE),
-			id_(id)
+			boundNE_(boundNE)
 		{
 
+		}
+
+		std::pair<GeoCoordinate<DecimalCoordinate>, GeoCoordinate<DecimalCoordinate>> BoundingRect::getBounds() const
+		{
+			return { boundSW_, boundNE_ };
 		}
 
 		bool BoundingRect::isContained(const GeoCoordinate<DecimalCoordinate>& point) const

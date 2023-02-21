@@ -24,6 +24,7 @@ namespace common
 			~Junction() noexcept = default;
 			bool isContained(const GeoCoordinate<DecimalCoordinate>& point) const;
 			bool isPassing(const GeoCoordinate<DecimalCoordinate> pointA, const GeoCoordinate<DecimalCoordinate> pointB) const;
+			bool isPassing(const GeoCoordinate<DecimalCoordinate> point, const LANE direction) const;
 			bool passedJunction(const GeoCoordinate<DecimalCoordinate>& pointA, const GeoCoordinate<DecimalCoordinate>& pointB) const;
 			std::string getIpAdress() const;
 			uint16_t getPort() const;

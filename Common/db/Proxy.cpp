@@ -4,33 +4,51 @@ namespace common
 {
 	namespace db
 	{
-		Proxy::Proxy(const std::shared_ptr<BoundingRect>& coveredArea,
+		Proxy::Proxy(const uint32_t& id,
 			const uint32_t& load,
-			const std::vector<std::shared_ptr<Junction>>monitoredJunctions,
-			const uint32_t& id,
-			const std::shared_ptr<Proxy> parent) :
-			coveredArea_(coveredArea),
-			load_(load),
-			monitoredJunctions_(monitoredJunctions),
+			const std::shared_ptr<BoundingRect>& coveredArea,
+			const std::vector<std::shared_ptr<Junction>>monitoredJunctions) :
 			id_(id),
-			parent_(parent)
+			load_(load),
+			coveredArea_(coveredArea),
+			monitoredJunctions_(monitoredJunctions)
 		{
 
 		}
 		
+		uint32_t Proxy::getId() const
+		{
+			return id_;
+		}
+
+		uint32_t Proxy::getLoad() const
+		{
+			return load_;
+		}
+
+		uint32_t Proxy::updateLoad(bool connecting)
+		{
+			(connecting == true) ? (load_++) : (load_--);
+			return load_;
+		}
+
+		BoundingRectPtr Proxy::getCoveredArea() const
+		{
+			return coveredArea_;
+		}
 		bool Proxy::isContained(const GeoCoordinate<DecimalCoordinate>& point) const
 		{
 			return coveredArea_->isContained(point);
 		}
 
-		std::shared_ptr<Proxy> Proxy::getParent() const
-		{
-			return parent_;
-		}
-
 		void Proxy::setMonitoredJunctions(const std::vector< std::shared_ptr<Junction> >& monitoredJunctions)
 		{
-			this->monitoredJunctions_ = monitoredJunctions;
+			monitoredJunctions_ = monitoredJunctions;
+		}
+
+		std::vector<JunctionPtr> Proxy::getMonitoredJunctions() const
+		{
+			return monitoredJunctions_;
 		}
 
 	} // namespace db

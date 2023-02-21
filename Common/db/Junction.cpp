@@ -19,7 +19,12 @@ namespace common
 
 		bool Junction::isPassing(const GeoCoordinate<DecimalCoordinate> pointA, const GeoCoordinate<DecimalCoordinate> pointB) const
 		{
-			return (calculateDirection(pointA, pointB) == calculateDirection(pointB, coveredArea_->getCenter()));
+			return isContained(pointB) && (calculateDirection(pointA, pointB) == calculateDirection(pointB, coveredArea_->getCenter()));
+		}
+
+		bool Junction::isPassing(const GeoCoordinate<DecimalCoordinate> point, const LANE direction) const
+		{
+			return isContained(point) && (calculateDirection(point, coveredArea_->getCenter()) == direction);
 		}
 
 		bool Junction::passedJunction(const GeoCoordinate<DecimalCoordinate>& pointA, const GeoCoordinate<DecimalCoordinate>& pointB) const
