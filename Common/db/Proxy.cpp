@@ -4,21 +4,25 @@ namespace common
 {
 	namespace db
 	{
-		Proxy::Proxy(const uint32_t& id,
+		Proxy::Proxy(const std::string& ipAdress, const uint16_t& port,
 			const uint32_t& load,
-			const std::shared_ptr<BoundingRect>& coveredArea,
-			const std::vector<std::shared_ptr<Junction>>monitoredJunctions) :
-			id_(id),
+			const std::shared_ptr<BoundingRect>& coveredArea) :
+			ipAdress_(ipAdress),
+			port_(port),
 			load_(load),
-			coveredArea_(coveredArea),
-			monitoredJunctions_(monitoredJunctions)
+			coveredArea_(coveredArea)
 		{
 
 		}
-		
-		uint32_t Proxy::getId() const
+
+		std::string Proxy::getIpAdress() const
 		{
-			return id_;
+			return ipAdress_;
+		}
+
+		uint16_t Proxy::getPort() const
+		{
+			return port_;
 		}
 
 		uint32_t Proxy::getLoad() const
@@ -36,19 +40,10 @@ namespace common
 		{
 			return coveredArea_;
 		}
+
 		bool Proxy::isContained(const GeoCoordinate<DecimalCoordinate>& point) const
 		{
 			return coveredArea_->isContained(point);
-		}
-
-		void Proxy::setMonitoredJunctions(const std::vector< std::shared_ptr<Junction> >& monitoredJunctions)
-		{
-			monitoredJunctions_ = monitoredJunctions;
-		}
-
-		std::vector<JunctionPtr> Proxy::getMonitoredJunctions() const
-		{
-			return monitoredJunctions_;
 		}
 
 	} // namespace db

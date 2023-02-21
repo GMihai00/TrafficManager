@@ -152,7 +152,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="IPC.cpp" />
+    <ClCompile Include="net\ProxyRedirect.cpp" />
     <ClCompile Include="net\ProxyReply.cpp" />
+    <ClCompile Include="net\VehicleTrackerMessage.cpp" />
     <ClCompile Include="utile\IPAdressHelpers.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -165,8 +167,10 @@
     <ClInclude Include="net\Client.hpp" />
     <ClInclude Include="net\Connection.hpp" />
     <ClInclude Include="net\Message.hpp" />
+    <ClInclude Include="net\ProxyRedirect.hpp" />
     <ClInclude Include="net\ProxyReply.hpp" />
     <ClInclude Include="net\Server.hpp" />
+    <ClInclude Include="net\VehicleTrackerMessage.hpp" />
     <ClInclude Include="utile\IPAdressHelpers.hpp" />
     <ClInclude Include="utile\IPCDataTypes.hpp" />
     <ClInclude Include="utile\MessageIdProvider.hpp" />

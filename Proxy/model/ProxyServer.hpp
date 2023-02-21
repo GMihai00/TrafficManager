@@ -11,6 +11,7 @@
 
 #include "net/Server.hpp"
 #include "net/ProxyReply.hpp"
+#include "net/ProxyRedirect.hpp"
 #include "net/Message.hpp"
 #include "MessageTypes.hpp"
 #include "db/Proxy.hpp"
@@ -27,12 +28,17 @@ namespace model
 		common::db::ProxyPtr dbProxy_;
 		std::unique_ptr<utile::DBWrapper> dbWrapper_;
 		LOGGER("PROXY-SERVER");
+
+		ipc::net::ProxyReply buildProxyReply(ipc::utile::VehicleDetectionMessage& msg, const common::db::JunctionPtr& junction) const;
+		ipc::net::ProxyRedirect buildProxyRedirect(ipc::utile::VehicleDetectionMessage& msg, const common::db::ProxyPtr& proxy) const;
+		void rejectMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
+
 		bool isMessageValid(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 		void handleMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
-		std::optional<ipc::net::ProxyReply> findClosestJunction(ipc::utile::VehicleDetectionMessage& msg);
+		std::optional<ipc::net::ProxyReply> getClosestJunctionReply(ipc::utile::VehicleDetectionMessage& msg);
 		void redirect(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 	public:
-		ProxyServer(const ipc::utile::PORT port, const uint32_t proxyId);
+		ProxyServer(const ipc::utile::PORT port, const common::db::ProxyPtr& dbProxy);
 		ProxyServer(const ProxyServer&) = delete;
 		virtual ~ProxyServer() noexcept = default;
 

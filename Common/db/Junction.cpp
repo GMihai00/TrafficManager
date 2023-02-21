@@ -41,5 +41,10 @@ namespace common
 		{
 			return port_;
 		}
+
+		GeoCoordinate<DecimalCoordinate> Junction::getCenter() const
+		{
+			return coveredArea_->getCenter();
+		}
 	} // namespace db
 } // namespace common

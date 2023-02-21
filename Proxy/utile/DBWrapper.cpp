@@ -26,13 +26,13 @@ namespace utile
 
 	db::ProxyPtr DBWrapper::buildProxyFromQueryResult(const std::shared_ptr<sql::ResultSet>& queryResult) noexcept
 	{
-		uint32_t id = queryResult->getInt("id");
+		std::string ipAdress = queryResult->getString("ip_adress");
+		uint16_t port = queryResult->getInt("port");
 		uint32_t load = queryResult->getInt("load");
 		uint32_t boudingRectId = queryResult->getInt("bounding_rect_id");
 		db::BoundingRectPtr coveredArea = findBoundingRectById(boudingRectId);
 
-		auto proxy = std::make_shared<db::Proxy>(id, load, coveredArea);
-		proxy->setMonitoredJunctions(findJunctionsCoveredByProxy(proxy));
+		auto proxy = std::make_shared<db::Proxy>(ipAdress, port, load, coveredArea);
 		return proxy;
 	}
 
@@ -66,60 +66,44 @@ namespace utile
 		}
 	}
 
-	db::ProxyPtr DBWrapper::findProxyById(const uint32_t id) noexcept
+	std::vector<db::ProxyPtr> DBWrapper::getAllProxys() noexcept
 	{
 		try
 		{
-			std::shared_ptr<sql::PreparedStatement> preparedStatement(connection_->prepareStatement("SELECT * FROM proxy WHERE id = ?;"));
-			preparedStatement->setInt(1, id);
+			std::vector<db::ProxyPtr> proxys;
+
+			std::shared_ptr<sql::PreparedStatement> preparedStatement(connection_->prepareStatement("SELECT * FROM proxy;"));
 			std::shared_ptr<sql::ResultSet> queryResult(preparedStatement->executeQuery());
 
-			if (queryResult->next())
+			while (queryResult->next())
 			{
-				return buildProxyFromQueryResult(queryResult);
+				proxys.push_back(std::move(buildProxyFromQueryResult(queryResult)));
 			}
-
-			return nullptr;
 		}
 		catch (const sql::SQLException& err)
 		{
-			LOG_WARN << "Failed to find Proxy with id: " << id << " err: " << err.what();
-			return nullptr;
+			LOG_WARN << "Failed to find Proxys err: " << err.what();
+			return {};
 		}
 	}
 
-	std::vector<db::JunctionPtr> DBWrapper::findJunctionsCoveredByProxy(const db::ProxyPtr& proxy) noexcept
+	std::vector<db::JunctionPtr> DBWrapper::getAllJunctions() noexcept
 	{
-		assert(proxy);
-		auto boudingRect = proxy->getCoveredArea();
-		assert(boudingRect);
-
 		try
 		{
 			std::vector<db::JunctionPtr> junctions;
-			auto bounds = boudingRect->getBounds();
-			auto sw_longitude = bounds.first.longitude;
-			auto sw_latitude = bounds.first.latitude;
-			auto ne_longitude = bounds.second.longitude;
-			auto ne_latitude = bounds.second.latitude;
 
-			std::shared_ptr<sql::PreparedStatement> preparedStatement(connection_->prepareStatement(
-				"SELECT * FROM junction WHERE bouding_rect_id NOT IN (SELECT id from bounding_rect WHERE ? > ne_latitude OR ? > ne_longitude OR sw_latitude > ? OR sw_longitude > ? );"));
-			preparedStatement->setInt(1, sw_latitude);
-			preparedStatement->setInt(2, sw_longitude);
-			preparedStatement->setInt(3, ne_latitude);
-			preparedStatement->setInt(4, ne_longitude);
-
+			std::shared_ptr<sql::PreparedStatement> preparedStatement(connection_->prepareStatement("SELECT * FROM junction;"));
 			std::shared_ptr<sql::ResultSet> queryResult(preparedStatement->executeQuery());
+
 			while (queryResult->next())
 			{
 				junctions.push_back(std::move(buildJunctionFromQueryResult(queryResult)));
 			}
-			return junctions;
 		}
 		catch (const sql::SQLException& err)
 		{
-			LOG_WARN << "Failed to find Junctions within BoundingRect err: " << err.what();
+			LOG_WARN << "Failed to find Junctions err: " << err.what();
 			return {};
 		}
 	}
@@ -150,38 +134,28 @@ namespace utile
 		}
 	}
 
-	// FOR NOW USING JUST DB TO TAKE NEXT JUNCTION, IT SHOULD BE TAKEN WITH THE USE OF THE PROXY, NOT LIKE THIS
-	db::JunctionPtr DBWrapper::getNextJunction(const GeoCoordinate<DecimalCoordinate>& pointA, const LANE& direction) noexcept
+	db::ProxyPtr DBWrapper::findClosestProxyToPoint(const GeoCoordinate<DecimalCoordinate>& point) noexcept
 	{
 		try
 		{
-			auto proxy = findLeastLoadedProxyThatCoversLocation(pointA);
-			for (const auto& junction : proxy->getMonitoredJunctions())
-			{
-				if (junction->isPassing(pointA, direction))
-				{
-					return junction;
-				}
-				
-			}
-
+			
 			return nullptr;
 		}
 		catch (const sql::SQLException& err)
 		{
-			LOG_WARN << "Failed to get next Junction err: " << err.what();
+			LOG_WARN << "Failed to find closest proxy err: " << err.what();
 			return nullptr;
 		}
 	}
-
 	bool DBWrapper::updateProxyLoad(const db::ProxyPtr proxy, bool connecting) noexcept
 	{
 		assert(proxy);
 		try
 		{
-			std::shared_ptr<sql::PreparedStatement> preparedStatement(connection_->prepareStatement("UPDATE proxy SET load = ? WHERE id = ?;"));
+			std::shared_ptr<sql::PreparedStatement> preparedStatement(connection_->prepareStatement("UPDATE proxy SET load = ? WHERE ip_adress = ? AMD port = ?;"));
 			preparedStatement->setInt(1, proxy->updateLoad(connecting));
-			preparedStatement->setInt(2, proxy->getId());
+			preparedStatement->setString(2, proxy->getIpAdress());
+			preparedStatement->setInt(3, proxy->getPort());
 			preparedStatement->executeQuery();
 			return true;
 		}

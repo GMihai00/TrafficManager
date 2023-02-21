@@ -21,25 +21,24 @@ namespace common
 		class Proxy
 		{
 		protected:
-			const uint32_t id_;
+			const std::string ipAdress_;
+			const uint16_t port_;
 			uint32_t load_;
 			const BoundingRectPtr coveredArea_;
-			std::vector<JunctionPtr> monitoredJunctions_;
 
 		public:
 			Proxy() = delete;
-			Proxy(const uint32_t& id,
+			Proxy(const std::string& ipAdress,
+				const uint16_t& port,
 				const uint32_t& load,
-				const std::shared_ptr<BoundingRect>& coveredArea,
-				const std::vector<std::shared_ptr<Junction>>monitoredJunctions = {});
+				const std::shared_ptr<BoundingRect>& coveredArea);
 			~Proxy() noexcept = default;
-			uint32_t getId() const;
+			std::string getIpAdress() const;
+			uint16_t getPort() const;
 			uint32_t getLoad() const;
 			uint32_t updateLoad(bool connecting);
 			BoundingRectPtr getCoveredArea() const;
 			bool isContained(const GeoCoordinate<DecimalCoordinate>& point) const;
-			void setMonitoredJunctions(const std::vector< std::shared_ptr<Junction> >& monitoredJunctions);
-			std::vector<JunctionPtr> 
 		};
 	} // namespace db
 } // namespace common

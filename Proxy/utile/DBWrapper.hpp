@@ -38,14 +38,14 @@ namespace utile
 		db::JunctionPtr buildJunctionFromQueryResult(const std::shared_ptr<sql::ResultSet>& queryResult) noexcept;
 
 		db::BoundingRectPtr findBoundingRectById(const uint32_t id) noexcept;
-		std::vector<db::JunctionPtr> findJunctionsCoveredByProxy(const db::ProxyPtr& proxy) noexcept;
-		db::ProxyPtr findLeastLoadedProxyThatCoversLocation(const GeoCoordinate<DecimalCoordinate>& point) noexcept;
 	public:
 		DBWrapper(const std::string server = SERVER, const std::string username = USERNAME, const std::string password = PASSWORD);
 		~DBWrapper() noexcept = default;
 
-		db::ProxyPtr findProxyById(const uint32_t id) noexcept;
-		db::JunctionPtr getNextJunction(const GeoCoordinate<DecimalCoordinate>& pointA, const LANE& direction) noexcept;
+		std::vector<db::ProxyPtr> getAllProxys() noexcept;
+		std::vector<db::JunctionPtr> getAllJunctions() noexcept;
+		db::ProxyPtr findLeastLoadedProxyThatCoversLocation(const GeoCoordinate<DecimalCoordinate>& point) noexcept;
+		db::ProxyPtr findClosestProxyToPoint(const GeoCoordinate<DecimalCoordinate>& point) noexcept;
 		bool updateProxyLoad(const db::ProxyPtr proxy, bool connecting) noexcept;
 	};
 } // namespace utile

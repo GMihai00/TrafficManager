@@ -1,6 +1,6 @@
 #pragma once
-#ifndef IPC_NET_PROXYREPLY_HPP
-#define IPC_NET_PROXYREPLY_HPP
+#ifndef IPC_NET_PROXYREDIRECT_HPP
+#define IPC_NET_PROXYREDIRECT_HPP
 
 #include "Message.hpp"
 #include "../MessageTypes.hpp"
@@ -14,28 +14,25 @@ namespace ipc
     namespace net
     {
         using namespace common::utile;
-        class ProxyReply
+        class ProxyRedirect
         {
         private:
             MessageHeader<ipc::VehicleDetectionMessages> header_;
             ipc::utile::IP_ADRESS serverIPAdress_;
             ipc::utile::PORT serverPort_;
-            GeoCoordinate<DecimalCoordinate> serverCoordinates_;
 
             void readIpAdress(Message<ipc::VehicleDetectionMessages>& msg);
             void readPort(Message<ipc::VehicleDetectionMessages>& msg);
-            void readCoordinates(Message<ipc::VehicleDetectionMessages>& msg);
         public:
-            ProxyReply() = delete;
-            ProxyReply(Message<ipc::VehicleDetectionMessages>& msg);
+            ProxyRedirect() = delete;
+            ProxyRedirect(Message<ipc::VehicleDetectionMessages>& msg);
             operator Message<ipc::VehicleDetectionMessages>() const;
-            ~ProxyReply() noexcept = default;
+            ~ProxyRedirect() noexcept = default;
 
             std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT> getServerIPAdressAndPort() const;
             bool isEmergency() const;
-            GeoCoordinate<DecimalCoordinate> getServerCoordinates() const;
             bool isApproved() const;
         };
     } // namespace net
 } // namespace ipc
-#endif // #IPC_NET_PROXYREPLY_HPP
+#endif // #IPC_NET_PROXYREDIRECT_HPP

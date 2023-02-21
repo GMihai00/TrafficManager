@@ -28,6 +28,7 @@ namespace common
 			bool passedJunction(const GeoCoordinate<DecimalCoordinate>& pointA, const GeoCoordinate<DecimalCoordinate>& pointB) const;
 			std::string getIpAdress() const;
 			uint16_t getPort() const;
+			GeoCoordinate<DecimalCoordinate> getCenter() const;
 		};
 		typedef std::shared_ptr<Junction> JunctionPtr;
 	} // namespace db

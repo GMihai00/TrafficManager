@@ -1,15 +1,17 @@
 #include "ProxyServer.hpp"
 
 #include <cppconn/exception.h>
+#include "net/VehicleTrackerMessage.hpp"
+
 namespace model
 {
-	ProxyServer::ProxyServer(const ipc::utile::PORT port, const uint32_t proxyId) :
-		ipc::net::Server<ipc::VehicleDetectionMessages>(port)
+	ProxyServer::ProxyServer(const ipc::utile::PORT port, const common::db::ProxyPtr& dbProxy) :
+		ipc::net::Server<ipc::VehicleDetectionMessages>(port),
+		dbProxy_(dbProxy)
 	{
 		try
 		{
 			dbWrapper_ = std::make_unique<utile::DBWrapper>("", "", "");
-			dbProxy_ = dbWrapper_->findProxyById(proxyId);
 			if (dbProxy_ == nullptr)
 			{
 				LOG_ERR << "FAILED TO GET CORRESPONDING DB PROXY";
@@ -23,14 +25,26 @@ namespace model
 		}
 	}
 
+	void ProxyServer::rejectMessage(
+		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
+	{
+		LOG_WARN << "Rejecting message, valid proxy could not be found";
+		ipc::net::Message<ipc::VehicleDetectionMessages> message;
+		message.header.id = msg.header.id;
+		message.header.type = ipc::VehicleDetectionMessages::NACK;
+		client->send(message);
+	}
+
 	void ProxyServer::increaseLoad()
 	{
-		dbWrapper_->updateProxyLoad(dbProxy_, true);
+		//have to rethink this
+		//dbWrapper_->updateProxyLoad(dbProxy_, true);
 	}
 
 	void ProxyServer::decreaseLoad()
 	{
-		dbWrapper_->updateProxyLoad(dbProxy_, false);
+		//have to rethink this
+		//dbWrapper_->updateProxyLoad(dbProxy_, false);
 	}
 
 	bool ProxyServer::onClientConnect(ipc::utile::ConnectionPtr client)
@@ -52,16 +66,65 @@ namespace model
 		handleMessage(client, msg);
 	}
 
-	std::optional<ipc::net::ProxyReply> ProxyServer::findClosestJunction(ipc::utile::VehicleDetectionMessage& msg)
+	ipc::net::ProxyReply ProxyServer::buildProxyReply(ipc::utile::VehicleDetectionMessage& msg, const common::db::JunctionPtr& junction) const
 	{
-		std::optional<ipc::net::ProxyReply> rez = {};
+		ipc::utile::VehicleDetectionMessage reply;
+		reply.header.hasPriority = false;
+		reply.header.id = msg.header.id;
+		reply.header.type = ipc::VehicleDetectionMessages::ACK;
+		reply << junction->getIpAdress() << junction->getPort() << junction->getCenter();
 
-		return rez;
+		return ipc::net::ProxyReply(reply);
+	}
+
+	ipc::net::ProxyRedirect ProxyServer::buildProxyRedirect(ipc::utile::VehicleDetectionMessage& msg, const common::db::ProxyPtr& proxy) const
+	{
+		ipc::utile::VehicleDetectionMessage reply;
+		reply.header.hasPriority = false;
+		reply.header.id = msg.header.id;
+		reply.header.type = ipc::VehicleDetectionMessages::ACK;
+		reply << proxy->getIpAdress() << proxy->getPort();
+
+		return ipc::net::ProxyRedirect(reply);
+	}
+
+	std::optional<ipc::net::ProxyReply> ProxyServer::getClosestJunctionReply(ipc::utile::VehicleDetectionMessage& msg)
+	{
+		ipc::net::VehicleTrackerMessage vtMessage{msg};
+		auto coordinates = vtMessage.getCoordinates();
+		GeoCoordinate<DecimalCoordinate> pointA = coordinates.first;
+		GeoCoordinate<DecimalCoordinate> pointB = coordinates.second;
+
+		for (const auto& junction : dbWrapper_->getAllJunctions())
+		{
+			if (junction->isPassing(pointA, pointB))
+			{
+				return buildProxyReply(msg, junction);
+			}
+		}
+
+		return {};
 	}
 
 	void ProxyServer::redirect(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
+		ipc::net::VehicleTrackerMessage vtMessage{ msg };
+		auto coordinates = vtMessage.getCoordinates();
+		GeoCoordinate<DecimalCoordinate> pointA = coordinates.first;
+		GeoCoordinate<DecimalCoordinate> pointB = coordinates.second;
 
+		auto proxy = dbWrapper_->findLeastLoadedProxyThatCoversLocation(pointB);
+		if (!proxy)
+		{
+			proxy = dbWrapper_->findClosestProxyToPoint(pointB);
+			if (!proxy)
+			{
+				rejectMessage(client, msg);
+				return;
+			}
+		}
+		auto redirectmsg = buildProxyRedirect(msg, proxy);
+		client->send(redirectmsg);
 	}
 
 	void ProxyServer::handleMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
@@ -78,7 +141,7 @@ namespace model
 				// TO THINK ABOUT THIS HOW DO I GET THE ANSWEAR FROM THE REDIRECTED MESSAGE BACK TO THE CLIENT
 				break;
 			case ipc::net::Owner::Client:
-				if (auto proxyReply = findClosestJunction(msg); proxyReply.has_value())
+				if (auto proxyReply = getClosestJunctionReply(msg); proxyReply.has_value())
 				{
 					client->send(proxyReply.value());
 				}

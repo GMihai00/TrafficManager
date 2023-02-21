@@ -52,18 +52,6 @@ namespace ipc
             this->header_ = msg.header;
         }
 
-        ProxyReply::ProxyReply(MessageHeader<ipc::VehicleDetectionMessages> header,
-            ipc::utile::IP_ADRESS serverIPAdress,
-            ipc::utile::PORT serverPort,
-            GeoCoordinate<DecimalCoordinate> serverCoordinates) :
-            serverIPAdress_(serverIPAdress),
-            serverPort_(serverPort),
-            serverCoordinates_(serverCoordinates),
-            header_(header)
-        {
-
-        }
-
         ProxyReply::operator Message<ipc::VehicleDetectionMessages>() const
         {
             Message<ipc::VehicleDetectionMessages> message;
