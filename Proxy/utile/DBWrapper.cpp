@@ -150,6 +150,7 @@ namespace utile
 		}
 	}
 
+	// FOR NOW USING JUST DB TO TAKE NEXT JUNCTION, IT SHOULD BE TAKEN WITH THE USE OF THE PROXY, NOT LIKE THIS
 	db::JunctionPtr DBWrapper::getNextJunction(const GeoCoordinate<DecimalCoordinate>& pointA, const LANE& direction) noexcept
 	{
 		try
