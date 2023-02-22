@@ -46,5 +46,10 @@ namespace common
 		{
 			return coveredArea_->getCenter();
 		}
+
+		BoundingRectPtr Junction::getCoordinates() const
+		{
+			return coveredArea_;
+		}
 	} // namespace db
 } // namespace common

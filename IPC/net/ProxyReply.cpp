@@ -32,15 +32,24 @@ namespace ipc
         void ProxyReply::readCoordinates(Message<ipc::VehicleDetectionMessages>& msg)
         {
             // COORDINATES { latitude, longitude } - double
-            DecimalCoordinate lat = DECIMALCOORDINATE_INVALID_VALUE;
-            msg >> lat;
-            if (lat == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
-            DecimalCoordinate lon = DECIMALCOORDINATE_INVALID_VALUE;
-            msg >> lon;
-            if (lon == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
+            GeoCoordinate<DecimalCoordinate> boundSW{};
+            boundSW.latitude = DECIMALCOORDINATE_INVALID_VALUE;
+            msg >> boundSW.latitude;
+            if (boundSW.latitude == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
+            boundSW.longitude = DECIMALCOORDINATE_INVALID_VALUE;
+            msg >> boundSW.longitude;
+            if (boundSW.longitude == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
 
-            serverCoordinates_.latitude = lat;
-            serverCoordinates_.longitude = lon;
+           
+            GeoCoordinate<DecimalCoordinate> boundNE{};
+            boundNE.latitude = DECIMALCOORDINATE_INVALID_VALUE;
+            msg >> boundNE.latitude;
+            if (boundNE.latitude == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
+            boundNE.longitude = DECIMALCOORDINATE_INVALID_VALUE;
+            msg >> boundNE.longitude;
+            if (boundNE.longitude == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
+
+            serverCoordinates_ = std::make_shared<common::db::BoundingRect>(boundSW, boundNE);
         }
 
 
@@ -59,7 +68,10 @@ namespace ipc
             std::vector<char> ip(serverIPAdress_.begin(), serverIPAdress_.end());
             message << ip;
             message << serverPort_;
-            message << serverCoordinates_.latitude << serverCoordinates_.longitude;
+            auto bounds = serverCoordinates_->getBounds();
+            GeoCoordinate<DecimalCoordinate>  boundSW = bounds.first;
+            GeoCoordinate<DecimalCoordinate>  boundNE = bounds.second;
+            message << boundSW.latitude << boundSW.longitude << boundNE.latitude << boundNE.longitude;
             return message;
         }
 
@@ -73,7 +85,7 @@ namespace ipc
             return header_.hasPriority;
         }
 
-        GeoCoordinate<DecimalCoordinate> ProxyReply::getServerCoordinates() const
+        common::db::BoundingRectPtr ProxyReply::getServerCoordinates() const
         {
             return serverCoordinates_;
         }

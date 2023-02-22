@@ -29,6 +29,7 @@ namespace common
 			std::string getIpAdress() const;
 			uint16_t getPort() const;
 			GeoCoordinate<DecimalCoordinate> getCenter() const;
+			BoundingRectPtr getCoordinates() const;
 		};
 		typedef std::shared_ptr<Junction> JunctionPtr;
 	} // namespace db

@@ -9,6 +9,8 @@
 #include "utile/DataTypes.hpp"
 #include "utile/GeoCoordinate.hpp"
 
+#include "db/BoundingRect.hpp"
+
 namespace ipc
 {
     namespace net
@@ -20,7 +22,7 @@ namespace ipc
             MessageHeader<ipc::VehicleDetectionMessages> header_;
             ipc::utile::IP_ADRESS serverIPAdress_;
             ipc::utile::PORT serverPort_;
-            GeoCoordinate<DecimalCoordinate> serverCoordinates_;
+            common::db::BoundingRectPtr serverCoordinates_;
 
             void readIpAdress(Message<ipc::VehicleDetectionMessages>& msg);
             void readPort(Message<ipc::VehicleDetectionMessages>& msg);
@@ -33,7 +35,7 @@ namespace ipc
 
             std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT> getServerIPAdressAndPort() const;
             bool isEmergency() const;
-            GeoCoordinate<DecimalCoordinate> getServerCoordinates() const;
+            common::db::BoundingRectPtr getServerCoordinates() const;
             bool isApproved() const;
         };
     } // namespace net

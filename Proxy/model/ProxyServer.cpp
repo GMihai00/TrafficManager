@@ -72,7 +72,11 @@ namespace model
 		reply.header.hasPriority = false;
 		reply.header.id = msg.header.id;
 		reply.header.type = ipc::VehicleDetectionMessages::ACK;
-		reply << junction->getIpAdress() << junction->getPort() << junction->getCenter();
+		reply << junction->getIpAdress() << junction->getPort();
+		auto bounds = junction->getCoordinates()->getBounds();
+		GeoCoordinate<DecimalCoordinate> boundSW = bounds.first;
+		GeoCoordinate<DecimalCoordinate> boundNE = bounds.second;
+		reply << boundSW.latitude << boundSW.longitude << boundNE.latitude << boundNE.longitude;
 
 		return ipc::net::ProxyReply(reply);
 	}

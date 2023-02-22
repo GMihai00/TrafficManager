@@ -20,6 +20,7 @@ namespace common
 			const GeoCoordinate<DecimalCoordinate> boundNE_;
 		public:
 			BoundingRect() = delete;
+			BoundingRect(const GeoCoordinate<DecimalCoordinate>& boundSW, const GeoCoordinate<DecimalCoordinate>& boundNE);
 			BoundingRect(const uint32_t& id, const GeoCoordinate<DecimalCoordinate>& boundSW, const GeoCoordinate<DecimalCoordinate>& boundNE);
 			~BoundingRect() noexcept = default;
 			std::pair<GeoCoordinate<DecimalCoordinate>, GeoCoordinate<DecimalCoordinate>> getBounds() const;

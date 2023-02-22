@@ -13,6 +13,14 @@ namespace common
 
 		}
 
+		BoundingRect::BoundingRect(const GeoCoordinate<DecimalCoordinate>& boundSW, const GeoCoordinate<DecimalCoordinate>& boundNE) :
+			id_(0),
+			boundSW_(boundSW),
+			boundNE_(boundNE)
+		{
+
+		}
+
 		std::pair<GeoCoordinate<DecimalCoordinate>, GeoCoordinate<DecimalCoordinate>> BoundingRect::getBounds() const
 		{
 			return { boundSW_, boundNE_ };
