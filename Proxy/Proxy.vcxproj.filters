@@ -30,11 +30,11 @@
     <ClCompile Include="Proxy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="model\ProxyServer.cpp">
-      <Filter>Source Files\model</Filter>
-    </ClCompile>
     <ClCompile Include="utile\DBWrapper.cpp">
       <Filter>Source Files\utile</Filter>
+    </ClCompile>
+    <ClCompile Include="model\ProxyServer.cpp">
+      <Filter>Source Files\model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

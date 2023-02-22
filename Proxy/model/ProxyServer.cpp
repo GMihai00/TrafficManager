@@ -108,23 +108,48 @@ namespace model
 
 	void ProxyServer::redirect(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
-		ipc::net::VehicleTrackerMessage vtMessage{ msg };
-		auto coordinates = vtMessage.getCoordinates();
-		GeoCoordinate<DecimalCoordinate> pointA = coordinates.first;
-		GeoCoordinate<DecimalCoordinate> pointB = coordinates.second;
-
-		auto proxy = dbWrapper_->findLeastLoadedProxyThatCoversLocation(pointB);
-		if (!proxy)
+		try
 		{
-			proxy = dbWrapper_->findClosestProxyToPoint(pointB);
+			ipc::net::VehicleTrackerMessage vtMessage{ msg };
+			auto coordinates = vtMessage.getCoordinates();
+			GeoCoordinate<DecimalCoordinate> pointA = coordinates.first;
+			GeoCoordinate<DecimalCoordinate> pointB = coordinates.second;
+
+			auto proxy = dbWrapper_->findLeastLoadedProxyThatCoversLocation(pointB);
 			if (!proxy)
 			{
-				rejectMessage(client, msg);
-				return;
+				proxy = dbWrapper_->findClosestProxyToPoint(pointB);
+				if (!proxy)
+				{
+					rejectMessage(client, msg);
+					return;
+				}
 			}
+			auto redirectmsg = buildProxyRedirect(msg, proxy);
+			client->send(redirectmsg);
 		}
-		auto redirectmsg = buildProxyRedirect(msg, proxy);
-		client->send(redirectmsg);
+		catch (const std::runtime_error& )
+		{
+			LOG_WARN << "Invalid message sent to proxy by client with ip: " << client->getIpAdress();
+		}
+	}
+
+	bool ProxyServer::isCoveredByProxy(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage msg)
+	{
+		try
+		{
+			ipc::net::VehicleTrackerMessage vtMessage{ msg };
+			auto coordinates = vtMessage.getCoordinates();
+			GeoCoordinate<DecimalCoordinate> pointA = coordinates.first;
+			GeoCoordinate<DecimalCoordinate> pointB = coordinates.second;
+
+			return dbProxy_->isContained(pointB);
+		}
+		catch (const std::runtime_error&)
+		{
+			LOG_WARN << "Invalid message sent to proxy by client with ip: " << client->getIpAdress();
+			return false;
+		}
 	}
 
 	void ProxyServer::handleMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
@@ -141,6 +166,11 @@ namespace model
 				// TO THINK ABOUT THIS HOW DO I GET THE ANSWEAR FROM THE REDIRECTED MESSAGE BACK TO THE CLIENT
 				break;
 			case ipc::net::Owner::Client:
+				if (!isCoveredByProxy(client, msg))
+				{
+					rejectMessage(client, msg);
+				}
+
 				if (auto proxyReply = getClosestJunctionReply(msg); proxyReply.has_value())
 				{
 					client->send(proxyReply.value());

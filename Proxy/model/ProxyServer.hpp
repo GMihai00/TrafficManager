@@ -29,6 +29,7 @@ namespace model
 		std::unique_ptr<utile::DBWrapper> dbWrapper_;
 		LOGGER("PROXY-SERVER");
 
+		bool isCoveredByProxy(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage msg);
 		ipc::net::ProxyReply buildProxyReply(ipc::utile::VehicleDetectionMessage& msg, const common::db::JunctionPtr& junction) const;
 		ipc::net::ProxyRedirect buildProxyRedirect(ipc::utile::VehicleDetectionMessage& msg, const common::db::ProxyPtr& proxy) const;
 		void rejectMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);

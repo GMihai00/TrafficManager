@@ -147,6 +147,7 @@ namespace utile
 			return nullptr;
 		}
 	}
+
 	bool DBWrapper::updateProxyLoad(const db::ProxyPtr proxy, bool connecting) noexcept
 	{
 		assert(proxy);

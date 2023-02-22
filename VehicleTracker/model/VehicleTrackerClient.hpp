@@ -7,10 +7,13 @@
 #include <thread>
 #include <condition_variable>
 #include <memory>
+#include <stack>
 
 #include "net/Client.hpp"
 #include "net/Client.hpp"
 #include "net/Message.hpp"
+#include "net/ProxyReply.hpp"
+#include "net/ProxyRedirect.hpp"
 #include "MessageTypes.hpp"
 #include "db/Junction.hpp"
 #include "utile/DataTypes.hpp"
@@ -36,7 +39,9 @@ namespace model
         std::mutex mutexProcess_;
         std::condition_variable condVarProcess_;
         std::atomic_bool shouldPause_ = true;
+        bool isRedirected_ = false;
 
+        std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>> lastVisitedJunctions_;
         std::optional<std::string> signature_;
 
         bool isEmergency_;
@@ -49,8 +54,10 @@ namespace model
         bool start();
         void pause();
 
+        bool switchConnectionToRedirectedProxy(ipc::net::ProxyRedirect& redirect);
+        bool handleProxyAnswear(ipc::net::Message<ipc::VehicleDetectionMessages>& msg);
         bool queryProxy();
-        bool setupData(ipc::net::Message<ipc::VehicleDetectionMessages> msg);
+        bool setupData(ipc::net::ProxyReply& reply);
         bool notifyJunction();
         void waitToPassJunction();
     public:

@@ -3,7 +3,6 @@
 #include <chrono>
 #include <exception>
 
-#include "net/ProxyReply.hpp"
 
 namespace model
 {
@@ -16,15 +15,23 @@ namespace model
 
 			while (!shouldPause_)
 			{
-				if (!connect(ipc::utile::G_PROXY_IP, ipc::utile::G_PROXY_PORT))
+				if (lastVisitedJunctions_.empty())
 				{
 					throw std::runtime_error("Failed to communicate with proxy");
 				}
 
+				if (!connect(lastVisitedJunctions_.top().first, lastVisitedJunctions_.top().second))
+				{
+					lastVisitedJunctions_.pop();
+					continue;
+				}
+
 				if (!queryProxy())
 				{
-					throw std::runtime_error("Failed to communicate with proxy");
+					lastVisitedJunctions_.pop();
+					continue;
 				}
+
 				disconnect();
 
 				if (!connect(nextJunction_->getIpAdress(), nextJunction_->getPort()))
@@ -50,6 +57,7 @@ namespace model
 		ipc::net::Client<ipc::VehicleDetectionMessages>(),
 		gpsAdapter_(inputStream)
 	{
+		lastVisitedJunctions_.push({ ipc::utile::G_PROXY_IP, ipc::utile::G_PROXY_PORT });
 		threadProcess_ = std::thread(std::bind(&VehicleTrackerClient::process, this));
 	}
 
@@ -71,12 +79,11 @@ namespace model
 		shouldPause_ = true;
 	}
 
-	// SEND 2 CONSECUTIVE COORDINATES
-	// RECIEVE JUNCTION IP ADRESS, LANE, JUNCTION COORDINATES IF IN AREA OF COVERAGE 
 	// TO DO: FOR SECURITY PROXY WILL SEND A CRYPTED MESSAGE LOOK AT KERBEROS PROTOCOL
 	// https://www.youtube.com/watch?v=5N242XcKAsM
 	bool VehicleTrackerClient::queryProxy()
 	{
+		isRedirected_ = false;
 		if (!isConnected()) { return false; }
 
 		auto start = gpsAdapter_.getCurrentCoordinates();
@@ -97,32 +104,70 @@ namespace model
 
 		// GET MESSAGE AND CHECK TYPE
 		auto answear = getLastUnreadAnswear();
-		if (!answear.has_value() || !setupData(answear.value().first.msg)) { return false; }
+		if (!answear.has_value()) { return false; }
 
-		return true;
-	}
-
-	bool VehicleTrackerClient::setupData(ipc::net::Message<ipc::VehicleDetectionMessages> msg)
-	{
-		try
-		{
-			ipc::net::ProxyReply proxyReply{ msg };
-
-			if (!proxyReply.isApproved()) { return false; }
-
-			auto junctionIpAndPort = proxyReply.getServerIPAdressAndPort();
-			nextJunction_ = std::make_shared<common::db::Junction>(junctionIpAndPort.first, junctionIpAndPort.second, proxyReply.getServerCoordinates());
-			isEmergency_ = proxyReply.isEmergency();
-		}
-		catch (const std::exception& err)
-		{
-			LOG_ERR << err.what();
+		// IF THIS FAILS IT MEANS THAT YOU ARE UNABLE TO BE REDIRECTED TO A JUNCTION FOR SOME KIND OF REASON
+		// JUST HALT THE EXECUTION OF THE PROGRAM AND RETURN ERR EXIT CODE, NO REASON TO MOVE FORWARD
+		if (!handleProxyAnswear(answear.value().first.msg)) 
+		{ 
+			lastVisitedJunctions_.pop();
 			return false;
 		}
+
+		if (isRedirected_)
+		{
+			return queryProxy();
+		}
 		return true;
 	}
 
-	// TO DO
+	bool VehicleTrackerClient::handleProxyAnswear(ipc::net::Message<ipc::VehicleDetectionMessages>& msg)
+	{
+		ipc::net::Message<ipc::VehicleDetectionMessages> msgcpy = msg;
+
+		try
+		{
+			ipc::net::ProxyReply reply{ msgcpy };
+			return setupData(reply);
+		}
+		catch (const std::runtime_error&)
+		{
+			LOG_DBG << "REDIRECTED TO ANOTHER PROXY";
+		}
+
+		try
+		{
+			ipc::net::ProxyRedirect redirect{ msg };
+			return switchConnectionToRedirectedProxy(redirect);
+		}
+		catch (const std::runtime_error&)
+		{
+			// IF WE REACHED THIS POINT WE JUST GOT A NACK MESSAGE
+			// FOR NOW NO NEED TO REPARSE IT TO SEE IF IT IS NACK OR NOT
+			return false;
+		}
+	}
+
+	bool VehicleTrackerClient::setupData(ipc::net::ProxyReply& reply)
+	{
+		if (!reply.isApproved()) { return false; }
+
+		auto junctionIpAndPort = reply.getServerIPAdressAndPort();
+		nextJunction_ = std::make_shared<common::db::Junction>(junctionIpAndPort.first, junctionIpAndPort.second, reply.getServerCoordinates());
+		isEmergency_ = reply.isEmergency();
+
+		return true;
+	}
+
+	bool VehicleTrackerClient::switchConnectionToRedirectedProxy(ipc::net::ProxyRedirect& redirect)
+	{
+		isRedirected_ = true;
+		disconnect();
+		auto proxyIpAndPort = redirect.getServerIPAdressAndPort();
+		lastVisitedJunctions_.push({ proxyIpAndPort.first, proxyIpAndPort.second });
+		return connect(proxyIpAndPort.first, proxyIpAndPort.second);
+	}
+
 	bool VehicleTrackerClient::notifyJunction()
 	{
 		if (!isConnected())
@@ -139,9 +184,14 @@ namespace model
 		return true;
 	}
 
-	// TO DO
 	void VehicleTrackerClient::waitToPassJunction()
 	{
-
+		auto pointA = gpsAdapter_.getCurrentCoordinates();
+		auto pointB = gpsAdapter_.getCurrentCoordinates();
+		while (!(!nextJunction_->isPassing(pointA, pointB) || nextJunction_->passedJunction(pointA, pointB)))
+		{
+			pointB = pointA;
+			gpsAdapter_.getCurrentCoordinates();
+		}
 	}
 }
