@@ -4,9 +4,11 @@
 #include <algorithm>
 #include <memory>
 #include <vector>
+#include <set>
 #include <map>
 #include <thread>
 #include <system_error>
+#include <condition_variable>
 
 #include <boost/asio.hpp>
 #include <boost/asio/ts/buffer.hpp>
@@ -17,6 +19,7 @@
 #include "Connection.hpp"
 #include "utile/Logger.hpp"
 #include "../utile/IPCDataTypes.hpp"
+#include "../utile/IPAdressHelpers.hpp"
 
 namespace ipc
 {
@@ -27,19 +30,34 @@ namespace ipc
         class Server
         {
         protected:
-            common::utile::ThreadSafeQueue<OwnedMessage<T>> incomingMessagesQueue_;
+            common::utile::ThreadSafePriorityQueue<OwnedMessage<T>> incomingMessagesQueue_;
             boost::asio::io_context context_;
             std::thread threadContext_;
-            std::thread threadProcess_;
+            std::thread threadUpdate_;
+            std::condition_variable condVarUpdate_;
+            std::mutex mutexUpdate_;
             boost::asio::ip::tcp::acceptor connectionAccepter_;
+            common::utile::ThreadSafeQueue<uint32_t> availableIds_;
             std::map<uint32_t, std::shared_ptr<Connection<T>>> connections_;
-            std::mutex mutexConnections_;
-            uint32_t idCounter_ = 0;
             LOGGER("SERVER");
         public:
-            Server(ipc::utile::PORT port):
-                connectionAccepter_(context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
+            Server(const utile::IP_ADRESS& host, ipc::utile::PORT port):
+                connectionAccepter_(context_)
             {
+                if (!utile::IsIPV4(host))
+                {
+                    throw std::runtime_error("Invalid IPV4 ip adress: " + host);
+                }
+
+                boost::asio::ip::tcp::endpoint endpoint(host, port);
+                connectionAccepter_.open(endpoint.protocol());
+                connectionAccepter_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(false));
+                connectionAccepter_.set_option(boost::asio::ip::tcp::acceptor::broadcast(false));
+                connectionAccepter_.bind(endpoint);
+                connectionAccepter_.listen();
+
+                for (uint32_t id = 0; id < UINT32_MAX; id++) { availableIds_.push(id); }   
+                threadUpdate_ = std::thread([]() { while (true) { update(); }});
             }
 
             virtual ~Server()
@@ -71,27 +89,26 @@ namespace ipc
         
                 if (threadContext_.joinable())
                     threadContext_.join();
-        
-                if (threadProcess_.joinable())
-                    threadProcess_.join();
+                
+                if (threadUpdate_.joinable())
+                    threadUpdate_.join();
     
                 LOG_INF <<"Server Stopped\n";
             }
     
-            // THIS TO BE CHANGED TO PROCESS MESSAGES ONLY IF THERE ARE ONES AVAILABLE.
-            // While true update not the best solution...
-            void update(size_t maxMessages = -1)
+            void update()
             {
-                size_t messageCount = 0;
-                while (messageCount < maxMessages && !incomingMessagesQueue_.empty())
+                std::unique_lock<std::mutex> ulock(mutexUpdate_);
+
+                condVarUpdate_.wait(ulock, [&] { !incomingMessagesQueue_.empty(); });
+
+                const auto& maybeMsg = incomingMessagesQueue_.pop();
+            
+                if (!maybeMsg.has_value())
                 {
-                    const auto& msg = incomingMessagesQueue_.pop().first;
-            
+                    const auto& msg = maybeMsg.value().first;
                     onMessage(msg.remote, msg.msg);
-            
-                    messageCount++;
                 }
-        
             }
             // ASYNC OK
             void waitForClientConnection()
@@ -101,34 +118,27 @@ namespace ipc
                     {
                         if (!errcode)
                         {
-                            LOG_INF << "Connection succeded " << socket.remote_endpoint();
+                            LOG_INF << "Attempting to connect to " << socket.remote_endpoint();
                             std::shared_ptr<Connection<T>> newConnection = 
                                 std::make_shared<Connection<T>>(
                                     Owner::Server, 
                                     context_,
                                     std::move(socket),
-                                    incomingMessagesQueue_);
+                                    incomingMessagesQueue_,
+                                    condVarUpdate_);
                     
                             if (onClientConnect(newConnection))
                             {
-                                mutexConnections_.lock();
-                                uint32_t looped = 0;
-                                while (connections_.find(idCounter_) != connections_.end())
+                                auto idCounter = availableIds_.pop();
+                                if (!idCounter.has_value())
                                 {
-                                    idCounter_++;
-                                    looped++;
-                                    if (looped == 0)
-                                    {
-                                        LOG_ERR << "Server doesn't support any more connections. Denied!";
-                                        mutexConnections_.unlock();
-                                        return;
-                                    }
+                                    LOG_ERR << "Server doesn't support any more connections. Denied!";
+                                    return;
                                 }
-                                connections_[idCounter_] = std::shared_ptr<Connection>(std::move(newConnection));
-                                connections_[idCounter_]->connectToClient(idCounter_);
-                                mutexConnections_.unlock();
+                                connections_[idCounter.value()] = std::shared_ptr<Connection>(std::move(newConnection));
+                                connections_[idCounter.value()]->connectToClient(idCounter.value());
 
-                                LOG_INF << connections_[idCounter_]->getId() << " Connection Approved";
+                                LOG_INF << connections_[idCounter.value()]->getId() << " Connection Approved";
                             }
                             else
                             {
@@ -153,8 +163,9 @@ namespace ipc
                 else
                 {
                     onClientDisconnect(client);
-                    client.reset();
                     connections_.erase(client->getId());
+                    availableIds_.push(client->getId());
+                    client.reset();
                 }
             }
     

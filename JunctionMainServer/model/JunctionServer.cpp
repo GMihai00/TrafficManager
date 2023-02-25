@@ -31,7 +31,7 @@ namespace model
 		ipc::net::Message<ipc::VehicleDetectionMessages> message;
 		message.header.id = msg.header.id;
 		message.header.type = ipc::VehicleDetectionMessages::ACK;
-		client->send(message);
+		messageClient(client, message);
 	}
 
 	void JunctionServer::rejectMessage(
@@ -41,7 +41,7 @@ namespace model
 		ipc::net::Message<ipc::VehicleDetectionMessages> message;
 		message.header.id = msg.header.id;
 		message.header.type = ipc::VehicleDetectionMessages::NACK;
-		client->send(message);
+		messageClient(client ,message);
 	}
 
 	boost::optional<common::utile::LANE> JunctionServer::getMessageSourceLane(

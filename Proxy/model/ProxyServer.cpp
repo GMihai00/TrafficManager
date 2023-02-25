@@ -32,7 +32,7 @@ namespace model
 		ipc::net::Message<ipc::VehicleDetectionMessages> message;
 		message.header.id = msg.header.id;
 		message.header.type = ipc::VehicleDetectionMessages::NACK;
-		client->send(message);
+		messageClient(client, message);
 	}
 
 	void ProxyServer::increaseLoad()
@@ -130,7 +130,7 @@ namespace model
 				}
 			}
 			auto redirectmsg = buildProxyRedirect(msg, proxy);
-			client->send(redirectmsg);
+			messageClient(client, redirectmsg);
 		}
 		catch (const std::runtime_error& )
 		{
@@ -177,7 +177,7 @@ namespace model
 
 				if (auto proxyReply = getClosestJunctionReply(msg); proxyReply.has_value())
 				{
-					client->send(proxyReply.value());
+					messageClient(client, proxyReply.value());
 				}
 				else
 				{

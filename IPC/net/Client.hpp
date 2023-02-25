@@ -7,6 +7,8 @@
 #include <mutex>
 #include <vector>
 #include <optional>
+#include <condition_variable>
+#include <chrono>
 
 #include <boost/asio.hpp>
 #include <boost/asio/ts/buffer.hpp>
@@ -17,8 +19,8 @@
 #include "Connection.hpp"
 #include "utile/Logger.hpp"
 #include "../utile/IPCDataTypes.hpp"
+#include "../utile/IPAdressHelpers.hpp"
 
-// A SOME KIND OF WAY TO GET NOTIFIED WHEN MESSAGE IS RECIEVED
 namespace ipc
 {
     namespace net
@@ -32,6 +34,8 @@ namespace ipc
         protected:
             boost::asio::io_context context_;
             std::thread threadContext_;
+            std::mutex mutexUpdate_;
+            std::condition_variable condVarUpdate_;
             std::unique_ptr<Connection<T>> connection_;
             LOGGER("CLIENT");
         public:
@@ -44,8 +48,14 @@ namespace ipc
                 disconnect();
             }
     
-            bool connect(const std::string& host, const ipc::utile::PORT port)
+            bool connect(const utile::IP_ADRESS& host, const ipc::utile::PORT port)
             {
+                if (!utile::IsIPV4(host))
+                {
+                    LOG_ERR << "Invalid IPV4 ip adress: " << host;
+                    return false;
+                }
+
                 try
                 {
                     boost::asio::ip::tcp::resolver resolver(context_);
@@ -56,7 +66,8 @@ namespace ipc
                         Owner::Client,
                         context_,
                         boost::asio::ip::tcp::socket(context_),
-                        incomingMessages_);
+                        incomingMessages_,
+                        condVarUpdate_);
             
                     connection_->connectToServer(endpoints);
             
@@ -82,7 +93,7 @@ namespace ipc
         
                 if (threadContext_.joinable())
                     threadContext_.join();
-        
+                
                 connection_.release();
             }
     
@@ -116,6 +127,29 @@ namespace ipc
 		        if (isConnected())
 			        connection_->send(msg);
 	        }
+
+            bool waitForAnswear(uint32_t timeout = 0)
+            {
+                if (timeout == 0)
+                {
+                    std::unique_lock<std::mutex> ulock(mutexUpdate_);
+                    condVarUpdate_.wait(ulock, [&] { !incomingMessages_.empty(); });
+
+                    return true;
+                }
+
+                std::unique_lock<std::mutex> ulock(mutexUpdate_);
+
+                if (condVarUpdate_.wait_for(ulock, std::chrono::milliseconds(timeout * 100), [&] { !incomingMessages_.empty(); }))
+                {
+                    return true;
+                }
+                else
+                {
+                    LOG_ERR << " Answear waiting timedout";
+                    return false;
+                }
+            }
 	
 	        uint32_t getId()
 	        {

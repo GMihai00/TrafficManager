@@ -7,6 +7,7 @@
 #include <system_error>
 #include <mutex>
 #include <thread>
+#include <condition_variable>
 
 #include <boost/asio.hpp>
 #include <boost/asio/ts/buffer.hpp>
@@ -38,6 +39,7 @@ namespace ipc
             std::mutex mutexRead_;
             std::mutex mutexWrite_;
             std::mutex mutexSend_;
+            std::condition_variable& condVarUpdate_;
             boost::asio::io_context& context_;
             boost::asio::ip::tcp::socket socket_;
             common::utile::ThreadSafePriorityQueue<OwnedMessage<T>>& incomingMessages_;
@@ -78,11 +80,13 @@ namespace ipc
             Connection(Owner owner,
                 boost::asio::io_context& context,
                 boost::asio::ip::tcp::socket socket,
-                common::utile::ThreadSafePriorityQueue<OwnedMessage<T>>& incomingMessages) :
+                common::utile::ThreadSafePriorityQueue<OwnedMessage<T>>& incomingMessages,
+                std::condition_variable& condVarUpdate) :
                 owner_{ owner },
                 context_{ context },
                 socket_{ std::move(socket) },
                 incomingMessages_{ incomingMessages },
+                condVarUpdate_{condVarUpdate},
                 isWriting{false},
                 isReading{false},
                 id_{0}
@@ -187,11 +191,11 @@ namespace ipc
             {
                 while (true)
                 {
-                    mutexRead_.lock();
+                    std::scoped_lock lock(mutexRead_);
                     readHeader();
                     readBody();
                     addToIncomingMessageQueue();
-                    mutexRead_.unlock();
+                    condVarUpdate_.notify_one();
                 }
             }
 
