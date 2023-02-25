@@ -35,18 +35,16 @@ namespace ipc
             const Owner owner_;
             std::thread threadRead_;
             std::thread threadWrite_;
-            std::mutex mutexStartRead_;
             std::mutex mutexRead_;
             std::mutex mutexWrite_;
-            std::mutex mutexSend_;
             std::condition_variable& condVarUpdate_;
             boost::asio::io_context& context_;
             boost::asio::ip::tcp::socket socket_;
             common::utile::ThreadSafePriorityQueue<OwnedMessage<T>>& incomingMessages_;
             common::utile::ThreadSafePriorityQueue<Message<T>> outgoingMessages_;
             Message<T> incomingTemporaryMessage_;
-            bool isReading;
-            bool isWriting;
+            std::atomic_bool isReading;
+            std::atomic_bool isWriting;
             uint32_t id_;
             LOGGER("CONNECTION-UNDEFINED");
 
@@ -93,7 +91,16 @@ namespace ipc
             {
             }
 
-            virtual ~Connection() {}
+            virtual ~Connection()
+            { 
+                if (threadRead_.joinable())
+                    threadRead_.join();
+
+                if (threadWrite_.joinable())
+                    threadWrite_.join();
+
+                disconnect(); 
+            }
     
             Owner getOwner() const
             {
@@ -117,7 +124,6 @@ namespace ipc
                 {
                     LOG_SET_NAME("CONNECTION-SERVER");
                     std::function<void(std::error_code errcode, boost::asio::ip::tcp::endpoint endpoint)> connectCallback;
-                    mutexStartRead_.lock();
                     if (isReading)
                     {
                         connectCallback = [this](std::error_code errcode, boost::asio::ip::tcp::endpoint endpoint)
@@ -146,7 +152,6 @@ namespace ipc
                         };
                     }
                     isReading = true;
-                    mutexStartRead_.unlock();
                     boost::asio::async_connect(socket_, endpoints, connectCallback);
                 }
             }
@@ -160,7 +165,6 @@ namespace ipc
                         id_ = id;
                         LOG_SET_NAME("CONNECTION-" + std::to_string(id_));
                         std::function<void()> connectCallback;
-                        mutexStartRead_.lock();
                         if (!isReading)
                         {
                             connectCallback = [this]()
@@ -176,7 +180,6 @@ namespace ipc
                             };
                         }
                         isReading = true;
-                        mutexStartRead_.unlock();
                         connectCallback();
                     }
                 }
@@ -224,8 +227,7 @@ namespace ipc
                     const auto& pair = std::make_pair(
                         OwnedMessage<T>{this->shared_from_this(), incomingTemporaryMessage_},
                         incomingTemporaryMessage_.header.hasPriority);
-                    incomingMessages_.push(
-                        pair);
+                    incomingMessages_.push(pair);
                 }
                 else
                 {
@@ -241,7 +243,6 @@ namespace ipc
 
             void send(const Message<T>& msg)
             {
-                mutexSend_.lock();
                 std::function<void()> postCallback;
                 std::pair<Message<T>, bool> pair = std::make_pair(msg, msg.header.hasPriority);
                 outgoingMessages_.push(pair);
@@ -261,7 +262,6 @@ namespace ipc
                     };
                 }
                 isWriting = true;
-                mutexSend_.unlock();
                 boost::asio::post(context_, postCallback);
             }
     
@@ -269,7 +269,7 @@ namespace ipc
             {
                 while (!outgoingMessages_.empty())
                 {
-                    mutexWrite_.lock();
+                    std::scoped_lock lock(mutexWrite_);
                     auto outgoingMsg = outgoingMessages_.pop();
                     if (!outgoingMsg)
                     {
@@ -286,7 +286,6 @@ namespace ipc
                     {
                         LOG_DBG << "Finished writing message ";
                     }
-                    mutexWrite_.unlock();
                 }
                 isWriting = false;
                 if (threadWrite_.joinable())
@@ -325,18 +324,8 @@ namespace ipc
             {
                 if (isConnected())
                 {
-                    joinThreads();
                     boost::asio::post(context_, [this]() { socket_.close(); });
                 }
-            }
-    
-            void joinThreads()
-            {
-                if (threadRead_.joinable())
-                    threadRead_.join();
-        
-                if (threadWrite_.joinable())
-                    threadWrite_.join();
             }
         };
     }   // namespace net
