@@ -5,6 +5,7 @@
 #include <string>
 #include <optional>
 #include <type_traits>
+#include "boost/algorithm/string.hpp"
 
 #include "DataTypes.hpp"
 constexpr auto PI = 3.14159265358979323846;
@@ -43,6 +44,15 @@ namespace common
 			T latitude;
 			T longitude;
 
+			GeoCoordinate(const std::string& input)
+			{
+				std::vector<std::string> val;
+				boost::split(val, input, boost::is_any_of(","));
+				if (val.size() != 2)
+					throw std::runtime_error("Invalid input");
+				latitude = std::stoi(val[0]);
+				longitude = std::stoi(val[1]);
+			}
 			GeoCoordinate() = default;
 			GeoCoordinate(const GeoCoordinate<T>& obj)
 			{

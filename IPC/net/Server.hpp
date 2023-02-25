@@ -49,7 +49,8 @@ namespace ipc
                     throw std::runtime_error("Invalid IPV4 ip adress: " + host);
                 }
 
-                boost::asio::ip::tcp::endpoint endpoint(host, port);
+                // throws boost::system::system_error
+                boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(host), port);
                 connectionAccepter_.open(endpoint.protocol());
                 connectionAccepter_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(false));
                 connectionAccepter_.set_option(boost::asio::ip::tcp::acceptor::broadcast(false));
@@ -57,7 +58,7 @@ namespace ipc
                 connectionAccepter_.listen();
 
                 for (uint32_t id = 0; id < UINT32_MAX; id++) { availableIds_.push(id); }   
-                threadUpdate_ = std::thread([]() { while (true) { update(); }});
+                threadUpdate_ = std::thread([&]() { while (true) { update(); }});
             }
 
             virtual ~Server()
@@ -100,7 +101,7 @@ namespace ipc
             {
                 std::unique_lock<std::mutex> ulock(mutexUpdate_);
 
-                condVarUpdate_.wait(ulock, [&] { !incomingMessagesQueue_.empty(); });
+                condVarUpdate_.wait(ulock, [&] { return !incomingMessagesQueue_.empty(); });
 
                 const auto& maybeMsg = incomingMessagesQueue_.pop();
             

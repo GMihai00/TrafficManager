@@ -31,7 +31,7 @@ namespace model
 		void aproveMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 		void rejectMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 	public:
-		JunctionServer(const ipc::utile::PORT port, const Config& config);
+		JunctionServer(const ipc::utile::IP_ADRESS& host, const ipc::utile::PORT port, const Config& config);
 		JunctionServer(const JunctionServer&) = delete;
 		virtual ~JunctionServer() noexcept = default;
 

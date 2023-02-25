@@ -1,85 +1,140 @@
-// JUST A SAMPLE OF CODE FOR DB
-#include "utile/DBWrapper.hpp"
-#include <exception>
+#include <array>
+#include <optional>
+#include <string>
+#include <string_view>
 
-using namespace std;
+#include "db/Proxy.hpp"
+#include "model/ProxyServer.hpp"
+#include "utile/CommandLineParser.hpp"
+#include "utile/Logger.hpp"
 
+using namespace common::utile;
+using namespace common;
 
-int main()
+LOGGER("MAIN");
+
+std::optional<ipc::utile::IP_ADRESS> getHost(const CommandLineParser& commandLine)
 {
-	//sql::Driver *driver;
-	//sql::Connection* con;
-	//sql::Statement* stmt;
-	//sql::PreparedStatement* pstmt;
+	constexpr std::array<std::string_view, 2> optionNames = { "-h", "--host" };
+
+	for (const auto& optionName : optionNames)
+	{
+		auto option = commandLine.getOption(optionName);
+		if (option.has_value())
+			return std::string(option.value());
+	}
+
+	return {};
+}
+
+std::optional<ipc::utile::PORT> getPort(const CommandLineParser& commandLine)
+{
+	constexpr std::array<std::string_view, 2> optionNames = { "-p", "--port" };
+
+	for (const auto& optionName : optionNames)
+	{
+		auto option = commandLine.getOption(optionName);
+		if (option.has_value())
+			return std::stoi(std::string(option.value()));
+	}
+
+	return {};
+
+}
+
+namespace details
+{
+	std::optional<GeoCoordinate<DecimalCoordinate>> 
+		getCoordinate(const CommandLineParser& commandLine, const std::array<std::string_view, 2>& optionNames)
+	{
+		for (const auto& optionName : optionNames)
+		{
+			auto option = commandLine.getOption(optionName);
+			if (option.has_value())
+			{
+				try
+				{
+					auto coordinate = GeoCoordinate<DecimalCoordinate>(std::string(option.value()));
+					return coordinate;
+				}
+				catch (std::runtime_error err)
+				{
+					LOG_ERR << err.what() << " Please provide <lat>,<lon> format data";
+					return {};
+				}
+			}
+		}
+		return {};
+	}
+
+	std::optional<GeoCoordinate<DecimalCoordinate>> getSWBound(const CommandLineParser& commandLine)
+	{
+		constexpr std::array<std::string_view, 2> optionNames = { "-bne", "--bound_sw" };
+		return getCoordinate(commandLine, optionNames);
+	}
+
+	std::optional<GeoCoordinate<DecimalCoordinate>> getNEBound(const CommandLineParser& commandLine)
+	{
+		constexpr std::array<std::string_view, 2> optionNames = { "-bne", "--bound_ne" };
+		return getCoordinate(commandLine, optionNames);
+	}
+}
+
+db::BoundingRectPtr getCoveredArea(const CommandLineParser& commandLine)
+{
+	auto boundSW = details::getSWBound(commandLine);
+	if (!boundSW.has_value())
+	{
+		LOG_ERR << "SW bound not found";
+		return nullptr;
+	}
+	auto boundNE = details::getNEBound(commandLine);
+	if (!boundNE.has_value())
+	{
+		LOG_ERR << "NE bound not found";
+		return nullptr;
+	}
+
+	return std::make_shared<db::BoundingRect>(boundSW.value(), boundNE.value());
+}
+
+// TO DO CONSTEXPR ON THE ERR CODE VALUES LATER
+int main(int argc, char* argv[])
+{
+	auto commandLine = CommandLineParser(argc, argv);
+	
+	auto host = getHost(commandLine);
+	if (!host.has_value())
+	{
+		LOG_ERR << "Host addres not defined";
+		exit(5);
+	}
+
+	auto port = getPort(commandLine);
+	if (!port.has_value())
+	{
+		LOG_ERR << "Port not defined";
+		exit(5);
+	}
+
+	auto coveredArea = getCoveredArea(commandLine);
+	if (!coveredArea)
+	{
+		LOG_ERR << "Covered area not defined";
+		exit(5);
+	}
+
+	db::ProxyPtr dbProxy = std::make_shared<db::Proxy>(host.value(), port.value(), 0, coveredArea);
+
 	try
 	{
-		utile::DBWrapper dbwrapper;
-		std::cout << "CONNECTED";
+		model::ProxyServer proxySERVER(host.value(), port.value(), dbProxy);
+		// proxySERVER.start(); FOR SOME KIND OF REASON IT SAYS METHOD IS NOT PUBLIC...
 	}
-	catch (std::runtime_error& ec)
+	catch (std::runtime_error& err)
 	{
-		std::cout << "Failed to establish connection error: " << ec.what();
+		LOG_ERR << err.what();
+		exit(10);
 	}
-
-	/*
-	stmt = con->createStatement();
-	stmt->execute("DROP TABLE IF EXISTS inventory");
-	cout << "Finished dropping table (if existed)" << endl;
-	stmt->execute("CREATE TABLE inventory (id serial PRIMARY KEY, name VARCHAR(50), quantity INTEGER);");
-	cout << "Finished creating table" << endl;
-	delete stmt;
-
-	pstmt = con->prepareStatement("INSERT INTO inventory(name, quantity) VALUES(?,?)");
-	pstmt->setString(1, "banana");
-	pstmt->setInt(2, 150);
-	pstmt->execute();
-	cout << "One row inserted." << endl;
-
-	pstmt->setString(1, "orange");
-	pstmt->setInt(2, 154);
-	pstmt->execute();
-	cout << "One row inserted." << endl;
-
-	pstmt->setString(1, "apple");
-	pstmt->setInt(2, 100);
-	pstmt->execute();
-	cout << "One row inserted." << endl;
-
-	delete pstmt;
-	delete con;
-	system("pause");*/
-
-	//sql::Driver* driver;
-	//sql::Connection* con;
-	//sql::PreparedStatement* pstmt;
-	//sql::ResultSet* result;
-
-	//try
-	//{
-	//	driver = get_driver_instance();
-	//	//for demonstration only. never save password in the code!
-	//	con = driver->connect(server, username, password);
-	//}
-	//catch (sql::SQLException e)
-	//{
-	//	cout << "Could not connect to server. Error message: " << e.what() << endl;
-	//	system("pause");
-	//	exit(1);
-	//}
-
-	//con->setSchema("quickstartdb");
-
-	////select  
-	//pstmt = con->prepareStatement("SELECT * FROM inventory;");
-	//result = pstmt->executeQuery();
-
-	//while (result->next())
-	//	printf("Reading from table=(%d, %s, %d)\n", result->getInt(1), result->getString(2).c_str(), result->getInt(3));
-
-	//delete result;
-	//delete pstmt;
-	//delete con;
-	//system("pause");
-	//return 0;
 	return 0;
 }

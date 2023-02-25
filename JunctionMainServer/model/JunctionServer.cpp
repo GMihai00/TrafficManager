@@ -2,8 +2,10 @@
 
 namespace model
 {
-	JunctionServer::JunctionServer(const ipc::utile::PORT port,const Config& config):
-		ipc::net::Server<ipc::VehicleDetectionMessages>(port),
+	JunctionServer::JunctionServer(const ipc::utile::IP_ADRESS& host,
+		const ipc::utile::PORT port, 
+		const Config& config):
+		ipc::net::Server<ipc::VehicleDetectionMessages>(host, port),
 		trafficLightStateMachine_(config)
 	{
 		this->localProxyServer_ = config.localProxyServer;

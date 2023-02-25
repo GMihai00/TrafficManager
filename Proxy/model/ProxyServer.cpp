@@ -5,8 +5,10 @@
 
 namespace model
 {
-	ProxyServer::ProxyServer(const ipc::utile::PORT port, const common::db::ProxyPtr& dbProxy) :
-		ipc::net::Server<ipc::VehicleDetectionMessages>(port),
+	ProxyServer::ProxyServer(const ipc::utile::IP_ADRESS& host,
+		const ipc::utile::PORT port,
+		const common::db::ProxyPtr& dbProxy) :
+		ipc::net::Server<ipc::VehicleDetectionMessages>(host, port),
 		dbProxy_(dbProxy)
 	{
 		try
