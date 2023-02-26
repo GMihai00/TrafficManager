@@ -8,3 +8,6 @@
 #include "db/BoundingRect.hpp"
 #include "db/Junction.hpp"
 #include "db/Proxy.hpp"
+#include "utile/SignalHandler.hpp"
+#include "utile/CommandLineParser.hpp"
+#include "utile/ThreadPool.hpp"

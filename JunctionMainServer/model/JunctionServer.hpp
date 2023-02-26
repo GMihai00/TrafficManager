@@ -14,7 +14,7 @@
 // TO REFACTOR EVERYTHING IN HERE IT IS SO SO SOOOO WRONG
 namespace model
 {
-	class JunctionServer : ipc::net::Server<ipc::VehicleDetectionMessages>
+	class JunctionServer : public ipc::net::Server<ipc::VehicleDetectionMessages>
 	{
 	private:
 		

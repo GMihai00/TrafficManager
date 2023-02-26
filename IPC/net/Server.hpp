@@ -65,7 +65,7 @@ namespace ipc
             {
                 stop();
             }
-    
+
             bool start()
             {
                 try

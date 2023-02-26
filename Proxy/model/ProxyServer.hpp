@@ -22,7 +22,7 @@
 namespace model
 {
     using namespace common::utile;
-	class ProxyServer : ipc::net::Server<ipc::VehicleDetectionMessages>
+	class ProxyServer : public ipc::net::Server<ipc::VehicleDetectionMessages>
 	{
 	private:
 		common::db::ProxyPtr dbProxy_;

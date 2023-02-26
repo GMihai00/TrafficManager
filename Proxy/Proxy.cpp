@@ -2,11 +2,13 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <condition_variable>
 
 #include "db/Proxy.hpp"
 #include "model/ProxyServer.hpp"
 #include "utile/CommandLineParser.hpp"
 #include "utile/Logger.hpp"
+#include "utile/SignalHandler.hpp"
 
 using namespace common::utile;
 using namespace common;
@@ -101,6 +103,7 @@ db::BoundingRectPtr getCoveredArea(const CommandLineParser& commandLine)
 // TO DO CONSTEXPR ON THE ERR CODE VALUES LATER
 int main(int argc, char* argv[])
 {
+	SignalHandler sigHandler{};
 	auto commandLine = CommandLineParser(argc, argv);
 	
 	auto host = getHost(commandLine);
@@ -129,7 +132,16 @@ int main(int argc, char* argv[])
 	try
 	{
 		model::ProxyServer proxySERVER(host.value(), port.value(), dbProxy);
-		// proxySERVER.start(); FOR SOME KIND OF REASON IT SAYS METHOD IS NOT PUBLIC...
+		if (!proxySERVER.start())
+		{
+			LOG_ERR << "Failed to start server";
+		}
+
+		std::condition_variable condVarEnd;
+		sigHandler.setAction(SIGTERM, [&condVarEnd]() { condVarEnd.notify_one(); });
+		std::mutex mutexEnd;
+		std::unique_lock<std::mutex> ulock(mutexEnd);
+		condVarEnd.wait(ulock);
 	}
 	catch (std::runtime_error& err)
 	{

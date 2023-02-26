@@ -164,7 +164,9 @@
     <ClInclude Include="utile\IObserver.hpp" />
     <ClInclude Include="utile\Logger.hpp" />
     <ClInclude Include="utile\Observer.hpp" />
+    <ClInclude Include="utile\SignalHandler.hpp" />
     <ClInclude Include="utile\SignatureHelpers.hpp" />
+    <ClInclude Include="utile\ThreadPool.hpp" />
     <ClInclude Include="utile\ThreadSafePriorityQueue.hpp" />
     <ClInclude Include="utile\ThreadSafeQueue.hpp" />
     <ClInclude Include="utile\Timer.hpp" />
@@ -178,6 +180,7 @@
     <ClCompile Include="utile\DataTypes.cpp" />
     <ClCompile Include="utile\GeoCoordinate.cpp" />
     <ClCompile Include="utile\Observer.cpp" />
+    <ClCompile Include="utile\SignalHandler.cpp" />
     <ClCompile Include="utile\SignatureHelpers.cpp" />
     <ClCompile Include="utile\Timer.cpp" />
   </ItemGroup>

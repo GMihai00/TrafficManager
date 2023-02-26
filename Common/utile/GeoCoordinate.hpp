@@ -50,8 +50,8 @@ namespace common
 				boost::split(val, input, boost::is_any_of(","));
 				if (val.size() != 2)
 					throw std::runtime_error("Invalid input");
-				latitude = std::stoi(val[0]);
-				longitude = std::stoi(val[1]);
+				latitude = std::stod(val[0]);
+				longitude = std::stod(val[1]);
 			}
 			GeoCoordinate() = default;
 			GeoCoordinate(const GeoCoordinate<T>& obj)

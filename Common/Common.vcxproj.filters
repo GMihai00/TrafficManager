@@ -66,6 +66,12 @@
     <ClInclude Include="utile\CommandLineParser.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
+    <ClInclude Include="utile\SignalHandler.hpp">
+      <Filter>Header Files\utile</Filter>
+    </ClInclude>
+    <ClInclude Include="utile\ThreadPool.hpp">
+      <Filter>Header Files\utile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp">
@@ -96,6 +102,9 @@
       <Filter>Source Files\db</Filter>
     </ClCompile>
     <ClCompile Include="utile\CommandLineParser.cpp">
+      <Filter>Source Files\utile</Filter>
+    </ClCompile>
+    <ClCompile Include="utile\SignalHandler.cpp">
       <Filter>Source Files\utile</Filter>
     </ClCompile>
   </ItemGroup>
