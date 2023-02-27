@@ -57,6 +57,7 @@ namespace model
 		ipc::net::Client<ipc::VehicleDetectionMessages>(),
 		gpsAdapter_(inputStream)
 	{
+		// should be taken from config file, not hardcoded
 		lastVisitedJunctions_.push({ ipc::utile::G_PROXY_IP, ipc::utile::G_PROXY_PORT });
 		threadProcess_ = std::thread(std::bind(&VehicleTrackerClient::process, this));
 	}

@@ -18,15 +18,12 @@ namespace common
 		class SignalHandler
 		{
 		protected:
-			std::map<uint8_t, std::function<void()>> actionsMap_;
-			std::thread threadProcess_;
 			std::mutex mutexAction_;
 			LOGGER("SIGHANDLER");
 		public:
-			SignalHandler();
-			SignalHandler(const std::map<uint8_t, std::function<void()>>& actionsMap);
+			SignalHandler() = default;
 			~SignalHandler() noexcept = default;
-			void setAction(const uint8_t& signal, const std::function<void()>& action);
+			void setAction(const uint8_t& sig, const _crt_signal_t& action);
 		};
 	} // namespace utile
 } // namespace common

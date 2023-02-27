@@ -165,11 +165,13 @@
   <ItemGroup>
     <ClCompile Include="model\GPSAdapter.cpp" />
     <ClCompile Include="model\VehicleTrackerClient.cpp" />
+    <ClCompile Include="utile\ConfigHandler.cpp" />
     <ClCompile Include="VehicleTracker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="model\GPSAdapter.hpp" />
     <ClInclude Include="model\VehicleTrackerClient.hpp" />
+    <ClInclude Include="utile\ConfigHandler.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

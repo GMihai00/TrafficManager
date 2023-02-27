@@ -8,6 +8,7 @@
 #include <condition_variable>
 #include <memory>
 #include <stack>
+#include <filesystem>
 
 #include "net/Client.hpp"
 #include "net/Client.hpp"
@@ -64,6 +65,9 @@ namespace model
         VehicleTrackerClient() = delete;
         VehicleTrackerClient(std::istream& inputStream);
         ~VehicleTrackerClient();
+
+        // SHOULD HAVE SEPARATE CLASS THAT DOES THIS IN UTILE
+        bool saveDataToJson();
     };
 }
 #endif // #MODEL_VEHICLETRAKER_HPP

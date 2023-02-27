@@ -136,7 +136,7 @@ namespace ipc
                                     LOG_ERR << "Server doesn't support any more connections. Denied!";
                                     return;
                                 }
-                                connections_[idCounter.value()] = std::shared_ptr<Connection>(std::move(newConnection));
+                                connections_[idCounter.value()] = std::shared_ptr<Connection<T>>(std::move(newConnection));
                                 connections_[idCounter.value()]->connectToClient(idCounter.value());
 
                                 LOG_INF << connections_[idCounter.value()]->getId() << " Connection Approved";

@@ -100,7 +100,9 @@ db::BoundingRectPtr getCoveredArea(const CommandLineParser& commandLine)
 	return std::make_shared<db::BoundingRect>(boundSW.value(), boundNE.value());
 }
 
-// TO DO CONSTEXPR ON THE ERR CODE VALUES LATER
+// NEEDS TO BE MADE GLOBAL DUE TO BEEING UNABLE TO CAPTURE VARIABLES INSIDE LAMBDAS PASSED TO SIGNALHANDLER
+std::condition_variable g_condVarEnd;
+
 int main(int argc, char* argv[])
 {
 	SignalHandler sigHandler{};
@@ -137,11 +139,10 @@ int main(int argc, char* argv[])
 			LOG_ERR << "Failed to start server";
 		}
 
-		std::condition_variable condVarEnd;
-		sigHandler.setAction(SIGTERM, [&condVarEnd]() { condVarEnd.notify_one(); });
+		sigHandler.setAction(SIGINT, [](int singal) { g_condVarEnd.notify_one(); });
 		std::mutex mutexEnd;
 		std::unique_lock<std::mutex> ulock(mutexEnd);
-		condVarEnd.wait(ulock);
+		g_condVarEnd.wait(ulock);
 	}
 	catch (std::runtime_error& err)
 	{
