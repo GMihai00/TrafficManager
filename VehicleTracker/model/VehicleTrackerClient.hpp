@@ -42,7 +42,7 @@ namespace model
         std::atomic_bool shouldPause_ = true;
         bool isRedirected_ = false;
 
-        std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>> lastVisitedJunctions_;
+        std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>> lastVisitedProxys_;
         std::optional<std::string> signature_;
 
         bool isEmergency_;
@@ -63,11 +63,14 @@ namespace model
         void waitToPassJunction();
     public:
         VehicleTrackerClient() = delete;
-        VehicleTrackerClient(std::istream& inputStream);
+        VehicleTrackerClient(std::istream& inputStream, const std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>>& lastVisitedJunctions);
         ~VehicleTrackerClient();
 
         // SHOULD HAVE SEPARATE CLASS THAT DOES THIS IN UTILE
-        bool saveDataToJson();
+        bool saveDataToJson()
+        {
+            return true;
+        }
     };
 }
 #endif // #MODEL_VEHICLETRAKER_HPP

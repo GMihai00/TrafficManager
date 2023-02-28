@@ -5,6 +5,8 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <memory>
+
 #include "utile/CommandLineParser.hpp"
 #include "utile/Logger.hpp"
 #include "utile/SignalHandler.hpp"
@@ -40,7 +42,8 @@ int main()
 	{
 		std::fstream inputStream{ "GPSData.txt" };// SHOULD LINK DIRECTLY TO GPS OUTPUTSTREAM BUT FOR NOW THIS SHOULD DO
 
-		g_vtClient = std::make_unique<model::VehicleTrackerClient>(inputStream);
+		std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>> lastVisitedProxys; // taken from config file
+		g_vtClient = std::make_unique<model::VehicleTrackerClient>(inputStream, lastVisitedProxys);
 		// should be taken from config file
 
 		std::mutex mutexEnd;

@@ -15,20 +15,20 @@ namespace model
 
 			while (!shouldPause_)
 			{
-				if (lastVisitedJunctions_.empty())
+				if (lastVisitedProxys_.empty())
 				{
 					throw std::runtime_error("Failed to communicate with proxy");
 				}
 
-				if (!connect(lastVisitedJunctions_.top().first, lastVisitedJunctions_.top().second))
+				if (!connect(lastVisitedProxys_.top().first, lastVisitedProxys_.top().second))
 				{
-					lastVisitedJunctions_.pop();
+					lastVisitedProxys_.pop();
 					continue;
 				}
 
 				if (!queryProxy())
 				{
-					lastVisitedJunctions_.pop();
+					lastVisitedProxys_.pop();
 					continue;
 				}
 
@@ -53,12 +53,16 @@ namespace model
 		}
 	}
 
-	VehicleTrackerClient::VehicleTrackerClient(std::istream& inputStream) :
+	VehicleTrackerClient::VehicleTrackerClient(
+		std::istream& inputStream, const std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>>& lastVisitedProxys) :
 		ipc::net::Client<ipc::VehicleDetectionMessages>(),
-		gpsAdapter_(inputStream)
+		gpsAdapter_(inputStream),
+		lastVisitedProxys_(lastVisitedProxys)
 	{
-		// should be taken from config file, not hardcoded
-		lastVisitedJunctions_.push({ ipc::utile::G_PROXY_IP, ipc::utile::G_PROXY_PORT });
+		// FIRST RUN / CONFIG NOT FOUND
+		if (lastVisitedProxys_.empty())
+			lastVisitedProxys_.push({ ipc::utile::G_PROXY_IP, ipc::utile::G_PROXY_PORT });
+
 		threadProcess_ = std::thread(std::bind(&VehicleTrackerClient::process, this));
 	}
 
@@ -111,7 +115,7 @@ namespace model
 		// JUST HALT THE EXECUTION OF THE PROGRAM AND RETURN ERR EXIT CODE, NO REASON TO MOVE FORWARD
 		if (!handleProxyAnswear(answear.value().first.msg)) 
 		{ 
-			lastVisitedJunctions_.pop();
+			lastVisitedProxys_.pop();
 			return false;
 		}
 
@@ -165,7 +169,7 @@ namespace model
 		isRedirected_ = true;
 		disconnect();
 		auto proxyIpAndPort = redirect.getServerIPAdressAndPort();
-		lastVisitedJunctions_.push({ proxyIpAndPort.first, proxyIpAndPort.second });
+		lastVisitedProxys_.push({ proxyIpAndPort.first, proxyIpAndPort.second });
 		return connect(proxyIpAndPort.first, proxyIpAndPort.second);
 	}
 
