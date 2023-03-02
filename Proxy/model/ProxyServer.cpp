@@ -13,7 +13,7 @@ namespace model
 	{
 		try
 		{
-			dbWrapper_ = std::make_unique<utile::DBWrapper>("", "", "");
+			dbWrapper_ = std::make_unique<utile::DBWrapper>();
 			if (dbProxy_ == nullptr)
 			{
 				LOG_ERR << "FAILED TO GET CORRESPONDING DB PROXY";
