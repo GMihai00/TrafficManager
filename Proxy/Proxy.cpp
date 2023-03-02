@@ -71,7 +71,7 @@ namespace details
 
 	std::optional<GeoCoordinate<DecimalCoordinate>> getSWBound(const CommandLineParser& commandLine)
 	{
-		constexpr std::array<std::string_view, 2> optionNames = { "-bne", "--bound_sw" };
+		constexpr std::array<std::string_view, 2> optionNames = { "-bsw", "--bound_sw" };
 		return getCoordinate(commandLine, optionNames);
 	}
 
@@ -143,6 +143,8 @@ int main(int argc, char* argv[])
 		std::mutex mutexEnd;
 		std::unique_lock<std::mutex> ulock(mutexEnd);
 		g_condVarEnd.wait(ulock);
+		LOG_INF << "Finished waiting";
+		// somehow destructors are failing don't know how
 	}
 	catch (std::runtime_error& err)
 	{

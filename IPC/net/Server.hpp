@@ -40,6 +40,7 @@ namespace ipc
             boost::asio::ip::tcp::acceptor connectionAccepter_;
             common::utile::ThreadSafeQueue<uint32_t> availableIds_;
             std::map<uint32_t, std::shared_ptr<Connection<T>>> connections_;
+            std::atomic<bool> shuttingDown_ = false;
             LOGGER("SERVER");
         public:
             Server(const utile::IP_ADRESS& host, ipc::utile::PORT port):
@@ -53,17 +54,21 @@ namespace ipc
                 // throws boost::system::system_error
                 boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(host), port);
                 connectionAccepter_.open(endpoint.protocol());
-                connectionAccepter_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(false));
-                connectionAccepter_.set_option(boost::asio::ip::tcp::acceptor::broadcast(false));
+                // THIS IS SOMEHOW FAILING
+                //connectionAccepter_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(false));
+                //connectionAccepter_.set_option(boost::asio::ip::tcp::acceptor::broadcast(false));
                 connectionAccepter_.bind(endpoint);
                 connectionAccepter_.listen();
 
-                for (uint32_t id = 0; id < UINT32_MAX; id++) { availableIds_.push(id); }   
-                threadUpdate_ = std::thread([&]() { while (true) { update(); }});
+                // 2 much memory usage reduced to lower number
+                for (uint32_t id = 0; id < 1000; id++) { availableIds_.push(id); }   
+                threadUpdate_ = std::thread([&]() { while (!shuttingDown_) { update(); }});
             }
 
             virtual ~Server()
             {
+                shuttingDown_ = true;
+                LOG_INF << "STOPING SERVER";
                 stop();
             }
 
@@ -87,11 +92,14 @@ namespace ipc
     
             void stop()
             {
+                LOG_DBG << "Stopping context";
                 context_.stop();
-        
+                
                 if (threadContext_.joinable())
                     threadContext_.join();
                 
+                LOG_INF << "Stopping thread update";
+                condVarUpdate_.notify_one();
                 if (threadUpdate_.joinable())
                     threadUpdate_.join();
     
@@ -102,7 +110,12 @@ namespace ipc
             {
                 std::unique_lock<std::mutex> ulock(mutexUpdate_);
 
-                condVarUpdate_.wait(ulock, [&] { return !incomingMessagesQueue_.empty(); });
+                condVarUpdate_.wait(ulock, [&] { return !incomingMessagesQueue_.empty() || shuttingDown_; });
+
+                if (shuttingDown_)
+                {
+                    return;
+                }
 
                 const auto& maybeMsg = incomingMessagesQueue_.pop();
             
