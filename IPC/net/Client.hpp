@@ -38,6 +38,7 @@ namespace ipc
             std::mutex mutexUpdate_;
             std::condition_variable condVarUpdate_;
             std::unique_ptr<Connection<T>> connection_;
+            std::atomic<bool> shuttingDown_ = false;
             LOGGER("CLIENT");
         public:
             Client()
@@ -46,6 +47,8 @@ namespace ipc
 
             virtual ~Client()
             {
+                shuttingDown_ = true;
+                LOG_INF << "Server shutting down";
                 disconnect();
             }
     
@@ -92,6 +95,7 @@ namespace ipc
         
                 context_.stop();
         
+                condVarUpdate_.notify_one();
                 if (threadContext_.joinable())
                     threadContext_.join();
                 
@@ -134,16 +138,16 @@ namespace ipc
                 if (timeout == 0)
                 {
                     std::unique_lock<std::mutex> ulock(mutexUpdate_);
-                    condVarUpdate_.wait(ulock, [&] { !incomingMessages_.empty(); });
+                    condVarUpdate_.wait(ulock, [&] { !incomingMessages_.empty() || shuttingDown_; });
 
-                    return true;
+                    return !shuttingDown_;
                 }
 
                 std::unique_lock<std::mutex> ulock(mutexUpdate_);
 
-                if (condVarUpdate_.wait_for(ulock, std::chrono::milliseconds(timeout * 100), [&] { !incomingMessages_.empty(); }))
+                if (condVarUpdate_.wait_for(ulock, std::chrono::milliseconds(timeout * 100), [&] { !incomingMessages_.empty() || shuttingDown_; }))
                 {
-                    return true;
+                    return !shuttingDown_;
                 }
                 else
                 {

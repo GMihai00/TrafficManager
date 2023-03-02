@@ -17,6 +17,7 @@ namespace cvision
 		std::thread threadDetect_;
 		std::mutex mutexDetect_;
 		std::condition_variable condVarDetect_;
+		std::atomic<bool> shuttingDown_ = false;
 		cv::Mat frame_;
 		std::atomic<bool> isRunning_ = false;
 		cv::CascadeClassifier carCascade_;

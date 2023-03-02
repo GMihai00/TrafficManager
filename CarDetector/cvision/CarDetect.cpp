@@ -46,10 +46,13 @@ namespace cvision
 		isRunning_ = true;
 		threadDetect_ = std::thread([this]()
 			{
-				while (true)
+				while (!shuttingDown_)
 				{
 					std::unique_lock<std::mutex> ulock(mutexDetect_);
-					condVarDetect_.wait(ulock, [this] {	return !imageQueue_.empty(); });
+					condVarDetect_.wait(ulock, [this] {	return !imageQueue_.empty() || shuttingDown_; });
+
+					if (shuttingDown_)
+						continue;
 
 					std::shared_ptr<MovingObjectGroup> movingObjectGroup = imageQueue_.front();
 					imageQueue_.pop();
@@ -71,6 +74,8 @@ namespace cvision
 
 	void CarDetect::stopDetecting()
 	{
+		shuttingDown_ = true;
+		condVarDetect_.notify_one();
 		if (threadDetect_.joinable())
 			threadDetect_.join();
 	}

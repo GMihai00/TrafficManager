@@ -21,10 +21,13 @@ namespace cvision
 		isRunning_ = true;
 		threadRender_ = std::thread([this]()
 			{
-				while (true)
+				while (!shuttingDown_)
 				{
 					std::unique_lock<std::mutex> ulock(mutexRender_);
-					condVarRender_.wait(ulock, [this] { return !imageQueue_.empty(); });
+					condVarRender_.wait(ulock, [this] { return !imageQueue_.empty() || shuttingDown_; });
+
+					if (shuttingDown_)
+						continue;
 
 					auto img = imageQueue_.pop();
 					if (img)
@@ -39,6 +42,8 @@ namespace cvision
 
 	void ImageRender::stopRendering()
 	{
+		shuttingDown_ = true;
+		condVarRender_.notify_one();
 		if (threadRender_.joinable())
 			threadRender_.join();
 	}

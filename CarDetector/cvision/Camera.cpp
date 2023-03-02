@@ -47,8 +47,11 @@ namespace cvision
 				while (videoCapture_ != nullptr)
 				{
 					std::unique_lock<std::mutex> ulock(mutexRead_);
-					condVarRead_.wait(ulock, [&] { return currentImage_ == boost::none; });
+					condVarRead_.wait(ulock, [&] { return currentImage_ == boost::none || videoCapture_ == nullptr; });
 
+					if (videoCapture_ == nullptr)
+						continue;
+					
 					cv::Mat img;
 					if (videoCapture_ && videoCapture_->read(img))
 					{
@@ -70,6 +73,9 @@ namespace cvision
 	void Camera::stop()
 	{
 		videoCapture_.reset();
+
+		condVarRead_.notify_one();
+
 		if (threadRead_.joinable())
 			threadRead_.join();
 		LOG_DBG << "Camera stopped";

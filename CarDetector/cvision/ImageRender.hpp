@@ -18,6 +18,7 @@ namespace cvision
 		std::mutex mutexRender_;
 		std::condition_variable condVarRender_;
 		std::atomic<bool> isRunning_ = false;
+		std::atomic<bool> shuttingDown_ = false;
 	public:
 		ImageRender() = default;
 		ImageRender(const ImageRender&) = delete;

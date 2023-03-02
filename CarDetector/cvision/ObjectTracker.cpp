@@ -33,9 +33,12 @@ namespace cvision
         std::unique_lock<std::mutex> ulock(mutexProcess_);
         condVarProcess_.wait(ulock, [this] 
             {
-                return (!firstImageFrame_) &&
-                    !imageQueue_.empty();
+                return ((!firstImageFrame_) &&
+                    !imageQueue_.empty()) || !camera_.isRunning();
             });
+        
+        if (!camera_.isRunning())
+            return;
 
         firstImageFrame_ = imageQueue_.pop();
         if (firstImageFrame_.value().empty())
@@ -51,7 +54,10 @@ namespace cvision
         while (camera_.isRunning() || !imageQueue_.empty())
         {
             std::unique_lock<std::mutex> ulock(mutexProcess_);
-            condVarProcess_.wait(ulock, [this] { return !imageQueue_.empty(); });
+            condVarProcess_.wait(ulock, [this] { return !imageQueue_.empty() || !camera_.isRunning(); });
+
+            if (!camera_.isRunning())
+                continue;
 
             secondImageFrame_ = imageQueue_.pop();
             if (secondImageFrame_.value().empty())
@@ -134,6 +140,7 @@ namespace cvision
     void ObjectTracker::stopTracking()
     {
         camera_.stop();
+
         carDetector_->stopDetecting();
         imageRender_->stopRendering();
         imageQueue_.clear();
@@ -142,6 +149,7 @@ namespace cvision
         carCountLeft_ = 0;
         carCountRight_ = 0;
 
+        condVarProcess_.notify_one();
         if (threadProcess_.joinable())
             threadProcess_.join();
         if (threadCamera_.joinable())
