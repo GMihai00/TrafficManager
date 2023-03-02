@@ -176,6 +176,10 @@
   <ItemGroup>
     <None Include="..\resources\VTConfig.json" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\resources\GPSData\NMEA_all.txt" />
+    <Text Include="..\resources\GPSData\NMEA_GPGLL.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

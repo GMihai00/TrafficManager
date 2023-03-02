@@ -50,13 +50,9 @@ namespace model
         std::shared_ptr<common::db::Junction> nextJunction_;
         LANE followedLane_;
 
-        utile::ConfigHandler configHanlder_;
-
         LOGGER("VEHICLETRAKER-CLIENT");
 
         void process();
-        bool start();
-        void pause();
 
         bool switchConnectionToRedirectedProxy(ipc::net::ProxyRedirect& redirect);
         bool handleProxyAnswear(ipc::net::Message<ipc::VehicleDetectionMessages>& msg);
@@ -67,10 +63,12 @@ namespace model
     public:
         VehicleTrackerClient() = delete;
         VehicleTrackerClient(const std::string& pathConfigFile, std::istream& inputStream);
-        ~VehicleTrackerClient();
+        virtual ~VehicleTrackerClient() noexcept;
 
         // SHOULD HAVE SEPARATE CLASS THAT DOES THIS IN UTILE
         bool saveDataToJson();
+        bool start();
+        void pause();
     };
 }
 #endif // #MODEL_VEHICLETRAKER_HPP

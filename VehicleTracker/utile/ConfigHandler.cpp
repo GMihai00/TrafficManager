@@ -2,9 +2,9 @@
 
 namespace utile
 {
+	LOGGER("CONFIG-HANDLER");
 
-	std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>>
-		ConfigHandler::getLastVisitedProxys(const std::string& pathToConfigFile) noexcept
+	std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>> getLastVisitedProxys(const std::string& pathToConfigFile) noexcept
 	{
 		std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>> rez;
 
@@ -21,16 +21,16 @@ namespace utile
 		}
 
 		const auto& jsonTree = jsonRoot.get_child_optional("proxys");
-		if (jsonTree != boost::none)
+		if (jsonTree == boost::none)
 		{
 			LOG_ERR << "Main key missing from config file";
 			return {};
 		}
 		
-		for (auto& item : jsonTree.get())
+		for (const auto& item : jsonTree.get())
 		{
-			auto keyIp_adress = jsonRoot.get_child_optional("ip_adress");
-			auto keyPort = jsonRoot.get_child_optional("port");
+			auto keyIp_adress = item.second.get_child_optional("ip_adress");
+			auto keyPort = item.second.get_child_optional("port");
 			if (keyIp_adress != boost::none && keyPort != boost::none)
 			{
 				auto ip_adress = keyIp_adress.get().get_value_optional<std::string>();
@@ -49,7 +49,7 @@ namespace utile
 		return rez;
 	}
 
-	bool ConfigHandler::saveConfig(std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>> lastVisitedProxys) noexcept
+	bool saveConfig(std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>> lastVisitedProxys) noexcept
 	{
 		ptree jsonRoot, array;
 
@@ -64,6 +64,6 @@ namespace utile
 		}
 
 		jsonRoot.put_child("proxys", array);
-		write_jsonEx("VTConfig.json", jsonRoot);
+		return details::write_jsonEx("VTConfig.json", jsonRoot);
 	}
 };

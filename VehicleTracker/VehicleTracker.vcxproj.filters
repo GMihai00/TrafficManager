@@ -25,6 +25,9 @@
     <Filter Include="Source Files\utile">
       <UniqueIdentifier>{d271d1f5-f3be-4a45-9569-d32abeccf5ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\gpsdata">
+      <UniqueIdentifier>{847a6c46-bbf9-4587-b4cc-24db9bc264bd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VehicleTracker.cpp">
@@ -55,5 +58,13 @@
     <None Include="..\resources\VTConfig.json">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\resources\GPSData\NMEA_all.txt">
+      <Filter>Resource Files\gpsdata</Filter>
+    </Text>
+    <Text Include="..\resources\GPSData\NMEA_GPGLL.txt">
+      <Filter>Resource Files\gpsdata</Filter>
+    </Text>
   </ItemGroup>
 </Project>

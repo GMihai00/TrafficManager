@@ -45,7 +45,7 @@ namespace ipc
             {
             }
 
-            virtual ~Client()
+            virtual ~Client() noexcept
             {
                 shuttingDown_ = true;
                 LOG_INF << "Server shutting down";

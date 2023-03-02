@@ -44,9 +44,11 @@ int main()
 
 	try
 	{
-		std::fstream inputStream{ "GPSData.txt" };// SHOULD LINK DIRECTLY TO GPS OUTPUTSTREAM BUT FOR NOW THIS SHOULD DO
+		// SHOULD LINK DIRECTLY TO GPS OUTPUTSTREAM BUT FOR NOW THIS SHOULD DO
+		std::fstream inputStream{ "C:\\Users\\Mihai Gherghinescu\\source\\repos\\TrafficManager\\resources\\GPSData\\NMEA_GPGLL.txt" };
 
-		std::string configPath{ "VTConfig.json"};
+		// TO BE CHANGED TO RELATIVE PATH
+		std::string configPath{ "C:\\Users\\Mihai Gherghinescu\\source\\repos\\TrafficManager\\resources\\VTConfig.json"};
 
 		g_vtClient = std::make_unique<model::VehicleTrackerClient>(configPath, inputStream);
 		// should be taken from config file
@@ -59,4 +61,5 @@ int main()
 	{
 		LOG_ERR << "Client failed to init" << err.what();
 	}
+	return 0;
 }

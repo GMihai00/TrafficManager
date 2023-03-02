@@ -69,7 +69,7 @@ namespace model
 		return nexValue;
 	}
 
-	int GPSAdapter::calculateCheckSum(std::string& NMEAString)
+	int GPSAdapter::calculateCheckSum(std::string NMEAString)
 	{
 		int checksum = 0;
 		for (auto character : NMEAString)
@@ -139,7 +139,7 @@ namespace model
 		// "*" <checksum> if not matching return {}
 		if (NMEAString[start] != '*') { return {}; }
 		value = NMEAString.substr(++start, NMEAString.size() - start + 1);
-		if (calculateCheckSum(NMEAString) != hexStringToInt(value)) { return {}; }
+		if (calculateCheckSum(std::string(NMEAString.substr(0, start - 1))) != hexStringToInt(value)) { return {}; }
 
 		rez.latitude = latitude.value();
 		rez.longitude = longitude.value();

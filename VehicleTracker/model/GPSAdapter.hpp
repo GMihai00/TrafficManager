@@ -26,7 +26,7 @@ namespace model
 
 		void process();
 		int hexStringToInt(std::string& value);
-		int calculateCheckSum(std::string& NMEAString);
+		int calculateCheckSum(std::string NMEAString);
 		std::string getNextValue(std::string& NMEAString, size_t& start);
 		std::optional<GeoCoordinate<DecimalCoordinate>> parseNMEAString(std::string& NMEAString);
 	public:

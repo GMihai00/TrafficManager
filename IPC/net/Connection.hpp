@@ -92,7 +92,7 @@ namespace ipc
             {
             }
 
-            virtual ~Connection()
+            virtual ~Connection() noexcept
             { 
                 if (threadRead_.joinable())
                     threadRead_.join();

@@ -65,7 +65,7 @@ namespace ipc
                 threadUpdate_ = std::thread([&]() { while (!shuttingDown_) { update(); }});
             }
 
-            virtual ~Server()
+            virtual ~Server() noexcept
             {
                 shuttingDown_ = true;
                 LOG_INF << "STOPING SERVER";

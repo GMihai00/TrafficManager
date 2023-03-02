@@ -56,8 +56,7 @@ namespace model
 	VehicleTrackerClient::VehicleTrackerClient(const std::string& pathConfigFile, std::istream& inputStream) :
 		ipc::net::Client<ipc::VehicleDetectionMessages>(),
 		gpsAdapter_(inputStream),
-		configHanlder_(),
-		lastVisitedProxys_(configHanlder_.getLastVisitedProxys(pathConfigFile))
+		lastVisitedProxys_(utile::getLastVisitedProxys(pathConfigFile))
 	{
 		if (lastVisitedProxys_.empty())
 			lastVisitedProxys_.push({ ipc::utile::G_PROXY_IP, ipc::utile::G_PROXY_PORT });
@@ -67,7 +66,7 @@ namespace model
 
 	VehicleTrackerClient::~VehicleTrackerClient()
 	{
-
+		// NU SE OPRESTE GPSUL DE AIA CRAPA
 	}
 
 	bool VehicleTrackerClient::start()
@@ -201,6 +200,6 @@ namespace model
 
 	bool VehicleTrackerClient::saveDataToJson()
 	{
-		return configHanlder_.saveConfig(lastVisitedProxys_);
+		return utile::saveConfig(lastVisitedProxys_);
 	}
 }
