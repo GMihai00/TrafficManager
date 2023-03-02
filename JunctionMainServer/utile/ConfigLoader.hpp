@@ -29,6 +29,8 @@ namespace utile
 		void loadMissingRoadIfPresent(const ptree& jsonRoot, model::Config& config);
 	public:
 		model::Config load(const std::string& pathToConfigFile);
+		ConfigLoader() = default;
+		~ConfigLoader() noexcept = default;
 	};
 } // namespace utile
 #endif // #UTILE_CONFIGLOADER_HPP

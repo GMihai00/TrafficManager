@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MODEL_CONFIG_HPP
 #define MODEL_CONFIG_HPP
 

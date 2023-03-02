@@ -1,5 +1,6 @@
-#ifndef MODEL_JunctionServer_HPP
-#define MODEL_JunctionServer_HPP
+#pragma once
+#ifndef MODEL_JUNCTIONSERVER_HPP
+#define MODEL_JUNCTIONSERVER_HPP
 
 #include <thread>
 #include <mutex>
@@ -41,5 +42,5 @@ namespace model
 		void handleMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, common::utile::LANE lane);
 	};
 } // namespace model
-#endif // #MODEL_JunctionServer_HPP
+#endif // #MODEL_JUNCTIONSERVER_HPP
 

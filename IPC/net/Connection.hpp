@@ -1,3 +1,4 @@
+#pragma once
 #ifndef IPC_NET_CONNECTION_HPP
 #define IPC_NET_CONNECTION_HPP
 

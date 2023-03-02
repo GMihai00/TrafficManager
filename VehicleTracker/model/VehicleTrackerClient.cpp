@@ -53,13 +53,12 @@ namespace model
 		}
 	}
 
-	VehicleTrackerClient::VehicleTrackerClient(
-		std::istream& inputStream, const std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>>& lastVisitedProxys) :
+	VehicleTrackerClient::VehicleTrackerClient(const std::string& pathConfigFile, std::istream& inputStream) :
 		ipc::net::Client<ipc::VehicleDetectionMessages>(),
 		gpsAdapter_(inputStream),
-		lastVisitedProxys_(lastVisitedProxys)
+		configHanlder_(),
+		lastVisitedProxys_(configHanlder_.getLastVisitedProxys(pathConfigFile))
 	{
-		// FIRST RUN / CONFIG NOT FOUND
 		if (lastVisitedProxys_.empty())
 			lastVisitedProxys_.push({ ipc::utile::G_PROXY_IP, ipc::utile::G_PROXY_PORT });
 
@@ -198,5 +197,10 @@ namespace model
 			pointB = pointA;
 			gpsAdapter_.getCurrentCoordinates();
 		}
+	}
+
+	bool VehicleTrackerClient::saveDataToJson()
+	{
+		return configHanlder_.saveConfig(lastVisitedProxys_);
 	}
 }

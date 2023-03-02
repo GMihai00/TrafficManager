@@ -1,3 +1,4 @@
+#pragma once
 #ifndef IPC_NET_CLIENT_HPP
 #define IPC_NET_CLIENT_HPP
 

@@ -1,11 +1,11 @@
-#include "model/VehicleTrackerClient.hpp"
-
 #include <filesystem>
 #include <fstream>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <memory>
+
+#include "model/VehicleTrackerClient.hpp"
 
 #include "utile/CommandLineParser.hpp"
 #include "utile/Logger.hpp"
@@ -25,25 +25,30 @@ int main()
 	SignalHandler sigHandler{};
 	sigHandler.setAction(SIGINT, [](int singal)
 		{
-			if (g_vtClient)
-				g_vtClient->saveDataToJson();
+			if (!(g_vtClient && g_vtClient->saveDataToJson()))
+			{
+				LOG_ERR << "Failed to backup data";
+			}
 
 			g_condVarEnd.notify_one();
 		});
 	sigHandler.setAction(SIGTERM, [](int singal)
 		{
-			if (g_vtClient)
-			g_vtClient->saveDataToJson();
+			if(!(g_vtClient && g_vtClient->saveDataToJson()))
+			{
+				LOG_ERR << "Failed to backup data";
+			}
 
-	g_condVarEnd.notify_one();
+			g_condVarEnd.notify_one();
 		});
 
 	try
 	{
 		std::fstream inputStream{ "GPSData.txt" };// SHOULD LINK DIRECTLY TO GPS OUTPUTSTREAM BUT FOR NOW THIS SHOULD DO
 
-		std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>> lastVisitedProxys; // taken from config file
-		g_vtClient = std::make_unique<model::VehicleTrackerClient>(inputStream, lastVisitedProxys);
+		std::string configPath{ "VTConfig.json"};
+
+		g_vtClient = std::make_unique<model::VehicleTrackerClient>(configPath, inputStream);
 		// should be taken from config file
 
 		std::mutex mutexEnd;

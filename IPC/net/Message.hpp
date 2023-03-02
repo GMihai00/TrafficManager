@@ -1,3 +1,4 @@
+#pragma once
 #ifndef IPC_NET_MESSAGE_HPP
 #define IPC_NET_MESSAGE_HPP
 

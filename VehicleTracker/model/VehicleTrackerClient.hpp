@@ -23,6 +23,7 @@
 #include "utile/Observer.hpp"
 #include "utile/GeoCoordinate.hpp";
 #include "GPSAdapter.hpp"
+#include "../utile/ConfigHandler.hpp"
 
 namespace model
 {
@@ -49,6 +50,8 @@ namespace model
         std::shared_ptr<common::db::Junction> nextJunction_;
         LANE followedLane_;
 
+        utile::ConfigHandler configHanlder_;
+
         LOGGER("VEHICLETRAKER-CLIENT");
 
         void process();
@@ -63,14 +66,11 @@ namespace model
         void waitToPassJunction();
     public:
         VehicleTrackerClient() = delete;
-        VehicleTrackerClient(std::istream& inputStream, const std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>>& lastVisitedJunctions);
+        VehicleTrackerClient(const std::string& pathConfigFile, std::istream& inputStream);
         ~VehicleTrackerClient();
 
         // SHOULD HAVE SEPARATE CLASS THAT DOES THIS IN UTILE
-        bool saveDataToJson()
-        {
-            return true;
-        }
+        bool saveDataToJson();
     };
 }
 #endif // #MODEL_VEHICLETRAKER_HPP
