@@ -25,7 +25,6 @@ namespace ipc
         enum class Owner
         {
             Server,
-            Proxy,
             Client
         };
 
@@ -62,7 +61,7 @@ namespace ipc
             void readData(std::vector<uint8_t>& vBuffer, size_t toRead)
             {
                 size_t left = toRead;
-                while (left || shuttingDown_)
+                while (left && !shuttingDown_)
                 {
                     if (shuttingDown_)
                         break;
@@ -133,7 +132,7 @@ namespace ipc
 
             bool connectToServer(const boost::asio::ip::tcp::resolver::results_type& endpoints)
             {
-                if (owner_ == Owner::Client || owner_ == Owner::Proxy)
+                if (owner_ == Owner::Client)
                 {
                     LOG_SET_NAME("CONNECTION-SERVER");
                     std::function<void(std::error_code errcode, boost::asio::ip::tcp::endpoint endpoint)> connectCallback;
@@ -189,7 +188,7 @@ namespace ipc
     
             bool connectToClient(uint32_t id)
             {
-                if (owner_ == Owner::Server || owner_ == Owner::Proxy)
+                if (owner_ == Owner::Server)
                 {
                     if (socket_.is_open())
                     {
@@ -246,22 +245,23 @@ namespace ipc
                 std::vector<uint8_t> vBuffer(sizeof(MessageHeader<T>));
         
                 readData(vBuffer, sizeof(MessageHeader<T>));
+                std::memcpy(&incomingTemporaryMessage_.header, vBuffer.data(), sizeof(MessageHeader<T>));
                 LOG_DBG << "Finished reading header for message: " << incomingTemporaryMessage_;
-                std::memcpy(&incomingTemporaryMessage_.header, vBuffer.data(), sizeof(MessageHeader<int>));
             }
     
             void readBody()
             {
                 std::vector<uint8_t> vBuffer(incomingTemporaryMessage_.header.size);
     
-                readData(vBuffer, sizeof(incomingTemporaryMessage_.header.size));
-                LOG_DBG << "Finished reading message: " << incomingTemporaryMessage_;
+                readData(vBuffer, sizeof(uint8_t) * incomingTemporaryMessage_.header.size);
                 incomingTemporaryMessage_ << vBuffer;
+                LOG_DBG << "Finished reading message: " << incomingTemporaryMessage_;
             }
     
             void addToIncomingMessageQueue()
             {
-                if (owner_ == Owner::Server || owner_ == Owner::Proxy)
+                // THIS IS SO WRONG
+                if (owner_ == Owner::Server)
                 {
                     const auto& pair = std::make_pair(
                         OwnedMessage<T>{this->shared_from_this(), incomingTemporaryMessage_},
@@ -343,8 +343,9 @@ namespace ipc
     
             void writeHeader(const Message<T>& outgoingMessage)
             {
+                // this needs to be changed
                 boost::system::error_code errcode;
-                socket_.write_some(boost::asio::buffer(&outgoingMessage.header, sizeof(MessageHeader<T>)), errcode);
+                boost::asio::write(socket_, boost::asio::buffer(&outgoingMessage.header, sizeof(MessageHeader<T>)), errcode);
         
                 if (errcode)
                 {
@@ -358,7 +359,7 @@ namespace ipc
             void writeBody(const Message<T>& outgoingMessage)
             {
                 boost::system::error_code errcode;
-                socket_.write_some(boost::asio::buffer(outgoingMessage.body.data(), outgoingMessage.size()), errcode);
+                boost::asio::write(socket_, boost::asio::buffer(outgoingMessage.body.data(), sizeof(uint8_t) * outgoingMessage.size()), errcode);
         
                 if (errcode)
                 {

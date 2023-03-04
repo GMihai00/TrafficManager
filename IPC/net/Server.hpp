@@ -118,11 +118,11 @@ namespace ipc
                 }
 
                 LOG_DBG << "UPDATING: Handling new message";
-                const auto& maybeMsg = incomingMessagesQueue_.pop();
+                auto maybeMsg = incomingMessagesQueue_.pop();
             
-                if (!maybeMsg.has_value())
+                if (maybeMsg.has_value())
                 {
-                    const auto& msg = maybeMsg.value().first;
+                    auto msg = maybeMsg.value().first;
                     onMessage(msg.remote, msg.msg);
                 }
             }
@@ -195,7 +195,7 @@ namespace ipc
             {
             }
     
-            virtual void onMessage(std::shared_ptr<Connection<T>> client,const Message<T>& msg)
+            virtual void onMessage(std::shared_ptr<Connection<T>> client, Message<T>& msg)
             {
             }
         };

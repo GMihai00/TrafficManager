@@ -36,9 +36,9 @@ namespace model
 		JunctionServer(const JunctionServer&) = delete;
 		virtual ~JunctionServer() noexcept = default;
 
-		virtual bool onClientConnect(ipc::utile::ConnectionPtr client);
-		virtual void onClientDisconnect(ipc::utile::ConnectionPtr client);
-		virtual void onMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
+		virtual bool onClientConnect(ipc::utile::ConnectionPtr client) override;
+		virtual void onClientDisconnect(ipc::utile::ConnectionPtr client) override;
+		virtual void onMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg) override;
 		void handleMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, common::utile::LANE lane);
 	};
 } // namespace model

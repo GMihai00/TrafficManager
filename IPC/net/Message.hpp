@@ -74,18 +74,18 @@ namespace ipc
             friend Message<T>& operator >> (Message<T>& msg, DataType& data)
             {
                 static_assert(std::is_standard_layout<DataType>::value, "Data can not be poped");
-                try
+             
+                if (msg.body.size() < sizeof(DataType))
                 {
-                    size_t sizeAfterPop = msg.body.size() - sizeof(DataType);
-                    std::memcpy(&data, msg.body.data() + sizeAfterPop, sizeof(DataType));
-                    msg.body.resize(sizeAfterPop);
-                    msg.header.size = msg.size();
+                    std::cerr << "Error insufficient data";
+                    return msg;
                 }
-                catch(const std::exception& e)
-                {
-                    std::cerr << "Error while extracting data" << e.what() << '\n';
-                }
-            
+
+                size_t sizeAfterPop = msg.body.size() - sizeof(DataType);
+                std::memcpy(&data, msg.body.data() + sizeAfterPop, sizeof(DataType));
+                msg.body.resize(sizeAfterPop);
+                msg.header.size = msg.size();
+
                 return msg;
             }
         
@@ -93,21 +93,18 @@ namespace ipc
             friend Message<T>& operator >> (Message<T>& msg, std::vector<DataType>& dataVec)
             {
                 static_assert(std::is_standard_layout<DataType>::value, "Data can not be poped");
-                try
+               
+                if (msg.body.size() < sizeof(DataType) * dataVec.size())
                 {
-                    size_t sizeAfterPop = msg.body.size() - sizeof(DataType) * dataVec.size();
-                    std::memcpy(
-                        dataVec.data(),
-                        msg.body.data() + sizeAfterPop,
-                        sizeof(DataType) * dataVec.size());
-                    msg.body.resize(sizeAfterPop);
-                    msg.header.size = msg.size();
+                    std::cerr << "Error insufficient data";
+                    return msg;
                 }
-                catch(const std::exception& e)
-                {
-                    std::cerr << "Error while extracting data" << e.what() << '\n';
-                }
-            
+
+                size_t sizeAfterPop = msg.body.size() - sizeof(DataType) * dataVec.size();
+                std::memcpy(&dataVec, msg.body.data() + sizeAfterPop, sizeof(DataType) * dataVec.size());
+                msg.body.resize(sizeAfterPop);
+                msg.header.size = msg.size();
+           
                 return msg;
             }
 
@@ -126,7 +123,7 @@ namespace ipc
         template<typename T>
         struct OwnedMessage
         {
-            std::shared_ptr<Connection<T>> remote = nullptr;
+            std::shared_ptr<Connection<T>> remote; // WE SEND WHOLE OBJECT OVER THE NETWORK, NOT THE POINTER;
             Message<T> msg;
         
             friend std::ostream& operator << (std::ostream& os, const OwnedMessage<T>& msg)

@@ -162,19 +162,16 @@ namespace model
 	{
 		switch (msg.header.type)
 		{
-		case ipc::VehicleDetectionMessages::VCDR:
+		case ipc::VehicleDetectionMessages::VDB:
 			auto ownershipType = client->getOwner();
+			LOG_DBG << "Ownership: " << (int)ownershipType;
 			switch (ownershipType)
 			{
 			case ipc::net::Owner::Server:
-				break;
-			case ipc::net::Owner::Proxy:
-				// TO THINK ABOUT THIS HOW DO I GET THE ANSWEAR FROM THE REDIRECTED MESSAGE BACK TO THE CLIENT
-				break;
-			case ipc::net::Owner::Client:
 				if (!isCoveredByProxy(client, msg))
 				{
 					rejectMessage(client, msg);
+					return;
 				}
 
 				if (auto proxyReply = getClosestJunctionReply(msg); proxyReply.has_value())
@@ -185,19 +182,18 @@ namespace model
 				{
 					redirect(client, msg);
 				}
-				break;
 			default:
 				break;
 			}
 		}
 	}
 
-	// FOR NOW HANDLING JUST VCDR
+	// FOR NOW HANDLING JUST VDB
 	bool ProxyServer::isMessageValid(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
 		switch (msg.header.type)
 		{
-		case ipc::VehicleDetectionMessages::VCDR:
+		case ipc::VehicleDetectionMessages::VDB:
 			return true;
 		default:
 			return false;

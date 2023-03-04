@@ -34,6 +34,7 @@ namespace model
 				if (!queryProxy())
 				{
 					lastVisitedProxys_.pop();
+					disconnect();
 					continue;
 				}
 
@@ -128,7 +129,6 @@ namespace model
 		// JUST HALT THE EXECUTION OF THE PROGRAM AND RETURN ERR EXIT CODE, NO REASON TO MOVE FORWARD
 		if (!handleProxyAnswear(answear.value().first.msg)) 
 		{ 
-			lastVisitedProxys_.pop();
 			return false;
 		}
 

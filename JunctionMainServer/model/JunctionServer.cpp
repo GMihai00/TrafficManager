@@ -26,7 +26,6 @@ namespace model
 		}
 	}
 
-
 	void JunctionServer::aproveMessage(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
