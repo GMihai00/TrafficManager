@@ -62,7 +62,7 @@ namespace ipc
 
                 // 2 much memory usage reduced to lower number
                 for (uint32_t id = 0; id < 1000; id++) { availableIds_.push(id); }   
-                threadUpdate_ = std::thread([&]() { while (!shuttingDown_) { update(); }});
+                threadUpdate_ = std::thread([&]() { LOG_INF << "START UPDATING"; while (!shuttingDown_) { update(); }});
             }
 
             virtual ~Server() noexcept
@@ -109,7 +109,7 @@ namespace ipc
             void update()
             {
                 std::unique_lock<std::mutex> ulock(mutexUpdate_);
-
+                LOG_DBG << "UPDATING: Waiting for incoming message";
                 condVarUpdate_.wait(ulock, [&] { return !incomingMessagesQueue_.empty() || shuttingDown_; });
 
                 if (shuttingDown_)
@@ -117,6 +117,7 @@ namespace ipc
                     return;
                 }
 
+                LOG_DBG << "UPDATING: Handling new message";
                 const auto& maybeMsg = incomingMessagesQueue_.pop();
             
                 if (!maybeMsg.has_value())

@@ -41,10 +41,12 @@ namespace ipc
             std::condition_variable condVarUpdate_;
             std::unique_ptr<Connection<T>> connection_;
             std::atomic<bool> shuttingDown_ = false;
+            boost::asio::io_context::work idleWork_; // for context to not immediatly stop
             LOGGER("CLIENT");
         public:
-            Client()
+            Client() : idleWork_(context_)
             {
+                
             }
 
             virtual ~Client() noexcept
