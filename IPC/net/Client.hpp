@@ -22,6 +22,8 @@
 #include "../utile/IPCDataTypes.hpp"
 #include "../utile/IPAdressHelpers.hpp"
 
+// REMOVE ASYNC OPERATIONS
+
 namespace ipc
 {
     namespace net
@@ -73,9 +75,12 @@ namespace ipc
                         incomingMessages_,
                         condVarUpdate_);
             
-                    connection_->connectToServer(endpoints);
-            
-                    threadContext_ = std::thread([this]() { context_.run(); });
+                    if (connection_->connectToServer(endpoints))
+                    {
+                        threadContext_ = std::thread([this]() { context_.run(); });
+                        return true;
+                    }
+           
                 }
                 catch(const std::exception& e)
                 {

@@ -51,14 +51,15 @@ namespace model
 	bool GPSAdapter::start()
 	{
 		shouldPause_ = false;
+		return true;
 	}
 
-	bool GPSAdapter::pause()
+	void GPSAdapter::pause()
 	{
 		shouldPause_ = true;
 	}
 
-	bool GPSAdapter::stop()
+	void GPSAdapter::stop()
 	{
 		shuttingDown_ = true;
 		condVarProcess_.notify_one();
@@ -87,7 +88,7 @@ namespace model
 	std::string GPSAdapter::getNextValue(std::string& NMEAString, size_t& start)
 	{
 		std::string nexValue = "";
-		std::size_t end = NMEAString.find_first_of(",");
+		std::size_t end = NMEAString.find_first_of(",", start);
 		if (end != std::string::npos)
 		{
 			nexValue = NMEAString.substr(start, end - start);
@@ -160,14 +161,17 @@ namespace model
 		CHECK_IF_STILL_VALID_POSITION;
 		if (value == "V" ) { return {}; }
 
-		// "A/D/E/M/N" useless
-		value = getNextValue(NMEAString, start);
+		// "A/D/E/M/N" useless so just skip it
+		start++;
 		CHECK_IF_STILL_VALID_POSITION;
 
 		// "*" <checksum> if not matching return {}
 		if (NMEAString[start] != '*') { return {}; }
-		value = NMEAString.substr(++start, NMEAString.size() - start + 1);
-		if (calculateCheckSum(std::string(NMEAString.substr(0, start - 1))) != hexStringToInt(value)) { return {}; }
+		start++;
+		CHECK_IF_STILL_VALID_POSITION;
+
+		value = NMEAString.substr(start, NMEAString.size() - start + 1);
+		if (calculateCheckSum(std::string(NMEAString.substr(1, start - 2))) != hexStringToInt(value)) { return {}; }
 
 		rez.latitude = latitude.value();
 		rez.longitude = longitude.value();

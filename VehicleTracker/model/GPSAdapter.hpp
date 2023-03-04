@@ -38,8 +38,8 @@ namespace model
 		GeoCoordinate<DecimalCoordinate> getCurrentCoordinates();
 
 		bool start();
-		bool pause();
-		bool stop();
+		void pause();
+		void stop();
 	};
 
 }

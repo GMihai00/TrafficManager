@@ -53,6 +53,7 @@ int main()
 		g_vtClient = std::make_unique<model::VehicleTrackerClient>(configPath, inputStream);
 		// should be taken from config file
 
+		g_vtClient->start();
 		std::mutex mutexEnd;
 		std::unique_lock<std::mutex> ulock(mutexEnd);
 		g_condVarEnd.wait(ulock);

@@ -118,8 +118,7 @@ namespace ipc
                 return socket_.remote_endpoint().address().to_string();
             }
 
-            // ASYNC OK
-            void connectToServer(const boost::asio::ip::tcp::resolver::results_type& endpoints)
+            bool connectToServer(const boost::asio::ip::tcp::resolver::results_type& endpoints)
             {
                 if (owner_ == Owner::Client || owner_ == Owner::Proxy)
                 {
@@ -152,12 +151,30 @@ namespace ipc
                             }
                         };
                     }
-                    isReading = true;
-                    boost::asio::async_connect(socket_, endpoints, connectCallback);
+
+                    std::error_code ec;
+                    boost::asio::ip::tcp::endpoint endpoint;
+                    try
+                    {
+                        endpoint = boost::asio::connect(socket_, endpoints);
+                    }
+                    catch (boost::system::system_error const& err)
+                    {
+                        ec = err.code();
+                    }
+                   
+                    connectCallback(ec, endpoint);
+                    if (socket_.is_open())
+                    {
+                        isReading = true;
+                        return true;
+                    }
+
+                    return false;
                 }
             }
     
-            void connectToClient(uint32_t id)
+            bool connectToClient(uint32_t id)
             {
                 if (owner_ == Owner::Server || owner_ == Owner::Proxy)
                 {
@@ -182,8 +199,11 @@ namespace ipc
                         }
                         isReading = true;
                         connectCallback();
+                        return true;
                     }
+                    return false;
                 }
+                return false;
             }
     
             bool isConnected() const
