@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <mutex>
 
 #define LOGGER(name) common::utile::Logger logger_{name}
 #define LOG_SET_NAME(name) logger_.setName(name)
@@ -50,8 +51,9 @@ namespace common
             std::ostream& os_;
             std::ostream& oserr_;
             std::string name_;
-            LogTypes type_;
+            std::mutex mutexOutput_;
         public:
+            LogTypes type_;
             Logger(const std::string& name,
                 const LogTypes type = LogTypes::INF,
                 std::ostream& os = std::cout,
@@ -67,6 +69,7 @@ namespace common
             template<typename T>
             friend std::ostream& operator << (Logger& logger, T data)
             {
+                 std::scoped_lock lock(logger.mutexOutput_);
                  // TODO: SOMEHOW FLAG NOT SET 
                  /*if (logger.type_ == LogTypes::DBG &&
                      !(std::getenv("LOGGER_DEBUG") && std::getenv("LOGGER_DEBUG") == "TRUE"))

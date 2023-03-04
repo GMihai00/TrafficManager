@@ -79,6 +79,7 @@ namespace utile
 			{
 				proxys.push_back(std::move(buildProxyFromQueryResult(queryResult)));
 			}
+			return proxys;
 		}
 		catch (const sql::SQLException& err)
 		{
@@ -100,6 +101,7 @@ namespace utile
 			{
 				junctions.push_back(std::move(buildJunctionFromQueryResult(queryResult)));
 			}
+			return junctions;
 		}
 		catch (const sql::SQLException& err)
 		{

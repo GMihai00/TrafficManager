@@ -148,7 +148,7 @@ namespace model
 			auto coordinates = vtMessage.getCoordinates();
 			GeoCoordinate<DecimalCoordinate> pointA = coordinates.first;
 			GeoCoordinate<DecimalCoordinate> pointB = coordinates.second;
-
+			dbProxy_->isContained(pointB);
 			return dbProxy_->isContained(pointB);
 		}
 		catch (const std::runtime_error&)
