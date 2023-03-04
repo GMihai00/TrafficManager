@@ -8,10 +8,15 @@ namespace model
 {
 	void VehicleTrackerClient::process()
 	{
-		while (true)
+		while (!shuttingDown_)
 		{
 			std::unique_lock<std::mutex> ulock(mutexProcess_);
-			condVarProcess_.wait(ulock, [&] { return (shouldPause_ == false); });
+			condVarProcess_.wait(ulock, [&] { return (shouldPause_ == false || shuttingDown_); });
+
+			if (shuttingDown_)
+			{
+				continue;
+			}
 
 			while (!shouldPause_)
 			{
@@ -66,13 +71,14 @@ namespace model
 
 	VehicleTrackerClient::~VehicleTrackerClient()
 	{
-		// NU SE OPRESTE GPSUL DE AIA CRAPA
+		stop();
 	}
 
 	bool VehicleTrackerClient::start()
 	{
 		std::unique_lock<std::mutex> ulock(mutexProcess_);
 		shouldPause_ = false;
+		gpsAdapter_.start();
 		condVarProcess_.notify_one();
 		return true;
 	}
@@ -80,8 +86,17 @@ namespace model
 	void VehicleTrackerClient::pause()
 	{
 		shouldPause_ = true;
+		gpsAdapter_.pause();
 	}
 
+	void VehicleTrackerClient::stop()
+	{
+		shuttingDown_ = true;
+		gpsAdapter_.stop();
+		condVarProcess_.notify_one();
+		if (threadProcess_.joinable())
+			threadProcess_.join();
+	}
 	// TO DO: FOR SECURITY PROXY WILL SEND A CRYPTED MESSAGE LOOK AT KERBEROS PROTOCOL
 	// https://www.youtube.com/watch?v=5N242XcKAsM
 	bool VehicleTrackerClient::queryProxy()

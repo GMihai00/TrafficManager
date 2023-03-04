@@ -41,7 +41,8 @@ namespace model
         std::mutex mutexProcess_;
         std::condition_variable condVarProcess_;
         std::atomic_bool shouldPause_ = true;
-        bool isRedirected_ = false;
+        std::atomic_bool shuttingDown_ = false;
+        std::atomic_bool isRedirected_ = false;
 
         std::stack<std::pair<ipc::utile::IP_ADRESS, ipc::utile::PORT>> lastVisitedProxys_;
         std::optional<std::string> signature_;
@@ -67,8 +68,11 @@ namespace model
 
         // SHOULD HAVE SEPARATE CLASS THAT DOES THIS IN UTILE
         bool saveDataToJson();
+
+        // MAKE THIS INTO A INTERFACE MAYBE
         bool start();
         void pause();
+        void stop();
     };
 }
 #endif // #MODEL_VEHICLETRAKER_HPP

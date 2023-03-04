@@ -23,6 +23,8 @@ namespace model
 		std::thread threadProcess_;
 		std::mutex mutexProcess_;
 		std::condition_variable condVarProcess_;
+		std::atomic_bool shouldPause_ = true;
+		std::atomic_bool shuttingDown_ = false;
 
 		void process();
 		int hexStringToInt(std::string& value);
@@ -34,6 +36,10 @@ namespace model
 		GPSAdapter(std::istream& inputStream);
 		~GPSAdapter() noexcept;
 		GeoCoordinate<DecimalCoordinate> getCurrentCoordinates();
+
+		bool start();
+		bool pause();
+		bool stop();
 	};
 
 }

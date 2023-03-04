@@ -8,10 +8,16 @@ namespace model
 {
 	void GPSAdapter::process()
 	{
-		while (true)
+
+		while (!shuttingDown_)
 		{
 			std::unique_lock<std::mutex> ulock(mutexProcess_);
-			condVarProcess_.wait(ulock, [&] { return (lastCoordinates_.has_value() == false); });
+			condVarProcess_.wait(ulock, [&] { return ((lastCoordinates_.has_value() == false && !shouldPause_) || shuttingDown_); });
+
+			if (shuttingDown_)
+			{
+				continue;
+			}
 
 			std::string NMEAString;
 			inputStream_.sync();
@@ -39,6 +45,23 @@ namespace model
 
 	GPSAdapter::~GPSAdapter()
 	{
+		stop();
+	}
+
+	bool GPSAdapter::start()
+	{
+		shouldPause_ = false;
+	}
+
+	bool GPSAdapter::pause()
+	{
+		shouldPause_ = true;
+	}
+
+	bool GPSAdapter::stop()
+	{
+		shuttingDown_ = true;
+		condVarProcess_.notify_one();
 		if (threadProcess_.joinable())
 		{
 			threadProcess_.join();
@@ -49,7 +72,12 @@ namespace model
 	{
 		condVarProcess_.notify_one();
 		std::unique_lock<std::mutex> ulock(mutexProcess_);
-		condVarProcess_.wait(ulock, [&] { return lastCoordinates_.has_value(); });
+		condVarProcess_.wait(ulock, [&] { return lastCoordinates_.has_value() || shuttingDown_; });
+
+		if (shuttingDown_)
+		{
+			return {};
+		}
 
 		common::utile::GeoCoordinate currentCoordinate = lastCoordinates_.value();
 		lastCoordinates_ = {};
