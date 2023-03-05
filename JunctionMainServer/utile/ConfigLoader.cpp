@@ -51,53 +51,7 @@ namespace utile
 		return false;
 	}
 
-	bool ConfigLoader::loadLatitude(const ptree& jsonRoot, model::Config& config)
-	{
-		const auto& jsonTree = jsonRoot.get_child_optional("latitude");
-		if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
-		{
-			auto value = jsonTree.get().get_value<std::string>();
-			auto latitude = common::utile::StringToDecimalCoordinates(value);
-			if (latitude.has_value())
-			{
-				config.coordinates.latitude = latitude.value();
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	bool ConfigLoader::loadLongitude(const ptree& jsonRoot, model::Config& config)
-	{
-		const auto& jsonTree = jsonRoot.get_child_optional("longitude");
-		if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
-		{
-			auto value = jsonTree.get().get_value<std::string>();
-			auto longitude = common::utile::StringToDecimalCoordinates(value);
-			if (longitude.has_value())
-			{
-				config.coordinates.longitude = longitude.value();
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	bool ConfigLoader::loadLocalServer(const ptree& jsonRoot, model::Config& config)
-	{
-		const auto& jsonTree = jsonRoot.get_child_optional("localServer");
-		if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
-		{
-			config.localProxyServer = jsonTree.get().get_value<std::string>();
-			return true;
-		}
-
-		return false;
-	}
-
-	void ConfigLoader::loadMissingRoadIfPresent(const ptree& jsonRoot, model::Config& config)
+	void ConfigLoader::setMissingRoadIfPresent(const ptree& jsonRoot, model::Config& config)
 	{
 		std::vector <std::string> directions = { "top", "down" , "left", "right" };
 		const auto& jsonTree = jsonRoot.get_child_optional("missingLane");
@@ -116,7 +70,43 @@ namespace utile
 		}
 	}
 
-	model::Config ConfigLoader::load(const std::string& pathToConfigFile)
+	bool ConfigLoader::setServerEnpoint(const ptree& jsonRoot, model::Config& config)
+	{
+		const auto& jsonTree = jsonRoot.get_child_optional("server");
+		if (jsonTree == boost::none)
+		{
+			LOG_ERR << "\"server\" tag missing";
+			return false;
+		}
+
+		return setServerIp(jsonTree.get(), config) && setServerPort(jsonTree.get(), config);
+	}
+
+	bool ConfigLoader::setServerIp(const ptree& jsonRoot, model::Config& config)
+	{
+		const auto& jsonTree = jsonRoot.get_child_optional("ip");
+		if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
+		{
+			config.serverIp = jsonTree.get().get_value<std::string>();
+			return true;
+		}
+
+		return false;
+	}
+
+	bool ConfigLoader::setServerPort(const ptree& jsonRoot, model::Config& config)
+	{
+		const auto& jsonTree = jsonRoot.get_child_optional("port");
+		if (jsonTree != boost::none && jsonTree.get().get_value_optional<uint16_t>() != boost::none)
+		{
+			config.serverPort = jsonTree.get().get_value<uint16_t>();
+			return true;
+		}
+
+		return false;
+	}
+
+	std::optional<model::Config> ConfigLoader::load(const std::string& pathToConfigFile)
 	{
 		model::Config config;
         ptree jsonRoot;
@@ -140,22 +130,13 @@ namespace utile
 			config.maxWaitingTime = 300;
 		}
 
-
-		if (!(loadLatitude(jsonRoot, config) && loadLongitude(jsonRoot, config)))
+		if (!setServerEnpoint(jsonRoot, config))
 		{
-			LOG_ERR << "Coordinates could not be loaded! " << 
-				"Please verify the integrity of your config file";
-			exit(1);
+			LOG_ERR << "Ip and Port not specified";
+			return {};
 		}
 
-		if (!(loadLocalServer(jsonRoot, config)))
-		{
-			LOG_ERR << "Could not load IP Address of the local server. " <<
-				"Please verify the integrity of your config file";
-			exit(1);
-		}
-
-		loadMissingRoadIfPresent(jsonRoot, config);
+		setMissingRoadIfPresent(jsonRoot, config);
 
 		return config;
 	}

@@ -2,13 +2,12 @@
 
 namespace model
 {
-	JunctionServer::JunctionServer(const ipc::utile::IP_ADRESS& host,
-		const ipc::utile::PORT port, 
-		const Config& config):
-		ipc::net::Server<ipc::VehicleDetectionMessages>(host, port),
+	// I can outomate this to make it on start that I query proxy to find the proxy it should be contained in
+	// and just post data 
+	JunctionServer::JunctionServer(const Config& config):
+		ipc::net::Server<ipc::VehicleDetectionMessages>(config.serverIp, config.serverPort),
 		trafficLightStateMachine_(config)
 	{
-		this->localProxyServer_ = config.localProxyServer;
 		trafficLightStateMachine_.initiate();
 	}
 
