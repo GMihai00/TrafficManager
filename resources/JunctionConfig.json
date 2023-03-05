@@ -1,12 +1,12 @@
 {
   "server": {
-    "ip": "IP_SERVER",
-    "port": "PORT"
+    "ip": "127.0.0.1",
+    "port": 5000
   },
   "maxWaitingTime": 120,
   "missingLane": "top",
   "usingRightLane": true,
-  "lanes": {
+  "lanes(disabled)": {
     "top": "IP1",
     "down": "IP2",
     "left": "IP3",

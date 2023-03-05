@@ -9,6 +9,7 @@
 #include "utile/CommandLineParser.hpp"
 #include "utile/Logger.hpp"
 #include "utile/SignalHandler.hpp"
+#include "utile/ErrorCodes.hpp"
 
 using namespace common::utile;
 using namespace common;
@@ -137,6 +138,7 @@ int main(int argc, char* argv[])
 		if (!proxySERVER.start())
 		{
 			LOG_ERR << "Failed to start server";
+			return ipc::utile::SERVER_FAILURE;
 		}
 
 		sigHandler.setAction(SIGINT, [](int singal) { g_condVarEnd.notify_one(); });
@@ -145,10 +147,11 @@ int main(int argc, char* argv[])
 		g_condVarEnd.wait(ulock);
 		LOG_INF << "Finished waiting";
 	}
-	catch (std::runtime_error& err)
+	catch (const std::exception& err)
 	{
-		LOG_ERR << err.what();
-		exit(10);
+		LOG_ERR << "Failed to start server: " << err.what();
+		return ipc::utile::SERVER_FAILURE;
 	}
+
 	return 0;
 }

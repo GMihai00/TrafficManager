@@ -7,14 +7,13 @@ namespace ipc
     {
         void ProxyReply::readIpAdress(Message<ipc::VehicleDetectionMessages>& msg)
         {
-            // IP (IPV4/IPV6) - char[40]
+            // IP (IPV4) - char[9]
             std::vector<char> ip;
-            ip.resize(40);
+            ip.resize(9);
             msg >> ip;
             serverIPAdress_ = std::string(ip.begin(), ip.end());
             //VALIDATE DATA THROW EXCEPTION IF INVALID
-            if (!ipc::utile::IsIPV4(serverIPAdress_) && 
-                !ipc::utile::IsIPV6(serverIPAdress_)) 
+            if (!ipc::utile::IsIPV4(serverIPAdress_))
             { 
                 throw std::runtime_error("Invalid ProxyReply");
             }
@@ -32,22 +31,21 @@ namespace ipc
         void ProxyReply::readCoordinates(Message<ipc::VehicleDetectionMessages>& msg)
         {
             // COORDINATES { latitude, longitude } - double
-            GeoCoordinate<DecimalCoordinate> boundSW{};
-            boundSW.latitude = DECIMALCOORDINATE_INVALID_VALUE;
-            msg >> boundSW.latitude;
-            if (boundSW.latitude == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
-            boundSW.longitude = DECIMALCOORDINATE_INVALID_VALUE;
-            msg >> boundSW.longitude;
-            if (boundSW.longitude == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
-
-           
             GeoCoordinate<DecimalCoordinate> boundNE{};
-            boundNE.latitude = DECIMALCOORDINATE_INVALID_VALUE;
-            msg >> boundNE.latitude;
-            if (boundNE.latitude == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
             boundNE.longitude = DECIMALCOORDINATE_INVALID_VALUE;
             msg >> boundNE.longitude;
             if (boundNE.longitude == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
+            boundNE.latitude = DECIMALCOORDINATE_INVALID_VALUE;
+            msg >> boundNE.latitude;
+            if (boundNE.latitude == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
+
+            GeoCoordinate<DecimalCoordinate> boundSW{};
+            boundSW.longitude = DECIMALCOORDINATE_INVALID_VALUE;
+            msg >> boundSW.longitude;
+            if (boundSW.longitude == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
+            boundSW.latitude = DECIMALCOORDINATE_INVALID_VALUE;
+            msg >> boundSW.latitude;
+            if (boundSW.latitude == DECIMALCOORDINATE_INVALID_VALUE) { throw std::runtime_error("Invalid ProxyReply"); }
 
             serverCoordinates_ = std::make_shared<common::db::BoundingRect>(boundSW, boundNE);
         }
@@ -55,9 +53,10 @@ namespace ipc
 
         ProxyReply::ProxyReply(Message<ipc::VehicleDetectionMessages>& msg)
         {   
-            readIpAdress(msg);
-            readPort(msg);
             readCoordinates(msg);
+            readPort(msg);
+            readIpAdress(msg);
+            
             this->header_ = msg.header;
         }
 

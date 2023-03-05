@@ -171,6 +171,7 @@
     <ClInclude Include="net\ProxyReply.hpp" />
     <ClInclude Include="net\Server.hpp" />
     <ClInclude Include="net\VehicleTrackerMessage.hpp" />
+    <ClInclude Include="utile\ErrorCodes.hpp" />
     <ClInclude Include="utile\IPAdressHelpers.hpp" />
     <ClInclude Include="utile\IPCDataTypes.hpp" />
     <ClInclude Include="utile\MessageIdProvider.hpp" />

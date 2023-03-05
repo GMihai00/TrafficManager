@@ -10,6 +10,7 @@
 #include "utile/CommandLineParser.hpp"
 #include "utile/Logger.hpp"
 #include "utile/SignalHandler.hpp"
+#include "utile/ErrorCodes.hpp"
 
 using namespace common::utile;
 using namespace common;
@@ -61,6 +62,7 @@ int main()
 	catch (std::runtime_error& err)
 	{
 		LOG_ERR << "Client failed to init" << err.what();
+		return ipc::utile::CLIENT_FAILURE;
 	}
 	return 0;
 }

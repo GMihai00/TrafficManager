@@ -88,7 +88,7 @@ namespace ipc
 
                 return msg;
             }
-        
+
             template<typename DataType>
             friend Message<T>& operator >> (Message<T>& msg, std::vector<DataType>& dataVec)
             {
@@ -100,13 +100,26 @@ namespace ipc
                     return msg;
                 }
 
-                size_t sizeAfterPop = msg.body.size() - sizeof(DataType) * dataVec.size();
-                std::memcpy(&dataVec, msg.body.data() + sizeAfterPop, sizeof(DataType) * dataVec.size());
-                msg.body.resize(sizeAfterPop);
-                msg.header.size = msg.size();
+                for (int poz = dataVec.size() - 1; poz >= 0; poz--)
+                {
+                    msg >> dataVec[poz];
+                }
            
                 return msg;
             }
+
+            friend Message<T>& operator << (Message<T>& msg, const std::string& data)
+            {
+                std::vector<char> convertedString(data.begin(), data.end());
+
+                size_t sizeBeforePush = msg.body.size();
+                msg.body.resize(sizeBeforePush + sizeof(char) * convertedString.size());
+                std::memcpy(msg.body.data() + sizeBeforePush, convertedString.data(), sizeof(char) * convertedString.size());
+                msg.header.size = msg.size();
+
+                return msg;
+            }
+
 
             void clear()
             {

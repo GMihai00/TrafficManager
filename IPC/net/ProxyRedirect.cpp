@@ -7,14 +7,13 @@ namespace ipc
     {
         void ProxyRedirect::readIpAdress(Message<ipc::VehicleDetectionMessages>& msg)
         {
-            // IP (IPV4/IPV6) - char[40]
+            // IP (IPV4) - char[9]
             std::vector<char> ip;
-            ip.resize(40);
+            ip.resize(9);
             msg >> ip;
             serverIPAdress_ = std::string(ip.begin(), ip.end());
             //VALIDATE DATA THROW EXCEPTION IF INVALID
-            if (!ipc::utile::IsIPV4(serverIPAdress_) &&
-                !ipc::utile::IsIPV6(serverIPAdress_))
+            if (!ipc::utile::IsIPV4(serverIPAdress_))
             {
                 throw std::runtime_error("Invalid ProxyRedirect");
             }
@@ -31,8 +30,9 @@ namespace ipc
 
         ProxyRedirect::ProxyRedirect(Message<ipc::VehicleDetectionMessages>& msg)
         {
-            readIpAdress(msg);
             readPort(msg);
+            readIpAdress(msg);
+            
             this->header_ = msg.header;
         }
 
