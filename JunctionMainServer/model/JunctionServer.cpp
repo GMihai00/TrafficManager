@@ -19,10 +19,7 @@ namespace model
 
 	void JunctionServer::onClientDisconnect(ipc::utile::ConnectionPtr client)
 	{
-		if (!trafficLightStateMachine_.endEmergencyState(client->getIpAdress()))
-		{
-			trafficLightStateMachine_.unregisterClient(client->getIpAdress());
-		}
+		trafficLightStateMachine_.endEmergencyState(client->getIpAdress());
 	}
 
 	void JunctionServer::aproveMessage(

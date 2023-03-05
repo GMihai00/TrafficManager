@@ -72,6 +72,7 @@ namespace model
 
 		bool TrafficLightStateMachine::unregisterClient(ipc::utile::IP_ADRESS ip)
 		{
+			// crapa de aici somehow
 			std::scoped_lock lock(mutexClients_);
 			std::optional<common::utile::LANE> corespondingLane = {};
 			for (const auto& [lane, clientsConnected] : clientsConnected_)
@@ -100,7 +101,7 @@ namespace model
 
 		bool TrafficLightStateMachine::startEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
-			std::scoped_lock lock(mutexClients_);
+			//std::scoped_lock lock(mutexClients_);
 			if (!registerClient(lane, ip))
 			{
 				return false;
@@ -112,7 +113,7 @@ namespace model
 
 		bool TrafficLightStateMachine::endEmergencyState(ipc::utile::IP_ADRESS ip)
 		{
-			std::scoped_lock lock(mutexClients_);
+			//std::scoped_lock lock(mutexClients_);
 			if (!unregisterClient(ip))
 			{
 				return false;

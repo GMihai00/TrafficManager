@@ -124,7 +124,11 @@ namespace ipc
     
             std::string getIpAdress() const
             {
-                return socket_.remote_endpoint().address().to_string();
+                if (socket_.is_open())
+                {
+                    return socket_.remote_endpoint().address().to_string();
+                }
+                return {};
             }
 
             bool connectToServer(const boost::asio::ip::tcp::resolver::results_type& endpoints)

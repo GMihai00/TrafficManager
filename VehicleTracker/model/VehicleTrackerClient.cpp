@@ -22,7 +22,8 @@ namespace model
 			{
 				if (lastVisitedProxys_.empty())
 				{
-					throw std::runtime_error("Failed to communicate with proxy");
+					continue;
+					//throw std::runtime_error("Failed to communicate with proxy");
 				}
 
 				if (!connect(lastVisitedProxys_.top().first, lastVisitedProxys_.top().second))
