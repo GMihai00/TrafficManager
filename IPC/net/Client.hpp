@@ -46,7 +46,7 @@ namespace ipc
         public:
             Client() : idleWork_(context_)
             {
-                
+                threadContext_ = std::thread([this]() { context_.run(); });
             }
 
             virtual ~Client() noexcept
@@ -54,6 +54,7 @@ namespace ipc
                 shuttingDown_ = true;
                 LOG_INF << "Server shutting down";
                 disconnect();
+                stop();
             }
     
             bool connect(const utile::IP_ADRESS& host, const ipc::utile::PORT port)
@@ -79,7 +80,6 @@ namespace ipc
             
                     if (connection_->connectToServer(endpoints))
                     {
-                        threadContext_ = std::thread([this]() { context_.run(); });
                         return true;
                     }
            
@@ -99,16 +99,18 @@ namespace ipc
                 {
                     connection_->disconnect();
                 }
-        
-                context_.stop();
-        
-                condVarUpdate_.notify_one();
-                if (threadContext_.joinable())
-                    threadContext_.join();
-                
                 connection_.release();
             }
     
+            void stop()
+            {
+                context_.stop();
+
+                condVarUpdate_.notify_one();
+                if (threadContext_.joinable())
+                    threadContext_.join();
+            }
+
             bool isConnected()
             {
                 if (connection_)

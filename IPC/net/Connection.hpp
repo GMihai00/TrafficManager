@@ -57,7 +57,7 @@ namespace ipc
                     return a.getId() < b.getId();
                 }
             };
-            // AICI RAMANE STUCK
+
             void readData(std::vector<uint8_t>& vBuffer, size_t toRead)
             {
                 size_t left = toRead;
@@ -65,12 +65,9 @@ namespace ipc
                 {
                     if (shuttingDown_)
                         break;
-
-                    size_t available = socket_.available();
-                    size_t canRead = std::min(left, available);
             
                     boost::system::error_code errcode;
-                    socket_.read_some(boost::asio::buffer(vBuffer.data() + (toRead - left), canRead), errcode);
+                    size_t read = socket_.read_some(boost::asio::buffer(vBuffer.data() + (toRead - left), sizeof(uint8_t) * left), errcode);
             
                     if (errcode)
                     {
@@ -78,7 +75,7 @@ namespace ipc
                         disconnect();
                         return;
                     }
-                    left -= canRead;
+                    left -= read;
                 }
             }
         public:
