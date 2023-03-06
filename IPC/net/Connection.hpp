@@ -49,6 +49,7 @@ namespace ipc
             std::atomic_bool isWriting_;
             std::atomic_bool shuttingDown_ = false;
             uint32_t id_;
+            std::string ipAdress_;
             LOGGER("CONNECTION-UNDEFINED");
 
         private:
@@ -124,11 +125,7 @@ namespace ipc
     
             std::string getIpAdress() const
             {
-                if (socket_.is_open())
-                {
-                    return socket_.remote_endpoint().address().to_string();
-                }
-                return {};
+                return ipAdress_;
             }
 
             bool connectToServer(const boost::asio::ip::tcp::resolver::results_type& endpoints)
@@ -180,6 +177,7 @@ namespace ipc
                     if (socket_.is_open())
                     {
                         isReading_ = true;
+                        ipAdress_ = socket_.remote_endpoint().address().to_string();
                         return true;
                     }
 
@@ -224,6 +222,13 @@ namespace ipc
                 return socket_.is_open();
             }
     
+            std::shared_ptr<Connection<T>> get_shared()
+            {
+                if (shuttingDown_)
+                    return nullptr;
+
+                return this->shared_from_this();
+            }
             void readMessages()
             {
                 std::unique_lock<std::mutex> ulock(mutexRead_);
@@ -259,13 +264,14 @@ namespace ipc
                 LOG_DBG << "Finished reading message: " << incomingTemporaryMessage_;
             }
     
+            // crash here
             void addToIncomingMessageQueue()
             {
                 // THIS IS SO WRONG
                 if (owner_ == Owner::Server)
                 {
                     const auto& pair = std::make_pair(
-                        OwnedMessage<T>{this->shared_from_this(), incomingTemporaryMessage_},
+                        OwnedMessage<T>{get_shared(), incomingTemporaryMessage_},
                         incomingTemporaryMessage_.header.hasPriority);
                     incomingMessages_.push(pair);
                 }
