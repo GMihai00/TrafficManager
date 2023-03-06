@@ -108,7 +108,11 @@ namespace model
 
 		auto start = gpsAdapter_.getCurrentCoordinates();
 		auto current = gpsAdapter_.getCurrentCoordinates();
-		auto direction = calculateDirection(start, current);
+
+		if (!(start.has_value() && current.has_value()))
+			return false;
+
+		auto direction = calculateDirection(start.value(), current.value());
 		if (!direction.has_value()) { return false; }
 		followedLane_ = direction.value();
 
@@ -116,7 +120,7 @@ namespace model
 		ipc::net::Message<ipc::VehicleDetectionMessages> message;
 		message.header.id = msgId;
 		message.header.type = ipc::VehicleDetectionMessages::VDB;
-		message << start.latitude << start.longitude << current.latitude << current.longitude;
+		message << start.value().latitude << start.value().longitude << current.value().latitude << current.value().longitude;
 		send(message);
 
 		// WAIT FOR RESPONSE
@@ -202,15 +206,18 @@ namespace model
 
 		return true;
 	}
-
+	
+	// AICI PASSED SI IS PASSING SOMEHOW IS FAILING 
 	void VehicleTrackerClient::waitToPassJunction()
 	{
 		auto pointA = gpsAdapter_.getCurrentCoordinates();
 		auto pointB = gpsAdapter_.getCurrentCoordinates();
-		while (!(!nextJunction_->isPassing(pointA, pointB) || nextJunction_->passedJunction(pointA, pointB)))
+		while (pointA.has_value() && pointB.has_value() 
+			&& !nextJunction_->passedJunction(pointA.value(), pointB.value()) 
+			&& nextJunction_->isPassing(pointA.value(), pointB.value()))
 		{
-			pointB = pointA;
-			gpsAdapter_.getCurrentCoordinates();
+			pointA = pointB;
+			pointB = gpsAdapter_.getCurrentCoordinates();
 		}
 	}
 

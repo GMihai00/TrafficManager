@@ -69,7 +69,7 @@ namespace model
 		}
 	}
 
-	GeoCoordinate<DecimalCoordinate> GPSAdapter::getCurrentCoordinates()
+	std::optional<GeoCoordinate<DecimalCoordinate>> GPSAdapter::getCurrentCoordinates()
 	{
 		condVarProcess_.notify_one();
 		std::unique_lock<std::mutex> ulock(mutexProcess_);

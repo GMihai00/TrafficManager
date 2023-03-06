@@ -35,7 +35,7 @@ namespace model
 		GPSAdapter() = delete;
 		GPSAdapter(std::istream& inputStream);
 		~GPSAdapter() noexcept;
-		GeoCoordinate<DecimalCoordinate> getCurrentCoordinates();
+		std::optional<GeoCoordinate<DecimalCoordinate>> getCurrentCoordinates();
 
 		bool start();
 		void pause();

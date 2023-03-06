@@ -37,6 +37,7 @@ namespace ipc
             std::thread threadUpdate_;
             std::condition_variable condVarUpdate_;
             std::mutex mutexUpdate_;
+            std::mutex mutexMessage_;
             boost::asio::ip::tcp::acceptor connectionAccepter_;
             common::utile::ThreadSafeQueue<uint32_t> availableIds_;
             std::map<uint32_t, std::shared_ptr<Connection<T>>> connections_;
@@ -172,11 +173,12 @@ namespace ipc
     
             void messageClient(std::shared_ptr<Connection<T>> client, const Message<T>& msg)
             {
+                std::scoped_lock lock(mutexMessage_);
                 if (client && client->isConnected())
                 {
                     client->send(msg);
                 }
-                else
+                else if (client)
                 {
                     onClientDisconnect(client);
                     connections_.erase(client->getId());
