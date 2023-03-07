@@ -1,3 +1,4 @@
+#pragma once
 #ifndef COMMON_UTILS_LOGGER_HPP
 #define COMMON_UTILS_LOGGER_HPP
 
@@ -5,6 +6,8 @@
 #include <string>
 #include <cstdlib>
 #include <mutex>
+
+#include "Log.hpp"
 
 #define LOGGER(name) common::utile::Logger logger_{name}
 #define LOG_SET_NAME(name) logger_.setName(name)
@@ -25,97 +28,45 @@ namespace common
             INF
         };
 
-        inline std::ostream& operator<<(std::ostream & os, LogTypes & type)
+        inline std::string toString(const LogTypes& type)
         {
             switch (type)
             {
             case LogTypes::WRN:
-                os << "WRN";
-                break;
+                return "WRN";
             case LogTypes::ERR:
-                os << "ERR";
-                break;
+                return "ERR";
             case LogTypes::INF:
-                os << "INF";
-                break;
+                return "INF";
             case LogTypes::DBG:
-                os << "DBG";
-                break;
+                return "DBG";
             }
-            return os;
+            return "";
         }
 
         class Logger
         {
         protected:
-            std::ostream& os_;
-            std::ostream& oserr_;
+            Log& log_;
             std::string name_;
-            std::mutex mutexOutput_;
         public:
             LogTypes type_;
             Logger(const std::string& name,
-                const LogTypes type = LogTypes::INF,
-                std::ostream& os = std::cout,
-                std::ostream& oserr = std::cerr) :
-                os_(os),
-                oserr_(oserr)
-            {
-                this->name_ = name;
-                this->type_ = type;
-            }
+                const LogTypes type = LogTypes::INF);
             ~Logger() = default;
 
-            template<typename T>
-            friend std::ostream& operator << (Logger& logger, T data)
+            template<class T>
+            Logger& operator <<(const T& data)
             {
-                 std::scoped_lock lock(logger.mutexOutput_);
-                 // TODO: SOMEHOW FLAG NOT SET 
-                 /*if (logger.type_ == LogTypes::DBG &&
-                     !(std::getenv("LOGGER_DEBUG") && std::getenv("LOGGER_DEBUG") == "TRUE"))
-                 {
-                     return logger.os_;
-                 }*/
-
-                if (logger.type_ == LogTypes::ERR)
-                {
-                    logger.oserr_ << logger.type_
-                        << " [" << logger.name_ << "] "
-                        << data;
-                
-                    return logger.oserr_;
-                }
-                else
-                {
-                    logger.os_ << logger.type_
-                        << " [" << logger.name_ << "] "
-                        << data;
-    
-                    return logger.os_;
-                }
+                log_ << toString(type_) << " [" << name_ << "] " << data << std::endl;
+                return *this;
             }
     
-            void setName(const std::string& name)
-            {
-                this->name_ = name;
-            }
+            void setName(const std::string& name);
 
-            friend Logger& operator<<(Logger& logger, LogTypes type);
+            Logger& operator<<(const LogTypes& type);
         };
 
-        inline Logger& operator<<(Logger& logger, LogTypes type)
-        {
-            logger.type_ = type;
-            if (logger.type_ == LogTypes::ERR)
-            {
-                logger.oserr_ << '\n';
-            }
-            else
-            {
-                logger.os_ << '\n';
-            }
-            return logger;
-        }
     } // namespace utile
 } // namespace common
 #endif // #COMMON_UTILS_LOGGER_HPP

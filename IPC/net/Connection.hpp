@@ -235,10 +235,9 @@ namespace ipc
                 condVarRead_.wait(ulock, [this]() { return isReading_ || shuttingDown_; });
                 ulock.unlock();
 
-                // crash after reading header from proxy
                 while (!shuttingDown_)
                 {
-                    std::scoped_lock lock(mutexRead_);
+                     std::scoped_lock lock(mutexRead_);
                     readHeader();
                     readBody();
                     addToIncomingMessageQueue();

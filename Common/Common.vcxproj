@@ -162,6 +162,7 @@
     <ClInclude Include="utile\DataTypes.hpp" />
     <ClInclude Include="utile\GeoCoordinate.hpp" />
     <ClInclude Include="utile\IObserver.hpp" />
+    <ClInclude Include="utile\Log.hpp" />
     <ClInclude Include="utile\Logger.hpp" />
     <ClInclude Include="utile\Observer.hpp" />
     <ClInclude Include="utile\SignalHandler.hpp" />
@@ -179,6 +180,7 @@
     <ClCompile Include="utile\CommandLineParser.cpp" />
     <ClCompile Include="utile\DataTypes.cpp" />
     <ClCompile Include="utile\GeoCoordinate.cpp" />
+    <ClCompile Include="utile\Logger.cpp" />
     <ClCompile Include="utile\Observer.cpp" />
     <ClCompile Include="utile\SignalHandler.cpp" />
     <ClCompile Include="utile\SignatureHelpers.cpp" />
