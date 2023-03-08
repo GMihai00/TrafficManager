@@ -36,7 +36,10 @@ namespace model
 		message.header.type = ipc::VehicleDetectionMessages::NACK;
 		messageClient(client, message);
 	}
-
+	
+	// astea trebuie facute de fapt de catre jms
+	// sa updateze baza de date
+	// nu are treaba proxy cu ele
 	void ProxyServer::increaseLoad()
 	{
 		//have to rethink this

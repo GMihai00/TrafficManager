@@ -77,7 +77,7 @@ namespace ipc
              
                 if (msg.body.size() < sizeof(DataType))
                 {
-                    std::cerr << "Error insufficient data";
+                    std::cerr << "ERR [MESSAGE] Tried reading data, but it was insufficient\n";
                     return msg;
                 }
 
@@ -96,7 +96,7 @@ namespace ipc
                
                 if (msg.body.size() < sizeof(DataType) * dataVec.size())
                 {
-                    std::cerr << "Error insufficient data";
+                    std::cerr << "ERR [MESSAGE] Tried reading data, but it was insufficient\n";
                     return msg;
                 }
 

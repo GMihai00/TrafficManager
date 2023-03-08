@@ -59,25 +59,26 @@ namespace ipc
                 }
             };
 
-            void readData(std::vector<uint8_t>& vBuffer, size_t toRead)
+            bool readData(std::vector<uint8_t>& vBuffer, size_t toRead)
             {
                 size_t left = toRead;
                 while (left && !shuttingDown_)
                 {
                     if (shuttingDown_)
-                        break;
+                        return false;
             
                     boost::system::error_code errcode;
-                    size_t read = socket_.read_some(boost::asio::buffer(vBuffer.data() + (toRead - left), sizeof(uint8_t) * left), errcode);
+                    size_t read = socket_.read_some(boost::asio::buffer(vBuffer.data() + (toRead - left), left), errcode);
             
                     if (errcode)
                     {
-                        LOG_ERR << "Error while reading data";
+                        LOG_ERR << "Error while reading data err: " << errcode.value();
                         disconnect();
-                        return;
+                        return false;
                     }
                     left -= read;
                 }
+                return true;
             }
         public:
             Connection(Owner owner,
@@ -237,33 +238,38 @@ namespace ipc
 
                 while (!shuttingDown_)
                 {
-                     std::scoped_lock lock(mutexRead_);
-                    readHeader();
-                    readBody();
+                    std::scoped_lock lock(mutexRead_);
+                    if (!readHeader()) { break; }
+                    if (!readBody()) { break; }
                     addToIncomingMessageQueue();
                     condVarUpdate_.notify_one();
                 }
+                isReading_ = false;
             }
 
-            void readHeader()
+            // AICI NU VERIFIC DACA READ DATA NU CUMVA A DAT FAIL!!!
+            bool readHeader()
             {
                 std::vector<uint8_t> vBuffer(sizeof(MessageHeader<T>));
         
-                readData(vBuffer, sizeof(MessageHeader<T>));
+                if (!readData(vBuffer, sizeof(MessageHeader<T>))) { return false; }
+
                 std::memcpy(&incomingTemporaryMessage_.header, vBuffer.data(), sizeof(MessageHeader<T>));
                 LOG_DBG << "Finished reading header for message: " << incomingTemporaryMessage_;
+                return true;
             }
     
-            void readBody()
+            bool readBody()
             {
-                std::vector<uint8_t> vBuffer(incomingTemporaryMessage_.header.size);
+                std::vector<uint8_t> vBuffer(incomingTemporaryMessage_.header.size * sizeof(uint8_t));
     
-                readData(vBuffer, sizeof(uint8_t) * incomingTemporaryMessage_.header.size);
+                if (!readData(vBuffer, sizeof(uint8_t) * incomingTemporaryMessage_.header.size)) { return false; }
+
                 incomingTemporaryMessage_ << vBuffer;
                 LOG_DBG << "Finished reading message: " << incomingTemporaryMessage_;
+                return true;
             }
     
-            // crash here
             void addToIncomingMessageQueue()
             {
                 // THIS IS SO WRONG
@@ -308,7 +314,15 @@ namespace ipc
                 }
                 isWriting_ = true;
                 // CONTEXT NOT RUNNING HERE SOMEHOW
-                boost::asio::post(context_, postCallback);
+
+                if (isConnected())
+                {
+                    boost::asio::post(context_, postCallback);
+                }
+                else
+                {
+                    LOG_WARN << "Failed to post message, client is disconnected";
+                }
             }
     
             void writeMessages()
@@ -331,12 +345,15 @@ namespace ipc
                         {
                             LOG_ERR << "Failed to get image from queue";
                             return;
-                        }
+                        } 
                         const auto& outgoingMessage = outgoingMsg.value().first;
-                        writeHeader(outgoingMessage);
+
+                        LOG_DBG << "Started writing message: " << outgoingMessage;
+                        if (!writeHeader(outgoingMessage)) { outgoingMessages_.clear(); break; }
+
                         if (outgoingMessage.header.size > 0)
                         {
-                            writeBody(outgoingMessage);
+                            if (!writeBody(outgoingMessage)) { outgoingMessages_.clear(); break; }
                         }
                         else
                         {
@@ -347,7 +364,7 @@ namespace ipc
                 }
             }
     
-            void writeHeader(const Message<T>& outgoingMessage)
+            bool writeHeader(const Message<T>& outgoingMessage)
             {
                 // this needs to be changed
                 boost::system::error_code errcode;
@@ -357,12 +374,13 @@ namespace ipc
                 {
                     LOG_ERR << "Failed to write message header: " << errcode.message();
                     disconnect();
-                    return;
+                    return false;
                 }
                 LOG_DBG << "Finished writing header";
+                return true;
             }
     
-            void writeBody(const Message<T>& outgoingMessage)
+            bool writeBody(const Message<T>& outgoingMessage)
             {
                 boost::system::error_code errcode;
                 boost::asio::write(socket_, boost::asio::buffer(outgoingMessage.body.data(), sizeof(uint8_t) * outgoingMessage.size()), errcode);
@@ -371,9 +389,10 @@ namespace ipc
                 {
                     LOG_ERR << "Failed to write message body: " << errcode.message();
                     disconnect();
-                    return;
+                    return false;
                 }
                 LOG_DBG << "Finished writing message";
+                return true;
             }
     
             void disconnect()

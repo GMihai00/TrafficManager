@@ -22,7 +22,6 @@
 #include "../utile/IPCDataTypes.hpp"
 #include "../utile/IPAdressHelpers.hpp"
 
-// REMOVE ASYNC OPERATIONS
 
 namespace ipc
 {
@@ -78,19 +77,14 @@ namespace ipc
                         incomingMessages_,
                         condVarUpdate_);
             
-                    if (connection_->connectToServer(endpoints))
-                    {
-                        return true;
-                    }
-           
+                    return connection_->connectToServer(endpoints);
+
                 }
                 catch(const std::exception& e)
                 {
                     LOG_ERR << "Client exception: " << e.what() << '\n';
                     return false;
                 }
-        
-                return false;
             }
     
             void disconnect()
@@ -99,7 +93,7 @@ namespace ipc
                 {
                     connection_->disconnect();
                 }
-                connection_.release();
+                connection_.reset();
             }
     
             void stop()
@@ -113,12 +107,7 @@ namespace ipc
 
             bool isConnected()
             {
-                if (connection_)
-                {
-                    return connection_->isConnected();
-                }
-        
-                return false;
+                return connection_ && connection_->isConnected();
             }
     
             bool answearRecieved()
