@@ -95,7 +95,7 @@ namespace cvision
         }
     }
 
-    bool ObjectTracker:: (bool shouldRender)
+    bool ObjectTracker::startTracking(bool shouldRender)
     {
         if (camera_.start())
         {

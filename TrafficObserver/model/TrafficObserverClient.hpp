@@ -15,7 +15,6 @@
 
 namespace model
 {
-    // CONFIG FOR RIGHTLANE SCENARIO AND IP ADRESS
     class TrafficObserverClient : public ipc::net::Client<ipc::VehicleDetectionMessages>
     {
     private:
@@ -23,15 +22,15 @@ namespace model
         cvision::ObjectTracker carTracker_;
         common::utile::IObserverPtr observer_;
         
-        bool usingRightLane_ = false; // FOR NOW JUST DEFAULTED
-        std::optional<std::string> signature_; // REALIZE THAT I NEED THIS FOR ALL CONNECTIONS!!!
+        bool usingRightLane_;
+        std::string keyword_;
 
         LOGGER("TRAFFICOBSERVER-CLIENT");
         bool startTrackingCars();
         void stopTrackingCars();
         bool sendData(size_t numberOfCars);
     public:
-        TrafficObserverClient();
+        TrafficObserverClient(std::string keyword, bool usingRightLane);
         ~TrafficObserverClient();
 
         void handleNewCarData();

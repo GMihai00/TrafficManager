@@ -15,8 +15,10 @@ namespace model
         }
     }
 
-    TrafficObserverClient::TrafficObserverClient() :
+    TrafficObserverClient::TrafficObserverClient(std::string keyword, bool usingRightLane) :
         ipc::net::Client<ipc::VehicleDetectionMessages>(),
+        keyword_(keyword),
+        usingRightLane_(usingRightLane),
         carTracker_(0)
     {
         observer_ = std::make_shared<common::utile::Observer>(std::bind(&TrafficObserverClient::handleNewCarData, this));
