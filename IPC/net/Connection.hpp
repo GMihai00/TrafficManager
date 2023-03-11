@@ -72,7 +72,8 @@ namespace ipc
             
                     if (errcode)
                     {
-                        LOG_ERR << "Error while reading data err: " << errcode.value();
+                        
+                        LOG_ERR << "Error while reading data err: " << errcode.value() << errcode.message();
                         disconnect();
                         return false;
                     }

@@ -77,7 +77,7 @@ namespace ipc
              
                 if (msg.body.size() < sizeof(DataType))
                 {
-                    std::cerr << "ERR [MESSAGE] Tried reading data, but it was insufficient\n";
+                    std::cerr << "WARN [MESSAGE] Tried reading data, but it was insufficient\n";
                     return msg;
                 }
 
@@ -96,7 +96,7 @@ namespace ipc
                
                 if (msg.body.size() < sizeof(DataType) * dataVec.size())
                 {
-                    std::cerr << "ERR [MESSAGE] Tried reading data, but it was insufficient\n";
+                    std::cerr << "WARN [MESSAGE] Tried reading data, but it was insufficient\n";
                     return msg;
                 }
 
@@ -127,6 +127,15 @@ namespace ipc
                 header.id = 0;
                 header.hasPriority = false;
                 header.size = this->size();
+            }
+
+            Message<T> clone()
+            {
+                Message<T> copy;
+                copy.header = this->header;
+                copy.body = this->body;
+
+                return copy;
             }
         };
     

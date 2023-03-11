@@ -43,8 +43,6 @@ namespace model
 		ProxyServer(const ProxyServer&) = delete;
 		virtual ~ProxyServer() noexcept = default;
 
-		void increaseLoad();
-		void decreaseLoad();
 		virtual bool onClientConnect(ipc::utile::ConnectionPtr client) override;
 		virtual void onClientDisconnect(ipc::utile::ConnectionPtr client) override;
 		virtual void onMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg) override;

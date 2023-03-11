@@ -36,30 +36,13 @@ namespace model
 		message.header.type = ipc::VehicleDetectionMessages::NACK;
 		messageClient(client, message);
 	}
-	
-	// astea trebuie facute de fapt de catre jms
-	// sa updateze baza de date
-	// nu are treaba proxy cu ele
-	void ProxyServer::increaseLoad()
-	{
-		//have to rethink this
-		//dbWrapper_->updateProxyLoad(dbProxy_, true);
-	}
-
-	void ProxyServer::decreaseLoad()
-	{
-		//have to rethink this
-		//dbWrapper_->updateProxyLoad(dbProxy_, false);
-	}
 
 	bool ProxyServer::onClientConnect(ipc::utile::ConnectionPtr client)
 	{
-		increaseLoad();
 		return true;
 	}
 	void ProxyServer::onClientDisconnect(ipc::utile::ConnectionPtr client)
 	{
-		decreaseLoad();
 	}
 
 	void ProxyServer::onMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
@@ -163,6 +146,7 @@ namespace model
 
 	void ProxyServer::handleMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
+		auto backupMsg = msg.clone();
 		switch (msg.header.type)
 		{
 		case ipc::VehicleDetectionMessages::VDB:
@@ -183,7 +167,7 @@ namespace model
 				}
 				else
 				{
-					redirect(client, msg);
+					redirect(client, backupMsg);
 				}
 			default:
 				break;

@@ -155,18 +155,19 @@ namespace model
 		}
 		catch (const std::runtime_error&)
 		{
-			LOG_DBG << "REDIRECTED TO ANOTHER PROXY";
 		}
 
 		try
 		{
 			ipc::net::ProxyRedirect redirect{ msg };
+			LOG_DBG << "Redirected";
 			return switchConnectionToRedirectedProxy(redirect);
 		}
 		catch (const std::runtime_error&)
 		{
 			// IF WE REACHED THIS POINT WE JUST GOT A NACK MESSAGE
 			// FOR NOW NO NEED TO REPARSE IT TO SEE IF IT IS NACK OR NOT
+			LOG_DBG << "Message rejected";
 			return false;
 		}
 	}
