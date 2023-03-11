@@ -6,7 +6,8 @@ namespace model
 	// and just post data 
 	JunctionServer::JunctionServer(const Config& config):
 		ipc::net::Server<ipc::VehicleDetectionMessages>(config.serverIp, config.serverPort),
-		trafficLightStateMachine_(config)
+		trafficLightStateMachine_(config),
+		laneToKeyword_(config.laneToKeyword)
 	{
 		trafficLightStateMachine_.initiate();
 	}
@@ -41,14 +42,36 @@ namespace model
 		messageClient(client ,message);
 	}
 
+	boost::optional<common::utile::LANE> JunctionServer::getLaneBasedOnKeyword(std::string keyword)
+	{
+		for (const auto& entry : laneToKeyword_)
+		{
+			if (entry.second == keyword)
+			{
+				return entry.first;
+			}
+		}
+		return boost::none;
+	}
+
 	boost::optional<common::utile::LANE> JunctionServer::getMessageSourceLane(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
 		switch (msg.header.type)
-		{
+		{ 
 		case ipc::VehicleDetectionMessages::VCDR:
 		{
-			return trafficLightStateMachine_.getVehicleTrackerLane(client->getIpAdress());
+			auto vtLane = trafficLightStateMachine_.getVehicleTrackerLane(client->getIpAdress());
+			if (vtLane != boost::none)
+			{
+				return vtLane;
+			}
+
+			std::string keyword;
+			keyword.resize(msg.header.size);
+			msg >> keyword;
+
+			return getLaneBasedOnKeyword(keyword);
 		}
 		case ipc::VehicleDetectionMessages::VDB:
 		{
@@ -84,6 +107,15 @@ namespace model
 	void JunctionServer::handleMessage(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, common::utile::LANE lane)
 	{
+		if (msg.header.type == ipc::VehicleDetectionMessages::VCDR)
+		{
+			if (!trafficLightStateMachine_.registerVehicleTrackerIpAdress(lane, client->getIpAdress()))
+			{
+				rejectMessage(client, msg);
+				return;
+			}
+		}
+
 		if (msg.header.hasPriority)
 		{
 			if (!trafficLightStateMachine_.startEmergencyState(lane, client->getIpAdress()))

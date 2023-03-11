@@ -21,7 +21,7 @@ namespace utile
 	private:
 		LOGGER("CONFIG-LOADER");
 
-		bool setLaneIPs(const ptree& jsonRoot, model::Config& config);
+		bool setLaneKeywords(const ptree& jsonRoot, model::Config& config);
 		bool setUsedLane(const ptree& jsonRoot, model::Config& config);
 		bool setMaxWaitingTime(const ptree& jsonRoot, model::Config& config);
 		bool setServerEnpoint(const ptree& jsonRoot, model::Config& config);

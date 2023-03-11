@@ -6,10 +6,10 @@
   "maxWaitingTime": 120,
   "missingLane": "top",
   "usingRightLane": true,
-  "lanes(disabled)": {
-    "top": "IP1",
-    "down": "IP2",
-    "left": "IP3",
-    "right": "IP4"
+  "lanes": {
+    "top": "keyword1",
+    "down": "keyword2",
+    "left": "keyword3",
+    "right": "keyword3"
   }
 }

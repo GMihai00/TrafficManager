@@ -13,7 +13,8 @@ namespace model
 {
 	struct Config
 	{
-		std::map<common::utile::LANE, ipc::utile::IP_ADRESS> laneToIPAdress;
+		// KEYWORDS HAVE FIXED SIDE
+		std::map<common::utile::LANE, std::string> laneToKeyword;
 		bool usingLeftLane;
 		uint16_t maxWaitingTime;
 		ipc::utile::IP_ADRESS serverIp;

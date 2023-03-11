@@ -10,8 +10,7 @@ namespace model
 		TrafficLightStateMachine::TrafficLightStateMachine(const Config& config) :
 			greenLightDuration_(config.maxWaitingTime),
 			regLightDuration_(120), // TO CHANGE THIS UPDATED BY ML
-			usingLeftLane_(config.usingLeftLane),
-			laneToVehicleTrackerIPAdress_(config.laneToIPAdress)
+			usingLeftLane_(config.usingLeftLane)
 		{
 			greenLightObserver_ = std::make_shared<Observer>(
 				std::bind(&TrafficLightStateMachine::greenLightExpireCallback, this));
@@ -241,6 +240,18 @@ namespace model
 			updateTrafficState();
 			updateGreenLightDuration();
 			greenLightTimer_.resetTimer(greenLightDuration_);
+		}
+
+		bool TrafficLightStateMachine::registerVehicleTrackerIpAdress(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ipAdress)
+		{
+			std::scoped_lock lock(mutexClients_);
+			if (laneToVehicleTrackerIPAdress_.find(lane) != laneToVehicleTrackerIPAdress_.end() && laneToVehicleTrackerIPAdress_.at(lane) != ipAdress)
+			{
+				LOG_ERR << "Camera already connect to the give lane. Please disable it";
+				return false;
+			}
+			laneToVehicleTrackerIPAdress_[lane] = ipAdress;
+			return true;
 		}
 
 	} // namespace controller

@@ -37,7 +37,7 @@ namespace cvision
 		std::shared_ptr<ImageProcessor> imageProcessor_;
 		std::shared_ptr<ImageRender> imageRender_;
 		MovingObjGroupPtrList movingObjects_;
-		std::shared_ptr<CarDetect> carDetector_;
+		// std::shared_ptr<CarDetect> carDetector_;
 		MovingObjGroupPtrList cars_;
 		std::optional<cv::Mat> firstImageFrame_;
 		std::optional<cv::Mat> secondImageFrame_;

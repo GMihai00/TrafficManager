@@ -5,6 +5,7 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <string>
 
 #include "net/Server.hpp"
 #include "MessageTypes.hpp"
@@ -21,6 +22,7 @@ namespace model
 		
 		//std::thread threadProcess_;
 		controller::TrafficLightStateMachine trafficLightStateMachine_;
+		std::map<common::utile::LANE, std::string> laneToKeyword_;
 		Config config_;
 		LOGGER("JUNCTION-SERVER");
 
@@ -30,6 +32,7 @@ namespace model
 			ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, boost::optional<common::utile::LANE> lane);
 		void aproveMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 		void rejectMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
+		boost::optional<common::utile::LANE> getLaneBasedOnKeyword(std::string keyword);
 	public:
 		JunctionServer(const Config& config);
 		JunctionServer(const JunctionServer&) = delete;

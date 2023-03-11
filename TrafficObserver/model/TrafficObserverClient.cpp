@@ -51,7 +51,7 @@ namespace model
 
     bool TrafficObserverClient::startTrackingCars()
     {
-        return carTracker_.startTracking();
+        return carTracker_.startTracking(true);
     }
 
     void TrafficObserverClient::stopTrackingCars()

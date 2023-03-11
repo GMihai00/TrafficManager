@@ -5,7 +5,7 @@
 
 namespace utile
 {
-	bool ConfigLoader::setLaneIPs(const ptree& jsonRoot, model::Config& config)
+	bool ConfigLoader::setLaneKeywords(const ptree& jsonRoot, model::Config& config)
 	{
 		int count = 0;
 		const auto& jsonTree = jsonRoot.get_child_optional("lanes");
@@ -20,7 +20,7 @@ namespace utile
 			const auto& jsonTreeDir = jsonTree.get().get_child_optional(directions[poz]);
 			if (jsonTreeDir != boost::none && jsonTreeDir.get().get_value_optional<std::string>() != boost::none)
 			{
-				config.laneToIPAdress[common::utile::LANE(poz)] = jsonTreeDir.get().get_value<std::string>();
+				config.laneToKeyword[common::utile::LANE(poz)] = jsonTreeDir.get().get_value<std::string>();
 				count++;
 			}
 		}
@@ -113,9 +113,9 @@ namespace utile
 
         read_json(pathToConfigFile, jsonRoot);
        
-		if (!setLaneIPs(jsonRoot, config))
+		if (!setLaneKeywords(jsonRoot, config))
 		{
-			LOG_WARN << "TOs not found. The server will read messages only from VTs";
+			LOG_WARN << "TOs keywords not found. The server will read messages only from VTs";
 		}
 
 		if (!setUsedLane(jsonRoot, config))

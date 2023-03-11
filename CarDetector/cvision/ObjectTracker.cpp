@@ -8,8 +8,8 @@ namespace cvision
         attachedObserver_(observer),
         camera_(idCamera),
         imageProcessor_(new ImageProcessor()),
-        imageRender_(new ImageRender()),
-        carDetector_(new CarDetect())
+        imageRender_(new ImageRender())
+       // carDetector_(new CarDetect())
     {
     }
 
@@ -17,8 +17,8 @@ namespace cvision
         attachedObserver_(observer),
         camera_(videoPath),
         imageProcessor_(new ImageProcessor()),
-        imageRender_(new ImageRender()),
-        carDetector_(new CarDetect())
+        imageRender_(new ImageRender())
+       // carDetector_(new CarDetect())
     {
 
     }
@@ -64,7 +64,7 @@ namespace cvision
             {
                 LOG_ERR << "SECOND IMAGE WAS EMPTY!\n";
             }
-            carDetector_->setFrame(secondImageFrame_.value());
+           // carDetector_->setFrame(secondImageFrame_.value());
             auto imgThreshold = imageProcessor_->getProcessedMergedImage(
                 firstImageFrame_.value(),secondImageFrame_.value());
             /*   cv::imshow("TRESH", imgThreshold); // DISPLAY ONLY
@@ -95,7 +95,7 @@ namespace cvision
         }
     }
 
-    bool ObjectTracker::startTracking(bool shouldRender)
+    bool ObjectTracker:: (bool shouldRender)
     {
         if (camera_.start())
         {
@@ -141,7 +141,7 @@ namespace cvision
     {
         camera_.stop();
 
-        carDetector_->stopDetecting();
+       // carDetector_->stopDetecting();
         imageRender_->stopRendering();
         imageQueue_.clear();
         firstImageFrame_ = {};
@@ -220,7 +220,7 @@ namespace cvision
                     closestMovingObjGroug->updateState(true);
                     if (closestMovingObjGroug->nrCars() == 0)
                     {
-                        carDetector_->loadObjectGroup(closestMovingObjGroug);
+                       // carDetector_->loadObjectGroup(closestMovingObjGroug);
                     }
                 }
                 else
@@ -243,8 +243,8 @@ namespace cvision
         movingObjGroup->addMovingObject(currentFrameMovingObj);
         movingObjGroup->updateState(true);
         movingObjects_.push_back(movingObjGroup);
-        carDetector_->loadObjectGroup(movingObjGroup);
-        carDetector_->startDetecting();
+       // carDetector_->loadObjectGroup(movingObjGroup);
+       // carDetector_->startDetecting();
     }
 
     bool ObjectTracker::checkIfCarsCrossedRight()
@@ -388,7 +388,7 @@ namespace cvision
     {
         drawObjInfoOnImage(img);
 
-        carDetector_->waitForFinish();
+       // carDetector_->waitForFinish();
         cv::Scalar rightLaneColor = checkIfCarsCrossedRight() ? SCALAR_GREEN : SCALAR_RED;
         cv::line(img, crossingLineRight_[0], crossingLineRight_[1], rightLaneColor, 2);
 

@@ -125,6 +125,8 @@ namespace model
 			void decreaseTimer(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
 			void greenLightExpireCallback();
 			void queueNextStatesWaiting();
+
+			bool registerVehicleTrackerIpAdress(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ipAdress);
 		};
 
 		struct ContextContainer
