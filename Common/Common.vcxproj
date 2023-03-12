@@ -172,6 +172,7 @@
     <ClInclude Include="utile\ThreadSafePriorityQueue.hpp" />
     <ClInclude Include="utile\ThreadSafeQueue.hpp" />
     <ClInclude Include="utile\Timer.hpp" />
+    <ClInclude Include="utile\TypeConverters.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp" />
@@ -187,6 +188,7 @@
     <ClCompile Include="utile\SignalHandler.cpp" />
     <ClCompile Include="utile\SignatureHelpers.cpp" />
     <ClCompile Include="utile\Timer.cpp" />
+    <ClCompile Include="utile\TypeConverters.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

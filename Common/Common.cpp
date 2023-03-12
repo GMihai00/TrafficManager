@@ -12,3 +12,4 @@
 #include "utile/CommandLineParser.hpp"
 #include "utile/ThreadPool.hpp"
 #include "utile/ConfigHelpers.hpp"
+#include "utile/TypeConverters.hpp"

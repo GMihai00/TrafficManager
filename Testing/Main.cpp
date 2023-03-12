@@ -17,21 +17,12 @@
 #include "utile/ConfigHelpers.hpp"
 #include "utile/CommandLineParser.hpp"
 #include "utile/SignalHandler.hpp"
+#include "utile/TypeConverters.hpp"
 
 using namespace common::utile;
 
 LOGGER("TEST-MAIN");
 
-// TO BE ADDED INSIDE COMMON
-std::wstring utf8_to_utf16(const std::string& s)
-{
-    wchar_t* wstr = new wchar_t(s.size());
-    size_t outSize;
-    mbstowcs_s(&outSize, wstr, s.size() + 1, s.c_str(), s.size());
-    auto rez = std::wstring(wstr);
-    delete wstr;
-    return rez;
-}
 
 std::condition_variable g_condVarEnd;
 std::vector<PROCESS_INFORMATION> g_runningProcesses;
@@ -56,6 +47,17 @@ struct command_line
 {
     std::wstring m_exe;
     std::vector<std::wstring> m_arguments;
+};
+
+struct proxy_config_data
+{
+    IP_ADRESS ip;
+    PORT port;
+    GeoCoordinate<DecimalCoordinate> boundSW;
+    GeoCoordinate<DecimalCoordinate> boundNE;
+    std::string dbServer;
+    std::string dbUsername;
+    std::string dbPassword;
 };
 
 // TO BE ADDED INSIDE COMMON
@@ -132,23 +134,37 @@ bool tryToRun4TOsForEachJMS(const model::JMSConfig& config)
     return std::all_of(commandsToBeRan.begin(), commandsToBeRan.end(), [](const auto& comand) { return createProcessFromSameDirectory(comand); });
 }
 
-// TO DO: Read from a json file
+// TO DO: Read from a json file and create format
 bool loadProxysFromConfigFile(const std::filesystem::path& configPath)
 {
-    return false;
+    std::vector<proxy_config_data> configs;
+
+    return std::all_of(configs.begin(), configs.end(), [](const auto& config) { return runProxy(config); });
 }
 
-bool runProxy(const IP_ADRESS& serverIp, 
-	const PORT& port, 
-	GeoCoordinate<DecimalCoordinate> boundSW,
-	GeoCoordinate<DecimalCoordinate> boundNe,
-	std::string dbServer,
-	std::string dbusername,
-	std::string dbpassword)
+bool runProxy(const proxy_config_data& config)
 {
-    command_line comand;
+    command_line cmd;
 
-    createProcessFromSameDirectory(comand);
+    cmd.m_exe = L"Proxy.exe";
+    cmd.m_arguments.push_back(L"-h");
+    cmd.m_arguments.push_back(utf8_to_utf16(config.ip));
+    cmd.m_arguments.push_back(L"-p");
+    cmd.m_arguments.push_back(std::to_wstring(config.port));
+    cmd.m_arguments.push_back(L"-bsw");
+    std::wstring boundSW = std::to_wstring(config.boundSW.latitude) + L"," + std::to_wstring(config.boundSW.longitude);
+    cmd.m_arguments.push_back(boundSW);
+    cmd.m_arguments.push_back(L"-bne");
+    std::wstring boundNE = std::to_wstring(config.boundNE.latitude) + L"," + std::to_wstring(config.boundNE.longitude);;
+    cmd.m_arguments.push_back(boundNE);
+    cmd.m_arguments.push_back(L"-s");
+    cmd.m_arguments.push_back(utf8_to_utf16(config.dbServer));
+    cmd.m_arguments.push_back(L"-u");
+    cmd.m_arguments.push_back(utf8_to_utf16(config.dbUsername));
+    cmd.m_arguments.push_back(L"-ps");
+    cmd.m_arguments.push_back(utf8_to_utf16(config.dbPassword));
+
+    return createProcessFromSameDirectory(cmd);
 }
 
 bool runJMSForAllConfigs(const std::filesystem::path& jmsConfigDir)
