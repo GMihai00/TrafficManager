@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 	try
 	{
 		// SHOULD LINK DIRECTLY TO GPS OUTPUTSTREAM BUT FOR NOW THIS SHOULD DO
-		std::fstream inputStream{ maybeConfigFile.value()};
+		std::fstream inputStream{ maybeGpsInputFile.value()};
 
 		g_vtClient = std::make_unique<model::VehicleTrackerClient>(maybeConfigFile.value(), inputStream);
 

@@ -131,7 +131,7 @@ std::optional<std::string> getDBUsername(const CommandLineParser& commandLine)
 
 std::optional<std::string> getDBPassword(const CommandLineParser& commandLine)
 {
-	constexpr std::array<std::string_view, 2> optionNames = { "-p", "--password" };
+	constexpr std::array<std::string_view, 2> optionNames = { "-ps", "--password" };
 
 	for (const auto& optionName : optionNames)
 	{
