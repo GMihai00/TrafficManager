@@ -22,8 +22,7 @@ namespace model
 			{
 				if (lastVisitedProxys_.empty())
 				{
-					continue;
-					//throw std::runtime_error("Failed to communicate with proxy");
+					stop();
 				}
 
 				if (!connect(lastVisitedProxys_.top().first, lastVisitedProxys_.top().second))
@@ -74,6 +73,8 @@ namespace model
 	VehicleTrackerClient::~VehicleTrackerClient()
 	{
 		stop();
+		if (threadProcess_.joinable())
+			threadProcess_.join();
 	}
 
 	bool VehicleTrackerClient::start()
@@ -96,8 +97,6 @@ namespace model
 		shuttingDown_ = true;
 		gpsAdapter_.stop();
 		condVarProcess_.notify_one();
-		if (threadProcess_.joinable())
-			threadProcess_.join();
 	}
 	// TO DO: FOR SECURITY PROXY WILL SEND A CRYPTED MESSAGE LOOK AT KERBEROS PROTOCOL
 	// https://www.youtube.com/watch?v=5N242XcKAsM

@@ -4,11 +4,12 @@
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 
+#define CHECK_IF_STILL_VALID_POSITION(start) if (start == std::string::npos) { return {}; }
+
 namespace model
 {
 	void GPSAdapter::process()
 	{
-
 		while (!shuttingDown_)
 		{
 			std::unique_lock<std::mutex> ulock(mutexProcess_);
@@ -46,6 +47,10 @@ namespace model
 	GPSAdapter::~GPSAdapter()
 	{
 		stop();
+		if (threadProcess_.joinable())
+		{
+			threadProcess_.join();
+		}
 	}
 
 	bool GPSAdapter::start()
@@ -63,10 +68,6 @@ namespace model
 	{
 		shuttingDown_ = true;
 		condVarProcess_.notify_one();
-		if (threadProcess_.joinable())
-		{
-			threadProcess_.join();
-		}
 	}
 
 	std::optional<GeoCoordinate<DecimalCoordinate>> GPSAdapter::getCurrentCoordinates()
@@ -116,59 +117,254 @@ namespace model
 
 	std::optional<GeoCoordinate<DecimalCoordinate>> GPSAdapter::parseNMEAString(std::string& NMEAString)
 	{
-		//"$GPGLL", <lat>, "N/S", <lon>, "E/W", <utc>, "A/V", "A/D/E/M/N" "*" <checksum> "CR/LF"(ignored in our case)
+		std::optional<GeoCoordinate<DecimalCoordinate>> rez;
+		rez = parseGPGLLString(NMEAString);
+		if (rez.has_value())
+		{
+			return rez;
+		}
+
+		rez = parseGPGGAString(NMEAString);
+		if (rez.has_value())
+		{
+			return rez;
+		}
+
+		rez = parseGPRMCString(NMEAString);
+		if (rez.has_value())
+		{
+			return rez;
+		}
+
+		return {};
+	}
+
+	std::optional<GeoCoordinate<DecimalCoordinate>> GPSAdapter::parseGPGLLString(std::string NMEAString)
+	{
+		//"$GPGLL", <lat>, "N/S", <lon>, "E/W", <time>(hhmmss.sss), "A/V", "A/D/E/M/N" "*" <checksum> "CR/LF"(ignored in our case)
 		GeoCoordinate<DecimalCoordinate> rez{};
 		size_t start = 0;
-        #define CHECK_IF_STILL_VALID_POSITION if (start == std::string::npos) { return {}; }
 
 		//$GPGLL
 		std::string value = getNextValue(NMEAString, start);
-		CHECK_IF_STILL_VALID_POSITION;
+		CHECK_IF_STILL_VALID_POSITION(start);
 		if (value != "$GPGLL") { return {}; }
 
 		// <lat>
 		value = getNextValue(NMEAString, start);
-		CHECK_IF_STILL_VALID_POSITION;
+		CHECK_IF_STILL_VALID_POSITION(start);
 
 		auto latitude = common::utile::StringToDecimalCoordinates(value);
 		if (!latitude.has_value()) { return {}; }
 
 		// N/S
 		value = getNextValue(NMEAString, start);
-		CHECK_IF_STILL_VALID_POSITION;
+		CHECK_IF_STILL_VALID_POSITION(start);
 		if (!(value == "N" || value == "S")) { return {}; }
 		if (value == "S") { latitude = -latitude.value(); }
 
 		// <lon>
 		value = getNextValue(NMEAString, start);
-		CHECK_IF_STILL_VALID_POSITION;
+		CHECK_IF_STILL_VALID_POSITION(start);
 
 		auto longitude = common::utile::StringToDecimalCoordinates(value);
 		if (!longitude.has_value()) { return {}; }
 
 		//take E/W
 		value = getNextValue(NMEAString, start);
-		CHECK_IF_STILL_VALID_POSITION;
+		CHECK_IF_STILL_VALID_POSITION(start);
 		if (!(value == "E" || value == "W")) { return {}; }
 		if (value == "W") { longitude = -longitude.value(); }
 
-		// utc IGNORED
+		// <time>(hhmmss.sss) IGNORED
 		value = getNextValue(NMEAString, start);
-		CHECK_IF_STILL_VALID_POSITION;
+		CHECK_IF_STILL_VALID_POSITION(start);
 
 		// A/V if V return {}
 		value = getNextValue(NMEAString, start);
-		CHECK_IF_STILL_VALID_POSITION;
+		CHECK_IF_STILL_VALID_POSITION(start);
 		if (value == "V" ) { return {}; }
 
 		// "A/D/E/M/N" useless so just skip it
 		start++;
-		CHECK_IF_STILL_VALID_POSITION;
+		CHECK_IF_STILL_VALID_POSITION(start);
 
 		// "*" <checksum> if not matching return {}
 		if (NMEAString[start] != '*') { return {}; }
 		start++;
-		CHECK_IF_STILL_VALID_POSITION;
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		value = NMEAString.substr(start, NMEAString.size() - start + 1);
+		if (calculateCheckSum(std::string(NMEAString.substr(1, start - 2))) != hexStringToInt(value)) { return {}; }
+
+		rez.latitude = latitude.value();
+		rez.longitude = longitude.value();
+		return rez;
+	}
+
+	std::optional<GeoCoordinate<DecimalCoordinate>> GPSAdapter::parseGPGGAString(std::string NMEAString)
+	{
+		//"$GPGGA", <time>(hhmmss.sss), <lat>, "N/S", <lon>, "E/W", <Position Fix Indicator>, <Satellites used>, <HDOP>, <MSL Altitude>, <Units>, 
+		//<Geoid Separation>, <Units>, <Age of diff. corr.>, <Diff. ref. station ID> "*" <checksum> "CR/LF"(ignored in our case)
+		GeoCoordinate<DecimalCoordinate> rez{};
+		size_t start = 0;
+
+		//$GPGGA
+		std::string value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+		if (value != "$GPGGA") { return {}; }
+
+		// <time>(hhmmss.sss) IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// <lat>
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		auto latitude = common::utile::StringToDecimalCoordinates(value);
+		if (!latitude.has_value()) { return {}; }
+
+		// N/S
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+		if (!(value == "N" || value == "S")) { return {}; }
+		if (value == "S") { latitude = -latitude.value(); }
+
+		// <lon>
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		auto longitude = common::utile::StringToDecimalCoordinates(value);
+		if (!longitude.has_value()) { return {}; }
+
+		//take E/W
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+		if (!(value == "E" || value == "W")) { return {}; }
+		if (value == "W") { longitude = -longitude.value(); }
+
+
+		// <Position Fix Indicator> IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// <Satellites used> IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// <HDOP> IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// <MSL Altitude> IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// <Units> IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// <Geoid Separation> IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+
+		// <Units> IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+
+		// <Age of diff. corr.> IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// <Diff. ref. station ID> IGNORED
+		while (start < NMEAString.size() && NMEAString[start] != '*') { start++; }
+
+		if (start >= NMEAString.size() || NMEAString[start] != '*') { return {}; }
+		start++;
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		value = NMEAString.substr(start, NMEAString.size() - start + 1);
+		if (calculateCheckSum(std::string(NMEAString.substr(1, start - 2))) != hexStringToInt(value)) { return {}; }
+
+		rez.latitude = latitude.value();
+		rez.longitude = longitude.value();
+		return rez;
+	}
+
+
+	std::optional<GeoCoordinate<DecimalCoordinate>> GPSAdapter::parseGPRMCString(std::string NMEAString)
+	{
+		//"$GPRMC", <time>(hhmmss.sss), "A/V", <lat>, "N/S", <lon>, "E/W", <Speed over ground>, <Course over ground>, <Date>, <Magnetic Variation>, "A/D/E" "*" <checksum> "CR/LF"(ignored in our case)
+		GeoCoordinate<DecimalCoordinate> rez{};
+		size_t start = 0;
+
+		//$GPRMC
+		std::string value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+		if (value != "$GPRMC") { return {}; }
+
+		// <time>(hhmmss.sss) IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// A/V if V return {}
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+		if (value == "V") { return {}; }
+
+		// <lat>
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		auto latitude = common::utile::StringToDecimalCoordinates(value);
+		if (!latitude.has_value()) { return {}; }
+
+		// N/S
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+		if (!(value == "N" || value == "S")) { return {}; }
+		if (value == "S") { latitude = -latitude.value(); }
+
+		// <lon>
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		auto longitude = common::utile::StringToDecimalCoordinates(value);
+		if (!longitude.has_value()) { return {}; }
+
+		//take E/W
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+		if (!(value == "E" || value == "W")) { return {}; }
+		if (value == "W") { longitude = -longitude.value(); }
+
+		// <Speed over ground> IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// <Course over ground> IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// <Date> IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// <Magnetic Variation> IGNORED
+		value = getNextValue(NMEAString, start);
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// "A/D/E" useless so just skip it
+		start++;
+		CHECK_IF_STILL_VALID_POSITION(start);
+
+		// "*" <checksum> if not matching return {}
+		if (NMEAString[start] != '*') { return {}; }
+		start++;
+		CHECK_IF_STILL_VALID_POSITION(start);
 
 		value = NMEAString.substr(start, NMEAString.size() - start + 1);
 		if (calculateCheckSum(std::string(NMEAString.substr(1, start - 2))) != hexStringToInt(value)) { return {}; }

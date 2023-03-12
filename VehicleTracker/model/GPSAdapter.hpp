@@ -30,6 +30,9 @@ namespace model
 		int hexStringToInt(std::string& value);
 		int calculateCheckSum(std::string NMEAString);
 		std::string getNextValue(std::string& NMEAString, size_t& start);
+		std::optional<GeoCoordinate<DecimalCoordinate>> parseGPGLLString(std::string NMEAString);
+		std::optional<GeoCoordinate<DecimalCoordinate>> parseGPGGAString(std::string NMEAString);
+		std::optional<GeoCoordinate<DecimalCoordinate>> parseGPRMCString(std::string NMEAString);
 		std::optional<GeoCoordinate<DecimalCoordinate>> parseNMEAString(std::string& NMEAString);
 	public:
 		GPSAdapter() = delete;
