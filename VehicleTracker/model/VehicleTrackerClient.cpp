@@ -3,6 +3,7 @@
 #include <chrono>
 #include <exception>
 
+#include "utile/ConfigHelpers.hpp"
 
 namespace model
 {
@@ -62,7 +63,7 @@ namespace model
 	VehicleTrackerClient::VehicleTrackerClient(const std::string& pathConfigFile, std::istream& inputStream) :
 		ipc::net::Client<ipc::VehicleDetectionMessages>(),
 		gpsAdapter_(inputStream),
-		lastVisitedProxys_(utile::getLastVisitedProxys(pathConfigFile))
+		lastVisitedProxys_(common::utile::getLastVisitedProxys(pathConfigFile))
 	{
 		if (lastVisitedProxys_.empty())
 			lastVisitedProxys_.push({ ipc::utile::G_PROXY_IP, ipc::utile::G_PROXY_PORT });
@@ -223,6 +224,6 @@ namespace model
 
 	bool VehicleTrackerClient::saveDataToJson()
 	{
-		return utile::saveConfig(lastVisitedProxys_);
+		return common::utile::saveVTConfig(lastVisitedProxys_);
 	}
 }

@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <exception>
+#include <string>
 
 #include "mysql_connection.h"
 #include <cppconn/driver.h>
@@ -18,10 +19,18 @@
 
 namespace utile
 {
-	constexpr auto SERVER = "tcp://localhost:3306/traffic_manager";
-	constexpr auto USERNAME = "root"; // I KNOW I NEED TO HIDE THIS THING
-	constexpr auto PASSWORD = "Calebbb1234567890*"; // I KNOW I NEED TO HIDE THIS THING
-	// SERVER, USERNAME AND PASSWORD WILL BE PASSED using CMD or with a config file, for now left it like this just cause it's easier to test
+	struct DBConnectionData
+	{
+		std::string m_server;
+		std::string m_username;
+		std::string m_password;
+		DBConnectionData() = delete;
+		DBConnectionData(const std::string& server, const std::string& username, const std::string& password) :
+			m_server(server),
+			m_username(username),
+			m_password(password)
+		{}
+	};
 
 	using namespace common;
 	using namespace common::utile;
@@ -39,7 +48,7 @@ namespace utile
 
 		db::BoundingRectPtr findBoundingRectById(const uint32_t id) noexcept;
 	public:
-		DBWrapper(const std::string server = SERVER, const std::string username = USERNAME, const std::string password = PASSWORD);
+		DBWrapper(DBConnectionData connectionData);
 		~DBWrapper() noexcept = default;
 
 		std::vector<db::ProxyPtr> getAllProxys() noexcept;

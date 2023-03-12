@@ -75,6 +75,9 @@
     <ClInclude Include="utile\Log.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
+    <ClInclude Include="utile\ConfigHelpers.hpp">
+      <Filter>Header Files\utile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp">
@@ -111,6 +114,9 @@
       <Filter>Source Files\utile</Filter>
     </ClCompile>
     <ClCompile Include="utile\Logger.cpp">
+      <Filter>Source Files\utile</Filter>
+    </ClCompile>
+    <ClCompile Include="utile\ConfigHelpers.cpp">
       <Filter>Source Files\utile</Filter>
     </ClCompile>
   </ItemGroup>

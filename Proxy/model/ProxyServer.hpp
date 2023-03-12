@@ -39,7 +39,10 @@ namespace model
 		std::optional<ipc::net::ProxyReply> getClosestJunctionReply(ipc::utile::VehicleDetectionMessage& msg);
 		void redirect(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 	public:
-		ProxyServer(const ipc::utile::IP_ADRESS& host, const ipc::utile::PORT port, const common::db::ProxyPtr& dbProxy);
+		ProxyServer(const ipc::utile::IP_ADRESS& host, 
+			const ipc::utile::PORT port,
+			const common::db::ProxyPtr& dbProxy,
+			const utile::DBConnectionData& connectionData);
 		ProxyServer(const ProxyServer&) = delete;
 		virtual ~ProxyServer() noexcept = default;
 

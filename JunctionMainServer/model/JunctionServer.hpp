@@ -7,11 +7,13 @@
 #include <chrono>
 #include <string>
 
+#include <boost/optional/optional.hpp>
+
 #include "net/Server.hpp"
 #include "MessageTypes.hpp"
-#include "Config.hpp"
+#include "utile/ConfigHelpers.hpp"
+
 #include "controller/TrafficLightStateMachine.hpp"
-#include <boost/optional/optional.hpp>
 
 // TO REFACTOR EVERYTHING IN HERE IT IS SO SO SOOOO WRONG
 namespace model
@@ -23,7 +25,6 @@ namespace model
 		//std::thread threadProcess_;
 		controller::TrafficLightStateMachine trafficLightStateMachine_;
 		std::map<common::utile::LANE, std::string> laneToKeyword_;
-		Config config_;
 		LOGGER("JUNCTION-SERVER");
 
 		boost::optional<common::utile::LANE> getMessageSourceLane(
@@ -34,7 +35,7 @@ namespace model
 		void rejectMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 		boost::optional<common::utile::LANE> getLaneBasedOnKeyword(std::string keyword);
 	public:
-		JunctionServer(const Config& config);
+		JunctionServer(const common::utile::model::JMSConfig& config);
 		JunctionServer(const JunctionServer&) = delete;
 		virtual ~JunctionServer() noexcept = default;
 

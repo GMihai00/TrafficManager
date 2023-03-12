@@ -101,6 +101,48 @@ db::BoundingRectPtr getCoveredArea(const CommandLineParser& commandLine)
 	return std::make_shared<db::BoundingRect>(boundSW.value(), boundNE.value());
 }
 
+std::optional<std::string> getDBServer(const CommandLineParser& commandLine)
+{
+	constexpr std::array<std::string_view, 2> optionNames = { "-s", "--server" };
+
+	for (const auto& optionName : optionNames)
+	{
+		auto option = commandLine.getOption(optionName);
+		if (option.has_value())
+			return std::string(option.value());
+	}
+
+	return {};
+}
+
+std::optional<std::string> getDBUsername(const CommandLineParser& commandLine)
+{
+	constexpr std::array<std::string_view, 2> optionNames = { "-u", "--username" };
+
+	for (const auto& optionName : optionNames)
+	{
+		auto option = commandLine.getOption(optionName);
+		if (option.has_value())
+			return std::string(option.value());
+	}
+
+	return {};
+}
+
+std::optional<std::string> getDBPassword(const CommandLineParser& commandLine)
+{
+	constexpr std::array<std::string_view, 2> optionNames = { "-p", "--password" };
+
+	for (const auto& optionName : optionNames)
+	{
+		auto option = commandLine.getOption(optionName);
+		if (option.has_value())
+			return std::string(option.value());
+	}
+
+	return {};
+}
+
 // NEEDS TO BE MADE GLOBAL DUE TO BEEING UNABLE TO CAPTURE VARIABLES INSIDE LAMBDAS PASSED TO SIGNALHANDLER
 std::condition_variable g_condVarEnd;
 
@@ -130,11 +172,29 @@ int main(int argc, char* argv[])
 		exit(5);
 	}
 
+	// "tcp://localhost:3306/traffic_manager";
+	auto bdServer = getDBServer(commandLine);
+	if (!bdServer.has_value())
+	{
+		LOG_ERR << "Proxy DB Server not defined";
+		exit(5);
+	}
+
+	// "root"
+	auto bdUsername = getDBUsername(commandLine);
+	// "everyday password"
+	auto bdPassword = getDBPassword(commandLine);
+	if (!bdUsername.has_value() || !bdPassword.has_value())
+	{
+		LOG_ERR << "DB credentials missing";
+		exit(5);
+	}
+
 	db::ProxyPtr dbProxy = std::make_shared<db::Proxy>(host.value(), port.value(), 0, coveredArea);
 
 	try
 	{
-		model::ProxyServer proxySERVER(host.value(), port.value(), dbProxy);
+		model::ProxyServer proxySERVER(host.value(), port.value(), dbProxy, ::utile::DBConnectionData(bdServer.value(), bdUsername.value(), bdPassword.value()));
 		if (!proxySERVER.start())
 		{
 			LOG_ERR << "Failed to start server";

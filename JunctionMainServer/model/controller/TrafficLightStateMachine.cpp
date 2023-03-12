@@ -7,7 +7,7 @@ namespace model
 	namespace controller
 	{
 
-		TrafficLightStateMachine::TrafficLightStateMachine(const Config& config) :
+		TrafficLightStateMachine::TrafficLightStateMachine(const common::utile::model::JMSConfig& config) :
 			greenLightDuration_(config.maxWaitingTime),
 			regLightDuration_(120), // TO CHANGE THIS UPDATED BY ML
 			usingLeftLane_(config.usingLeftLane)

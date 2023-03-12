@@ -1,18 +1,42 @@
 #include <condition_variable>
 #include <mutex>
+#include <filesystem>
 
 #include "model/JunctionServer.hpp"
-#include "utile/ConfigLoader.hpp"
+#include "utile/ConfigHelpers.hpp"
 #include "utile/SignalHandler.hpp"
 #include "utile/ErrorCodes.hpp"
+#include "utile/CommandLineParser.hpp"
 
 using namespace common::utile;
 
 LOGGER("MAIN");
 
+std::optional<std::string> getConfigFile(const CommandLineParser& commandLine)
+{
+	constexpr std::array<std::string_view, 2> optionNames = { "-conf", "--config_file" };
+
+	for (const auto& optionName : optionNames)
+	{
+		auto option = commandLine.getOption(optionName);
+		if (option.has_value())
+		{
+			std::error_code ec;
+			auto file = std::filesystem::path(std::string(option.value()));
+			if (std::filesystem::is_regular_file(file, ec))
+			{
+				return file.string();
+			}
+			return {};
+		}
+	}
+
+	return {};
+}
+
 std::condition_variable g_condVarEnd;
 
-int main()
+int main(int argc, char* argv[])
 {
 	SignalHandler sigHandler{};
 
@@ -27,8 +51,17 @@ int main()
 			g_condVarEnd.notify_one();
 		});
 
-	utile::ConfigLoader configLoader;
-	auto maybeConfig = configLoader.load("C:\\Users\\Mihai Gherghinescu\\source\\repos\\TrafficManager\\resources\\JunctionConfig.json"); // to change to relative path
+	auto commandLine = CommandLineParser(argc, argv);
+
+	// "C:\\Users\\Mihai Gherghinescu\\source\\repos\\TrafficManager\\resources\\JunctionConfig.json"
+	auto maybeConfigFile = getConfigFile(commandLine);
+	if (!maybeConfigFile.has_value())
+	{
+		LOG_ERR << "Config file not specified";
+		exit(5);
+	}
+
+	auto maybeConfig = common::utile::loadJMSConfig(maybeConfigFile.value());
 
 	if (!maybeConfig.has_value())
 	{
@@ -38,7 +71,7 @@ int main()
 
 	try
 	{
-		model::JunctionServer junctionServer(maybeConfig.value());
+		::model::JunctionServer junctionServer(maybeConfig.value());
 
 		if (!junctionServer.start())
 		{

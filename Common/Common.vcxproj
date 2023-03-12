@@ -159,6 +159,7 @@
     <ClInclude Include="db\Junction.hpp" />
     <ClInclude Include="db\Proxy.hpp" />
     <ClInclude Include="utile\CommandLineParser.hpp" />
+    <ClInclude Include="utile\ConfigHelpers.hpp" />
     <ClInclude Include="utile\DataTypes.hpp" />
     <ClInclude Include="utile\GeoCoordinate.hpp" />
     <ClInclude Include="utile\IObserver.hpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="db\Junction.cpp" />
     <ClCompile Include="db\Proxy.cpp" />
     <ClCompile Include="utile\CommandLineParser.cpp" />
+    <ClCompile Include="utile\ConfigHelpers.cpp" />
     <ClCompile Include="utile\DataTypes.cpp" />
     <ClCompile Include="utile\GeoCoordinate.cpp" />
     <ClCompile Include="utile\Logger.cpp" />

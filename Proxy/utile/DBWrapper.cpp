@@ -4,8 +4,8 @@
 // TO FINISH THIS
 namespace utile
 {
-	DBWrapper::DBWrapper(const std::string server, const std::string username, const std::string password) :
-		connection_(get_driver_instance()->connect(server, username, password))
+	DBWrapper::DBWrapper(DBConnectionData connectionData) :
+		connection_(get_driver_instance()->connect(connectionData.m_server, connectionData.m_username, connectionData.m_password))
 	{
 		LOG_INF << "Connected";
 		connection_->setSchema("traffic_manager");

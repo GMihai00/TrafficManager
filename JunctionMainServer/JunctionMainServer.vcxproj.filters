@@ -25,12 +25,6 @@
     <Filter Include="Header Files\model\controller">
       <UniqueIdentifier>{2ac6355d-3902-46a8-a43d-3bf93fb78c4f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\utile">
-      <UniqueIdentifier>{5e7daaa3-76a7-4947-8825-a9c5d576ad94}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\utile">
-      <UniqueIdentifier>{de1d6324-89d2-41d9-ab6f-d543aa44c724}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="JunctionMainServer.cpp">
@@ -41,9 +35,6 @@
     </ClCompile>
     <ClCompile Include="model\controller\TrafficLightStateMachine.cpp">
       <Filter>Source Files\model\controller</Filter>
-    </ClCompile>
-    <ClCompile Include="utile\ConfigLoader.cpp">
-      <Filter>Source Files\utile</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -57,12 +48,6 @@
     </ClInclude>
     <ClInclude Include="model\controller\TrafficLightStateMachine.hpp">
       <Filter>Header Files\model\controller</Filter>
-    </ClInclude>
-    <ClInclude Include="model\Config.hpp">
-      <Filter>Header Files\model</Filter>
-    </ClInclude>
-    <ClInclude Include="utile\ConfigLoader.hpp">
-      <Filter>Header Files\utile</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

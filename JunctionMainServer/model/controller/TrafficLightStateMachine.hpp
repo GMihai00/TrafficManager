@@ -21,7 +21,7 @@
 #include <boost/statechart/transition.hpp>
 #include <boost/statechart/custom_reaction.hpp>
 
-#include "../Config.hpp"
+#include "utile/ConfigHelpers.hpp"
 #include "utile/Logger.hpp"
 #include "utile/ThreadSafeQueue.hpp"
 #include "utile/Timer.hpp"
@@ -103,7 +103,7 @@ namespace model
 			void updateTrafficState();
 			void updateGreenLightDuration();
 		public:
-			TrafficLightStateMachine(const Config& config);
+			TrafficLightStateMachine(const common::utile::model::JMSConfig& config);
 			TrafficLightStateMachine(const TrafficLightStateMachine&) = delete;
 			virtual ~TrafficLightStateMachine() noexcept = default;
 

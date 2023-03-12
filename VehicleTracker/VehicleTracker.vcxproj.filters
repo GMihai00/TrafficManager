@@ -19,12 +19,6 @@
     <Filter Include="Source Files\model">
       <UniqueIdentifier>{027f2108-2357-4078-906a-1c69b3a288cb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\utile">
-      <UniqueIdentifier>{e0466019-fab4-4a07-8278-088551caf0ab}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\utile">
-      <UniqueIdentifier>{d271d1f5-f3be-4a45-9569-d32abeccf5ed}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\gpsdata">
       <UniqueIdentifier>{847a6c46-bbf9-4587-b4cc-24db9bc264bd}</UniqueIdentifier>
     </Filter>
@@ -39,9 +33,6 @@
     <ClCompile Include="model\GPSAdapter.cpp">
       <Filter>Source Files\model</Filter>
     </ClCompile>
-    <ClCompile Include="utile\ConfigHandler.cpp">
-      <Filter>Source Files\utile</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="model\VehicleTrackerClient.hpp">
@@ -49,9 +40,6 @@
     </ClInclude>
     <ClInclude Include="model\GPSAdapter.hpp">
       <Filter>Header Files\model</Filter>
-    </ClInclude>
-    <ClInclude Include="utile\ConfigHandler.hpp">
-      <Filter>Header Files\utile</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -162,16 +162,13 @@
     <ClCompile Include="JunctionMainServer.cpp" />
     <ClCompile Include="model\controller\TrafficLightStateMachine.cpp" />
     <ClCompile Include="model\JunctionServer.cpp" />
-    <ClCompile Include="utile\ConfigLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\resources\JunctionConfig.json" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="model\Config.hpp" />
     <ClInclude Include="model\controller\TrafficLightStateMachine.hpp" />
     <ClInclude Include="model\JunctionServer.hpp" />
-    <ClInclude Include="utile\ConfigLoader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

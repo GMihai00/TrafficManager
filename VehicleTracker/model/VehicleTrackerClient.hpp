@@ -21,9 +21,8 @@
 #include "utile/MessageIdProvider.hpp"
 #include "utile/Logger.hpp"
 #include "utile/Observer.hpp"
-#include "utile/GeoCoordinate.hpp";
+#include "utile/GeoCoordinate.hpp"
 #include "GPSAdapter.hpp"
-#include "../utile/ConfigHandler.hpp"
 
 namespace model
 {

@@ -7,13 +7,14 @@ namespace model
 {
 	ProxyServer::ProxyServer(const ipc::utile::IP_ADRESS& host,
 		const ipc::utile::PORT port,
-		const common::db::ProxyPtr& dbProxy) :
+		const common::db::ProxyPtr& dbProxy,
+		const utile::DBConnectionData& connectionData) :
 		ipc::net::Server<ipc::VehicleDetectionMessages>(host, port),
 		dbProxy_(dbProxy)
 	{
 		try
 		{
-			dbWrapper_ = std::make_unique<utile::DBWrapper>();
+			dbWrapper_ = std::make_unique<utile::DBWrapper>(connectionData);
 			if (dbProxy_ == nullptr)
 			{
 				LOG_ERR << "FAILED TO GET CORRESPONDING DB PROXY";
