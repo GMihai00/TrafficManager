@@ -43,7 +43,7 @@ namespace cvision
     void MovingObjectGroup::addMovingObject(const std::shared_ptr<MovingObject>& obj)
     {
         cntLock++;
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         std::scoped_lock lock(mutexGroup_);
         if (obj == nullptr)
         {
@@ -72,7 +72,7 @@ namespace cvision
     void MovingObjectGroup::updateState(bool found)
     {
         cntLock++;
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         std::scoped_lock lock(mutexGroup_);
         if (found)
         {
@@ -89,7 +89,7 @@ namespace cvision
     size_t MovingObjectGroup::getNrOfMovingObjInGroup()
     {
         cntLock++;
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         std::scoped_lock lock(mutexGroup_);
         cntLock--;
         return this->centerPositions_.size();
@@ -98,7 +98,7 @@ namespace cvision
     bool MovingObjectGroup::stillBeingTracked()
     {
         cntLock++;
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         std::scoped_lock lock(mutexGroup_);
         // HARDCODED VALUE BUT SHOULD BE FINE, IF NOT FOUND FOR 5 FRAMES
         // EITHER NOT MOVING OR PASSED CAMERA RANGE OF COVERAGE
@@ -111,7 +111,7 @@ namespace cvision
     {
         cntLock++;
         std::scoped_lock lock(mutexGroup_);
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         if (index >= centerPositions_.size())
         {
             cntLock--;
@@ -124,7 +124,7 @@ namespace cvision
     boost::optional<cv::Point> MovingObjectGroup::getLastCenterPosition()
     {
         cntLock++;
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         std::scoped_lock lock(mutexGroup_);
         if (centerPositions_.size() == 0)
         {
@@ -138,7 +138,7 @@ namespace cvision
     cv::Point MovingObjectGroup::getFuturePosition()
     {
         cntLock++;
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         std::scoped_lock lock(mutexGroup_);
         cntLock--;
         return futurePosition_;
@@ -147,7 +147,7 @@ namespace cvision
     boost::optional<double>  MovingObjectGroup::getDiagonalSize()
     {
         cntLock++;
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         std::scoped_lock lock(mutexGroup_);
         if (movingObjectStates_.empty())
         {
@@ -161,7 +161,7 @@ namespace cvision
     std::shared_ptr<MovingObject> MovingObjectGroup::getLastState()
     {
         cntLock++;
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         std::scoped_lock lock(mutexGroup_);
         // NEED TO INVESTIGATE WHY I CAN NOT LOCK MUTEX
         if (movingObjectStates_.empty())
@@ -176,7 +176,7 @@ namespace cvision
     std::shared_ptr<MovingObject> MovingObjectGroup::getFirstState()
     {
         cntLock++;
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         std::scoped_lock lock(mutexGroup_);
         if (movingObjectStates_.empty())
         {
@@ -189,7 +189,7 @@ namespace cvision
     cv::Mat MovingObjectGroup::getCroppedImage(cv::Mat img)
     {
         cntLock++;
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         std::scoped_lock lock(mutexGroup_);
         if (movingObjectStates_.empty())
         {
@@ -217,7 +217,7 @@ namespace cvision
     void MovingObjectGroup::updateCarState(size_t nrCars)
     {
         cntLock++;
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         std::scoped_lock lock(mutexGroup_);
         if (nrCars == 0)
         {
@@ -234,7 +234,7 @@ namespace cvision
     size_t MovingObjectGroup::nrCars()
     {
         cntLock++;
-        std::cout << "CNT LOCKS: " << cntLock << "\n";
+        // std::cout << "CNT LOCKS: " << cntLock << "\n";
         std::scoped_lock lock(mutexGroup_);
         cntLock--;
         return nrCars_;

@@ -7,6 +7,7 @@
 #include "utile/SignalHandler.hpp"
 #include "utile/ErrorCodes.hpp"
 #include "utile/CommandLineParser.hpp"
+#include "utile/TypeConverters.hpp"
 
 using namespace common::utile;
 
@@ -86,7 +87,7 @@ int main(int argc, char* argv[])
 	}
 	catch (const std::exception& err)
 	{
-		LOG_ERR << "Failed to start server" << err.what();
+		LOG_ERR << "Failed to start server" << common::utile::utf16_to_utf8(err.what());
 		return ipc::utile::SERVER_FAILURE;
 	}
 }

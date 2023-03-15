@@ -132,6 +132,8 @@ bool tryToRun4TOsForEachJMS(const model::JMSConfig& config)
 {
     std::vector<command_line> commandsToBeRan;
 
+    // runnning for same enpoint this is why it was failing ffs
+    int cnt = 1;
     for (auto lane_keyword_pair : config.laneToKeyword)
     {
         command_line cmd;
@@ -139,10 +141,11 @@ bool tryToRun4TOsForEachJMS(const model::JMSConfig& config)
         cmd.m_arguments.push_back(L"-h");
         cmd.m_arguments.push_back(utf8_to_utf16(config.serverIp));
         cmd.m_arguments.push_back(L"-p");
-        cmd.m_arguments.push_back(std::to_wstring(config.serverPort));
+        cmd.m_arguments.push_back(std::to_wstring(config.serverPort + cnt));
         cmd.m_arguments.push_back(L"-k");
         cmd.m_arguments.push_back(utf8_to_utf16(lane_keyword_pair.second));
         commandsToBeRan.push_back(cmd);
+        cnt++;
     }
 
     return std::all_of(commandsToBeRan.begin(), commandsToBeRan.end(), [](const auto& comand) { return createProcessFromSameDirectory(comand); });
