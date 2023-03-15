@@ -23,7 +23,6 @@ using namespace common::utile;
 
 LOGGER("TEST-MAIN");
 
-
 std::condition_variable g_condVarEnd;
 std::vector<PROCESS_INFORMATION> g_runningProcesses;
 
@@ -317,21 +316,21 @@ int main(int argc, char* argv[])
     if (!jmsConfigDir.has_value() || !runJMSForAllConfigs(jmsConfigDir.value()))
     {
         LOG_ERR << "Failed to run JMS";
-        exit(5);
+        return 5;
     }
 
     auto proxyConfigFile = getProxyConfigFile(commandLine);
     if (!proxyConfigFile.has_value() || !loadProxysFromConfigFile(proxyConfigFile.value()))
     {
         LOG_ERR << "Failed to run Proxys";
-        exit(5);
+        return 5;
     }
 
     auto gpsDataDir = getGPSDataDir(commandLine);
     if (!gpsDataDir.has_value())
     {
         LOG_ERR << "GPS input is missing";
-        exit(5);
+        return 5;
     }
     auto vtConfigFile = getVtConfigFile(commandLine);
     if (!vtConfigFile.has_value())

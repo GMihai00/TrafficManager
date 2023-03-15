@@ -58,7 +58,8 @@ namespace common
             template<class T>
             Logger& operator <<(const T& data)
             {
-                log_ << toString(type_) << " [" << name_ << "] " << data << std::endl;
+                // std::endl flushing buffer was deleting memory that wasn't printed yet, and when we finally got to printing it, memory was no longer owned by us so invalid memory exception was trown
+                log_ << toString(type_) << " [" << name_ << "] " << data <<'\n';
                 return *this;
             }
     

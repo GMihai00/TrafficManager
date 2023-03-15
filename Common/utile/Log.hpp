@@ -36,19 +36,33 @@ public:
         return write(std::move(value));
     }
 
-    Log& operator <<(std::ios& (*pf)(std::ios&))
+    Log& operator <<(std::ios& pf(std::ios&))
     {
-        return write(std::move(pf));
+        if (pf)
+        {
+            return write(std::move(*pf));
+        }
+        return *this;
     }
 
-    Log& operator <<(std::ios_base& (*pf)(std::ios_base&))
+    Log& operator <<(std::ios_base& pf(std::ios_base&))
     {
-        return write(std::move(pf));
+        if (pf)
+        {
+            return write(std::move(*pf));
+        }
+        return *this;
     }
 
-    Log& operator <<(std::ostream& (*pf)(std::ostream&))
+    Log& operator <<(std::ostream& pf(std::ostream&))
     {
-        return write(std::move(pf));
+        // crashin here somehow
+        // just random memory not accesible somehow
+        if (pf)
+        {
+            return write(std::move(*pf));
+        }
+        return *this;
     }
 
     Log& operator =(const Log&) = delete;
@@ -115,8 +129,8 @@ private:
     std::mutex mLogMutex;
     std::condition_variable mNotificationVariable;
 
-    bool mClosing = false;
-    bool mFlushed = false;
+    std::atomic<bool> mClosing = false;
+    std::atomic<bool> mFlushed = false;
 
     LogStream mStream{ *this };
 
@@ -165,6 +179,8 @@ private:
             }
 
             do {
+
+                // THIS IS CRASHING FOR SOME KIND OF REASON
                 mCurrentLog->mFunctor();
 
                 if (mFlushed)
@@ -198,6 +214,7 @@ private:
         const auto id = std::this_thread::get_id();
 
         std::lock_guard<std::mutex> lock{ mLogMutex };
+        // for some kind of reason lambda is failing
         mLogQueue.emplace_back(LogEntry{ id, [=, value = std::move(value)] {
             mStream << value;
         } });
@@ -219,6 +236,7 @@ private:
         return *this;
     }
 
+    // this is not working at all
     void flush()
     {
         std::cout << mStream.getStringAndClear();
