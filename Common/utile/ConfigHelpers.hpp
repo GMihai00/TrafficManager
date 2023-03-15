@@ -5,10 +5,12 @@
 #include <optional>
 #include <string>
 #include <set>
+#include <vector>
 #include <map>
 #include <stack>
 
 #include "DataTypes.hpp";
+#include "GeoCoordinate.hpp"
 
 namespace common
 {
@@ -31,6 +33,18 @@ namespace common
 				utile::PORT serverPort;
 				std::optional<LANE> missingLane;
 			};
+
+			struct proxy_config_data
+			{
+				IP_ADRESS ip;
+				PORT port;
+				GeoCoordinate<DecimalCoordinate> boundSW;
+				GeoCoordinate<DecimalCoordinate> boundNE;
+				std::string dbServer;
+				std::string dbUsername;
+				std::string dbPassword;
+			};
+
 		}
 
 		std::optional<model::JMSConfig> loadJMSConfig(const std::string& pathToConfigFile) noexcept;
@@ -39,6 +53,7 @@ namespace common
 
 		bool saveVTConfig(std::stack<std::pair<utile::IP_ADRESS, utile::PORT>> lastVisitedProxys) noexcept;
 
+		std::vector<model::proxy_config_data> loadProxyConfigs(const std::string& pathToConfigFile) noexcept;
 	} // namespace utile
 } // namespace common
 #endif // #COMMON_UTILE_CONFIGHELPERS_HPP

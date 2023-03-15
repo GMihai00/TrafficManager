@@ -49,17 +49,6 @@ struct command_line
     std::vector<std::wstring> m_arguments;
 };
 
-struct proxy_config_data
-{
-    IP_ADRESS ip;
-    PORT port;
-    GeoCoordinate<DecimalCoordinate> boundSW;
-    GeoCoordinate<DecimalCoordinate> boundNE;
-    std::string dbServer;
-    std::string dbUsername;
-    std::string dbPassword;
-};
-
 // TO BE ADDED INSIDE COMMON
 bool createProcessFromSameDirectory(const command_line& cmd)
 {
@@ -134,15 +123,7 @@ bool tryToRun4TOsForEachJMS(const model::JMSConfig& config)
     return std::all_of(commandsToBeRan.begin(), commandsToBeRan.end(), [](const auto& comand) { return createProcessFromSameDirectory(comand); });
 }
 
-// TO DO: Read from a json file and create format
-bool loadProxysFromConfigFile(const std::filesystem::path& configPath)
-{
-    std::vector<proxy_config_data> configs;
-
-    return std::all_of(configs.begin(), configs.end(), [](const auto& config) { return runProxy(config); });
-}
-
-bool runProxy(const proxy_config_data& config)
+bool runProxy(const model::proxy_config_data& config)
 {
     command_line cmd;
 
@@ -165,6 +146,13 @@ bool runProxy(const proxy_config_data& config)
     cmd.m_arguments.push_back(utf8_to_utf16(config.dbPassword));
 
     return createProcessFromSameDirectory(cmd);
+}
+
+bool loadProxysFromConfigFile(const std::filesystem::path& configPath)
+{
+    auto configs = loadProxyConfigs(configPath.string());
+    
+    return std::all_of(configs.begin(), configs.end(), [](const auto& config) { return runProxy(config); });
 }
 
 bool runJMSForAllConfigs(const std::filesystem::path& jmsConfigDir)

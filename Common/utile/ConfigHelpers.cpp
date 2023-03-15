@@ -148,6 +148,93 @@ namespace common
 					return false;
 				}
 			}
+
+			bool setProxyIp(const ptree& jsonRoot, model::proxy_config_data& config)
+			{
+				const auto& jsonTree = jsonRoot.get_child_optional("ip");
+				if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
+				{
+					config.ip = jsonTree.get().get_value<std::string>();
+					return true;
+				}
+
+				return false;
+			}
+
+			bool setProxyPort(const ptree& jsonRoot, model::proxy_config_data& config)
+			{
+				const auto& jsonTree = jsonRoot.get_child_optional("port");
+				if (jsonTree != boost::none && jsonTree.get().get_value_optional<uint16_t>() != boost::none)
+				{
+					config.port = jsonTree.get().get_value<uint16_t>();
+					return true;
+				}
+
+				return false;
+			}
+
+			bool setProxyEnpoint(const ptree& jsonRoot, model::proxy_config_data& config)
+			{
+
+				return setProxyIp(jsonRoot, config) && setProxyPort(jsonRoot, config);
+			}
+
+			bool setCoordinateLatitude(const ptree& jsonRoot, GeoCoordinate<DecimalCoordinate> coordinate)
+			{
+				const auto& jsonTree = jsonRoot.get_child_optional("latitude");
+				if (jsonTree != boost::none && jsonTree.get().get_value_optional<double>() != boost::none)
+				{
+					coordinate.latitude = jsonTree.get().get_value<double>();
+					return true;
+				}
+
+				return false;
+			}
+
+			bool setCoordinateLongitude(const ptree& jsonRoot, GeoCoordinate<DecimalCoordinate> coordinate)
+			{
+				const auto& jsonTree = jsonRoot.get_child_optional("longitude");
+				if (jsonTree != boost::none && jsonTree.get().get_value_optional<double>() != boost::none)
+				{
+					coordinate.longitude = jsonTree.get().get_value<double>();
+					return true;
+				}
+
+				return false;
+			}
+
+			boost::optional<GeoCoordinate<DecimalCoordinate>> getCoordinate(const ptree& jsonRoot, 
+				model::proxy_config_data& config, std::string name)
+			{
+				const auto& jsonTree = jsonRoot.get_child_optional(name);
+				if (jsonTree == boost::none)
+					return boost::none;
+
+				GeoCoordinate<DecimalCoordinate>  coordinate;
+				if (!(setCoordinateLatitude(jsonTree.get(), coordinate) && setCoordinateLongitude(jsonTree.get(), coordinate)))
+					return boost::none;
+
+				return coordinate;
+			}
+
+			bool setProxyCoordinates(const ptree& jsonRoot, model::proxy_config_data& config)
+			{
+				auto maybeBoundSW = getCoordinate(jsonRoot, config, "bound_sw");
+				auto maybeBoundNE = getCoordinate(jsonRoot, config, "bound_ne");
+				if (maybeBoundSW == boost::none || maybeBoundNE == boost::none)
+					return false;
+
+				config.boundSW = maybeBoundSW.get();
+				config.boundNE = maybeBoundNE.get();
+				return true;
+			}
+
+			bool setDbConnectionData(const ptree& jsonRoot, model::proxy_config_data& config)
+			{
+				const auto& jsonTree = jsonRoot.get_child_optional("db");
+				if (jsonTree == boost::none)
+					return false;
+			}
 		}
 
 		std::optional<model::JMSConfig> loadJMSConfig(const std::string& pathToConfigFile) noexcept
@@ -248,5 +335,44 @@ namespace common
 			return details::write_jsonEx("VTConfig.json", jsonRoot);
 		}
 
+		std::vector<model::proxy_config_data> loadProxyConfigs(const std::string& pathToConfigFile) noexcept
+		{
+			std::vector<model::proxy_config_data> rez;
+			ptree jsonRoot;
+
+			read_json(pathToConfigFile, jsonRoot);
+			const auto& jsonTree = jsonRoot.get_child_optional("proxys");
+
+			if (jsonTree == boost::none)
+			{
+				return {};
+			}
+
+			for (const auto& item : jsonTree.get())
+			{
+				model::proxy_config_data config;
+				if (!details::setProxyEnpoint(jsonTree.get(), config))
+				{
+					LOG_WARN << "Invalid config data. Missing proxy endpoint";
+					continue;
+				}
+
+				if (!details::setProxyCoordinates(jsonTree.get(), config))
+				{
+					LOG_WARN << "Invalid config data. Missing proxy coordinates";
+					continue;
+				}
+
+				if (!details::setDbConnectionData(jsonTree.get(), config))
+				{
+					LOG_WARN << "Invalid config data. Missing DB Connection Data";
+					continue;
+				}
+
+				rez.push_back(std::move(config));
+			}
+
+			return rez;
+		}
 	} // namespace utile
 } // namespace common
