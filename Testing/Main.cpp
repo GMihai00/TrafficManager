@@ -85,12 +85,13 @@ bool createProcessFromSameDirectory(const command_line& cmd)
     auto workingDir = getWorkingDirectory();
     workingDir /= cmd.m_exe;
 
-    auto command = workingDir.wstring();
+    auto command = L"\"" + workingDir.wstring() + L"\"";
     for (const auto& arg : cmd.m_arguments)
     {
-        command += L" " + arg;
+        command += L" \"" + arg + L"\"";
     }
 
+    std::wcout << L"[INFO] Attempting to run: " << command << L"\n";
     // Start the child process. 
     if (!CreateProcess(NULL,   // No module name (use command line)
         LPWSTR(command.c_str()),   // Command line
