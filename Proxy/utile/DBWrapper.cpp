@@ -115,7 +115,7 @@ namespace utile
 		try
 		{
 			std::shared_ptr<sql::PreparedStatement> preparedStatement(connection_->prepareStatement(
-				"SELECT * FROM proxy WHERE bouding_rect_id IN (SELECT id from bounding_rect WHERE ? <= ne_latitude AND  ? <= ne_longitude AND sw_latitude <= ? AND sw_longitude <= ? ) ORDER BY load;"));
+				"SELECT * FROM proxy WHERE bounding_rect_id IN (SELECT id from bounding_rect WHERE ? <= ne_latitude AND  ? <= ne_longitude AND sw_latitude <= ? AND sw_longitude <= ? ) ORDER BY proxy.load;"));
 			preparedStatement->setInt(1, point.latitude);
 			preparedStatement->setInt(2, point.longitude);
 			preparedStatement->setInt(3, point.latitude);

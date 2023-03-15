@@ -79,6 +79,7 @@ int main(int argc, char* argv[])
 			return ipc::utile::SERVER_FAILURE;
 		}
 
+		LOG_INF << "Server started";
 		std::mutex mutexEnd;
 		std::unique_lock<std::mutex> ulock(mutexEnd);
 		g_condVarEnd.wait(ulock);

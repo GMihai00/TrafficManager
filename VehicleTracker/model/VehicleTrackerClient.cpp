@@ -24,7 +24,6 @@ namespace model
 				if (lastVisitedProxys_.empty())
 				{
 					continue;
-					stop();
 				}
 
 				// LOG_DBG << lastVisitedProxys_.top().first << lastVisitedProxys_.top().second;

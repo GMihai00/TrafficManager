@@ -59,7 +59,9 @@ namespace common
             Logger& operator <<(const T& data)
             {
                 // std::endl flushing buffer was deleting memory that wasn't printed yet, and when we finally got to printing it, memory was no longer owned by us so invalid memory exception was trown
-                log_ << toString(type_) << " [" << name_ << "] " << data <<'\n';
+                // log_ << toString(type_) << " [" << name_ << "] " << data <<'\n';
+                // disabled synced logging for now due to hard debugging
+                std::cout << toString(type_) << " [" << name_ << "] " << data << '\n';
                 return *this;
             }
     
