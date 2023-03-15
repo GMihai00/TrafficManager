@@ -80,7 +80,8 @@ bool createProcessFromSameDirectory(const command_line& cmd)
         &pi)           // Pointer to PROCESS_INFORMATION structure
         )
     {
-        LOG_ERR << "CreateProcess failed error: " << GetLastError();
+        // THIS CAN'T BE OUTPUT GetLastError();
+        LOG_ERR << "CreateProcess failed";
         return false;
     }
 

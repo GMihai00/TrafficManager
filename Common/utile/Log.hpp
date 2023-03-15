@@ -180,7 +180,6 @@ private:
 
             do {
 
-                // THIS IS CRASHING FOR SOME KIND OF REASON
                 mCurrentLog->mFunctor();
 
                 if (mFlushed)
@@ -236,7 +235,6 @@ private:
         return *this;
     }
 
-    // this is not working at all
     void flush()
     {
         std::cout << mStream.getStringAndClear();
