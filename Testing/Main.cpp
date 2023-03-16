@@ -98,7 +98,7 @@ bool createProcessFromSameDirectory(const command_line& cmd)
         NULL,           // Process handle not inheritable
         NULL,           // Thread handle not inheritable
         FALSE,          // Set handle inheritance to FALSE
-        0,              // No creation flags
+        CREATE_NEW_CONSOLE,              // No creation flags
         NULL,           // Use parent's environment block
         NULL,           // Use parent's starting directory 
         &si,            // Pointer to STARTUPINFO structure
@@ -144,6 +144,10 @@ bool tryToRun4TOsForEachJMS(const model::JMSConfig& config)
         cmd.m_arguments.push_back(L"-k");
         cmd.m_arguments.push_back(utf8_to_utf16(lane_keyword_pair.second));
         commandsToBeRan.push_back(cmd);
+        
+
+        // just 1 camera so unselss i have 4 cameras connected can't really test it out
+        break;
     }
 
     return std::all_of(commandsToBeRan.begin(), commandsToBeRan.end(), [](const auto& comand) { return createProcessFromSameDirectory(comand); });
