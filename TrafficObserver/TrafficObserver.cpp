@@ -120,14 +120,14 @@ int main(int argc, char* argv[])
 		client = std::make_shared<model::TrafficObserverClient>(keyword.value());
 	}
 
-	//if (!client->connect(serverIp.value(), serverPort.value()))
-	//{
-	//	LOG_ERR << "Failed to connect to " << serverIp.value() << ":" << serverPort.value();
-	//	exit(5);
-	//}
+	if (!client->connect(serverIp.value(), serverPort.value()))
+	{
+		LOG_ERR << "Failed to connect to " << serverIp.value() << ":" << serverPort.value();
+		exit(5);
+	}
 
 	// can't be avoided
-	while (g_shouldStop)
+	while (!g_shouldStop)
 	{
 		Sleep(500);
 	}

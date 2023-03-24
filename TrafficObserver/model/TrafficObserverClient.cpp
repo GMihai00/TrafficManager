@@ -16,7 +16,8 @@ namespace model
         keyword_(keyword),
         carTracker_(0)
     {
-        observer_ = std::make_shared<common::utile::Observer>(std::bind(&TrafficObserverClient::handleNewCarData, this));
+        observer_callback_ = std::bind(&TrafficObserverClient::handleNewCarData, this);
+        observer_ = std::make_shared<common::utile::Observer>(observer_callback_);
         carTracker_.subscribe(observer_);
         this->startTrackingCars();
     }
@@ -26,8 +27,8 @@ namespace model
         keyword_(keyword),
         carTracker_(videoPath.string())
     {
-        observer_ = std::make_shared<common::utile::Observer>([&]() { handleNewCarData(); }); // WHY WASN'T BIND WORKING???
-        //observer_ = std::make_shared<common::utile::Observer>(std::bind(&TrafficObserverClient::handleNewCarData, this));
+        observer_callback_ = std::bind(&TrafficObserverClient::handleNewCarData, this);
+        observer_ = std::make_shared<common::utile::Observer>(observer_callback_);
         carTracker_.subscribe(observer_);
         this->startTrackingCars();
     }

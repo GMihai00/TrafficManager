@@ -46,6 +46,9 @@ namespace cvision
 		cv::Point crossingLineLeft_[2];
 		size_t carCountLeft_ = 0;
 		size_t carCountRight_ = 0;
+		size_t carCountLeftDisplay_ = 0;
+		size_t carCountRightDisplay_ = 0;
+
 		std::thread threadProcess_;
 		std::thread threadCamera_;
 		Camera camera_;

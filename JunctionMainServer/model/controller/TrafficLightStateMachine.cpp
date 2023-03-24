@@ -12,7 +12,8 @@ namespace model
 			regLightDuration_(120), // TO CHANGE THIS UPDATED BY ML
 			usingLeftLane_(config.usingLeftLane)
 		{
-			greenLightObserver_ = std::make_shared<Observer>([&]() { greenLightExpireCallback(); });
+			greeLightObserverCallback_ = std::bind(&TrafficLightStateMachine::greenLightExpireCallback, this);
+			greenLightObserver_ = std::make_shared<Observer>(greeLightObserverCallback_);
 			greenLightTimer_.subscribe(greenLightObserver_);
 		}
 

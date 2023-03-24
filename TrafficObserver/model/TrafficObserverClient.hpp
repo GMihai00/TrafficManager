@@ -22,7 +22,7 @@ namespace model
         ipc::utile::MessageIdProvider<ipc::VehicleDetectionMessages> messageIdProvider_;
         cvision::ObjectTracker carTracker_;
         common::utile::IObserverPtr observer_;
-        
+        std::function<void()> observer_callback_;
         std::string keyword_;
 
         LOGGER("TRAFFICOBSERVER-CLIENT");

@@ -8,7 +8,8 @@ namespace common
 
 		void Observer::notify()
 		{
-			callback_();
+			if (callback_)
+				callback_();
 		}
 
 	}

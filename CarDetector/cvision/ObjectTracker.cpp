@@ -271,7 +271,8 @@ namespace cvision
                         {
                             attachedObserver_->notify();
                         }
-                        carCountRight_+=carsToAdd;
+                        carCountRight_ += carsToAdd;
+                        carCountRightDisplay_ += carsToAdd;
                         objCrossedRight = true;
                     }
                     else
@@ -314,7 +315,8 @@ namespace cvision
                         {
                             attachedObserver_->notify();
                         }
-                        carCountLeft_+=carsToAdd;
+                        carCountLeft_ += carsToAdd;
+                        carCountLeftDisplay_ += carsToAdd;
                         objCrossedRightLeft = true;
                     }
                     else
@@ -373,14 +375,14 @@ namespace cvision
         double fontScale = (img.rows * img.cols) / 450000.0;
         int fontThickness = (int)std::round(fontScale * 2.5);
 
-        cv::Size textSize = cv::getTextSize(std::to_string(carCountRight_),
+        cv::Size textSize = cv::getTextSize(std::to_string(carCountRightDisplay_),
             fontFace, fontScale, fontThickness, 0);
-        cv::putText(img, "Vehicle count:" + std::to_string(carCountRight_), cv::Point(crossingLineRight_[0].x + 10, 25),
+        cv::putText(img, "Total detected vehicles:" + std::to_string(carCountRightDisplay_), cv::Point(crossingLineRight_[0].x + 10, 25),
             fontFace, fontScale, SCALAR_RED, fontThickness);
 
-        cv::Size textSize1 = cv::getTextSize(std::to_string(carCountLeft_),
+        cv::Size textSize1 = cv::getTextSize(std::to_string(carCountLeftDisplay_),
             fontFace, fontScale, fontThickness, 0);
-        cv::putText(img, "Vehicle count:" + std::to_string(carCountLeft_), cv::Point(crossingLineLeft_[0].x + 10, 25),
+        cv::putText(img, "Total detected vehicles:" + std::to_string(carCountLeftDisplay_), cv::Point(crossingLineLeft_[0].x + 10, 25),
             fontFace, fontScale, SCALAR_YELLOW, fontThickness);
     }
         

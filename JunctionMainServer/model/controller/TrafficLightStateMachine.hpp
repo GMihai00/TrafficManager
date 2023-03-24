@@ -96,6 +96,7 @@ namespace model
 			uint16_t regLightDuration_;
 			uint16_t greenLightDuration_; // TO CHANGE INSIDE CONFIG MAXWAITTIME TO GREENLIGHT DURATION
 			IObserverPtr greenLightObserver_;
+			std::function<void()> greeLightObserverCallback_;
 			common::utile::Timer greenLightTimer_;
 			LOGGER("TRAFFICLIGHT-STATEMACHINE");
 
