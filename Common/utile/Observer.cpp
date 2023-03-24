@@ -1,5 +1,5 @@
 #include "Observer.hpp"
-
+#include <iostream>
 namespace common
 {
 	namespace utile
@@ -8,7 +8,6 @@ namespace common
 
 		void Observer::notify()
 		{
-			std::scoped_lock lock(mutexNotify_);
 			callback_();
 		}
 

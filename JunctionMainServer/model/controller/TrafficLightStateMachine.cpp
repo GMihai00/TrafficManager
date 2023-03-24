@@ -12,11 +12,14 @@ namespace model
 			regLightDuration_(120), // TO CHANGE THIS UPDATED BY ML
 			usingLeftLane_(config.usingLeftLane)
 		{
-			greenLightObserver_ = std::make_shared<Observer>(
-				std::bind(&TrafficLightStateMachine::greenLightExpireCallback, this));
+			greenLightObserver_ = std::make_shared<Observer>([&]() { greenLightExpireCallback(); });
 			greenLightTimer_.subscribe(greenLightObserver_);
 		}
 
+		bool TrafficLightStateMachine::isUsingLeftLane()
+		{
+			return  usingLeftLane_;
+		}
 		bool TrafficLightStateMachine::isVehicleTracker(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip) const
 		{
 			return laneToVehicleTrackerIPAdress_.at(lane) == ip;
@@ -58,14 +61,22 @@ namespace model
 		}
 
 		bool TrafficLightStateMachine::registerClient(
-			const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
+			const common::utile::LANE lane, ipc::utile::IP_ADRESS ip, bool leftLane)
 		{
 			std::scoped_lock lock(mutexClients_);
 			if (!isClientValid(lane, ip))
 			{
 				return false;
 			}
-			decreaseTimer(lane, ip);
+			if (leftLane == usingLeftLane_)
+			{
+				decreaseTimer(lane, ip);
+			}
+			else
+			{
+				// update NR OF CARS THAT PASSED JUNCTION
+			}
+
 			return true;
 		}
 
@@ -90,6 +101,7 @@ namespace model
 			}
 
 			clientsConnected_[corespondingLane.value()].erase(ip);
+			// HERE I SHOULD UPDATE TIMER AS WELL
 			return true;
 		}
 
@@ -101,7 +113,7 @@ namespace model
 		bool TrafficLightStateMachine::startEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
 			//std::scoped_lock lock(mutexClients_);
-			if (!registerClient(lane, ip))
+			if (!registerClient(lane, ip, usingLeftLane_))
 			{
 				return false;
 			}

@@ -25,7 +25,7 @@ LOGGER("TEST-MAIN");
 
 std::condition_variable g_condVarEnd;
 std::vector<PROCESS_INFORMATION> g_runningProcesses;
-
+std::filesystem::path g_video_path;
 // TO BE ADDED INSIDE COMMON
 std::filesystem::path getWorkingDirectory()
 {
@@ -143,6 +143,8 @@ bool tryToRun4TOsForEachJMS(const model::JMSConfig& config)
         cmd.m_arguments.push_back(std::to_wstring(config.serverPort));
         cmd.m_arguments.push_back(L"-k");
         cmd.m_arguments.push_back(utf8_to_utf16(lane_keyword_pair.second));
+        cmd.m_arguments.push_back(L"-vp");
+        cmd.m_arguments.push_back(g_video_path.wstring());
         commandsToBeRan.push_back(cmd);
         
 
@@ -347,6 +349,8 @@ int main(int argc, char* argv[])
 
     auto commandLine = CommandLineParser(argc, argv);
 
+    // hardcoded for now
+    g_video_path = std::filesystem::path(L"C:\\Users\\Mihai Gherghinescu\\source\\repos\\TrafficManager\\resources\\TestData\\CarTestVideo1.mp4");
 
     auto jmsConfigDir = getJMSConfigsDir(commandLine);
     if (!jmsConfigDir.has_value() || !runJMSForAllConfigs(jmsConfigDir.value()))

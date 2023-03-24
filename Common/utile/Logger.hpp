@@ -58,9 +58,9 @@ namespace common
             template<class T>
             Logger& operator <<(const T& data)
             {
-                log_ << toString(type_) << " [" << name_ << "] " << data << "\n";
+                //log_ << toString(type_) << " [" << name_ << "] " << data << "\n";
                 // disabled synced logging for now due to hard debugging
-                //std::cout << toString(type_) << " [" << name_ << "] " << data << '\n';
+                std::cout << toString(type_) << " [" << name_ << "] " << data << '\n';
                 return *this;
             }
     

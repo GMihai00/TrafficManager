@@ -2,6 +2,7 @@
 #ifndef MODEL_COSTUMCLIENT_HPP
 #define MODEL_COSTUMCLIENT_HPP
 
+#include <filesystem>
 #include <utility>
 #include <condition_variable>
 
@@ -22,15 +23,15 @@ namespace model
         cvision::ObjectTracker carTracker_;
         common::utile::IObserverPtr observer_;
         
-        bool usingRightLane_;
         std::string keyword_;
 
         LOGGER("TRAFFICOBSERVER-CLIENT");
         bool startTrackingCars();
         void stopTrackingCars();
-        bool sendData(size_t numberOfCars);
+        bool sendData(size_t numberOfCars, bool leftLane = false);
     public:
-        TrafficObserverClient(std::string keyword, bool usingRightLane);
+        TrafficObserverClient(std::string keyword, std::filesystem::path videoPath);
+        TrafficObserverClient(std::string keyword);
         ~TrafficObserverClient();
 
         void handleNewCarData();

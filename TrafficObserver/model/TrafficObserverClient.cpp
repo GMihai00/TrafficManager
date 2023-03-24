@@ -5,23 +5,29 @@ namespace model
     void TrafficObserverClient::handleNewCarData()
     {
         auto carCount = carTracker_.getCarCount();
-        if (!usingRightLane_)
-        {
-            sendData(carCount.first);
-        }
-        else
-        {
-            sendData(carCount.second);
-        }
+        carTracker_.resetCarCount();
+
+        sendData(carCount.first, true);
+        sendData(carCount.second);
     }
 
-    TrafficObserverClient::TrafficObserverClient(std::string keyword, bool usingRightLane) :
+    TrafficObserverClient::TrafficObserverClient(std::string keyword) :
         ipc::net::Client<ipc::VehicleDetectionMessages>(),
         keyword_(keyword),
-        usingRightLane_(usingRightLane),
         carTracker_(0)
     {
         observer_ = std::make_shared<common::utile::Observer>(std::bind(&TrafficObserverClient::handleNewCarData, this));
+        carTracker_.subscribe(observer_);
+        this->startTrackingCars();
+    }
+
+    TrafficObserverClient::TrafficObserverClient(std::string keyword, std::filesystem::path videoPath) :
+        ipc::net::Client<ipc::VehicleDetectionMessages>(),
+        keyword_(keyword),
+        carTracker_(videoPath.string())
+    {
+        observer_ = std::make_shared<common::utile::Observer>([&]() { handleNewCarData(); }); // WHY WASN'T BIND WORKING???
+        //observer_ = std::make_shared<common::utile::Observer>(std::bind(&TrafficObserverClient::handleNewCarData, this));
         carTracker_.subscribe(observer_);
         this->startTrackingCars();
     }
@@ -31,7 +37,7 @@ namespace model
         this->stopTrackingCars();
     }
 
-    bool TrafficObserverClient::sendData(size_t numberOfCars)
+    bool TrafficObserverClient::sendData(size_t numberOfCars, bool leftLane)
     {
         if (!connection_)
         {
@@ -46,6 +52,7 @@ namespace model
             message.header.id = messageIdProvider_.provideId(ipc::VehicleDetectionMessages::VCDR);
             message.header.hasPriority = false;
             message << keyword_;
+            message << leftLane;
             connection_->send(message);
         }
 

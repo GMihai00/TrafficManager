@@ -12,7 +12,6 @@ namespace common
 	{
 		class Observer : public IObserver
 		{
-			std::mutex mutexNotify_;
 			const std::function<void()>& callback_;
 		public:
 			Observer() = delete;

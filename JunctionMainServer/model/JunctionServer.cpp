@@ -14,7 +14,6 @@ namespace model
 
 	bool JunctionServer::onClientConnect(ipc::utile::ConnectionPtr client)
 	{
-		// TO THINK ABOUT THIS
 		return true;
 	}
 
@@ -71,6 +70,7 @@ namespace model
 			keyword.resize(msg.header.size);
 			msg >> keyword;
 
+			// AICI AR MAI TREBUI SA TRIMIT SI DACA E LEFT LANE SAU RIGHT LANE
 			return getLaneBasedOnKeyword(keyword);
 		}
 		case ipc::VehicleDetectionMessages::VDB:
@@ -107,6 +107,7 @@ namespace model
 	void JunctionServer::handleMessage(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, common::utile::LANE lane)
 	{
+		bool leftLane = trafficLightStateMachine_.isUsingLeftLane();
 		if (msg.header.type == ipc::VehicleDetectionMessages::VCDR)
 		{
 			if (!trafficLightStateMachine_.registerVehicleTrackerIpAdress(lane, client->getIpAdress()))
@@ -114,6 +115,7 @@ namespace model
 				rejectMessage(client, msg);
 				return;
 			}
+			msg >> leftLane;
 		}
 
 		if (msg.header.hasPriority)
@@ -124,7 +126,7 @@ namespace model
 				return;
 			}
 		}
-		trafficLightStateMachine_.registerClient(lane, client->getIpAdress());
+		trafficLightStateMachine_.registerClient(lane, client->getIpAdress(), leftLane);
 		aproveMessage(client, msg);
 	}
 

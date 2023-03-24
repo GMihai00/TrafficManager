@@ -107,6 +107,7 @@ namespace model
 			TrafficLightStateMachine(const TrafficLightStateMachine&) = delete;
 			virtual ~TrafficLightStateMachine() noexcept = default;
 
+			bool isUsingLeftLane();
 			// BASED ON THE LANE WE WILL DETERMINE WHAT PHAZE TO START: CAN BE EITHER II, III, VI or VII
 			// as they are the only ones that allow the vehicles to move freely from one lane
 			bool isVehicleTracker(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip) const;
@@ -114,7 +115,7 @@ namespace model
 			bool isLaneMissing(const common::utile::LANE lane) const;
 
 			bool isClientValid(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
-			bool registerClient(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			bool registerClient(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip, bool leftLane);
 			bool unregisterClient(ipc::utile::IP_ADRESS ip);
 
 			bool startEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);

@@ -37,7 +37,7 @@ namespace cvision
 		std::shared_ptr<ImageProcessor> imageProcessor_;
 		std::shared_ptr<ImageRender> imageRender_;
 		MovingObjGroupPtrList movingObjects_;
-		// std::shared_ptr<CarDetect> carDetector_;
+		std::shared_ptr<CarDetect> carDetector_;
 		MovingObjGroupPtrList cars_;
 		std::optional<cv::Mat> firstImageFrame_;
 		std::optional<cv::Mat> secondImageFrame_;
@@ -80,6 +80,7 @@ namespace cvision
 		void stopTracking();
 
 		std::pair<size_t, size_t> getCarCount();
+		void resetCarCount();
 		void subscribe(IObserverPtr observer);
 	};
 } // namespace cvision
