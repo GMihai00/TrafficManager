@@ -89,6 +89,22 @@ namespace ipc
                 return msg;
             }
 
+            friend Message<T>& operator >> (Message<T>& msg, std::string& data)
+            {
+                if (msg.body.size() < sizeof(char) * data.size())
+                {
+                    std::cerr << "WARN [MESSAGE] Tried reading data, but it was insufficient\n";
+                    return msg;
+                }
+
+                size_t sizeAfterPop = msg.body.size() - sizeof(char) * data.size();
+                std::memcpy(data.data(), msg.body.data() + sizeAfterPop, sizeof(char) * data.size());
+                msg.body.resize(sizeAfterPop);
+                msg.header.size = msg.size();
+
+                return msg;
+            }
+
             template<typename DataType>
             friend Message<T>& operator >> (Message<T>& msg, std::vector<DataType>& dataVec)
             {
@@ -99,12 +115,12 @@ namespace ipc
                     std::cerr << "WARN [MESSAGE] Tried reading data, but it was insufficient\n";
                     return msg;
                 }
-
-                for (int poz = dataVec.size() - 1; poz >= 0; poz--)
-                {
-                    msg >> dataVec[poz];
-                }
-           
+                
+                size_t sizeAfterPop = msg.body.size() - sizeof(DataType) * dataVec.size();
+                std::memcpy(dataVec.data(), msg.body.data() + sizeAfterPop, sizeof(DataType) * dataVec.size());
+                msg.body.resize(sizeAfterPop);
+                msg.header.size = msg.size();
+                
                 return msg;
             }
 

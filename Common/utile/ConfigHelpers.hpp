@@ -31,7 +31,7 @@ namespace common
 				uint16_t maxWaitingTime;
 				utile::IP_ADRESS serverIp;
 				utile::PORT serverPort;
-				std::optional<LANE> missingLane;
+				std::optional<LANE> missingLane = {};
 			};
 
 			struct proxy_config_data

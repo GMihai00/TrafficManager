@@ -6,7 +6,7 @@
 #include "utile/SignalHandler.hpp"
 #include "utile/Logger.hpp"
 #include "utile/CommandLineParser.hpp"
-
+#include "net/Message.hpp"
 using namespace common::utile;
 
 LOGGER("MAIN");
@@ -131,8 +131,8 @@ int main(int argc, char* argv[])
 	{
 		Sleep(500);
 	}
-   /* std::mutex mutexEnd;
-    std::unique_lock<std::mutex> ulock(mutexEnd);
-    g_condVarEnd.wait(ulock);*/
-    return 0;
+ //  /* std::mutex mutexEnd;
+ //   std::unique_lock<std::mutex> ulock(mutexEnd);
+ //   g_condVarEnd.wait(ulock);*/
+ //   return 0;
 }

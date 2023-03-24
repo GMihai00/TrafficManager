@@ -41,8 +41,9 @@ namespace model
 		messageClient(client ,message);
 	}
 
-	boost::optional<common::utile::LANE> JunctionServer::getLaneBasedOnKeyword(std::string keyword)
+	boost::optional<common::utile::LANE> JunctionServer::getLaneBasedOnKeyword(const std::string& keyword)
 	{
+		std::cout << keyword;
 		for (const auto& entry : laneToKeyword_)
 		{
 			if (entry.second == keyword)
@@ -65,12 +66,11 @@ namespace model
 			{
 				return vtLane;
 			}
-
+			
 			std::string keyword;
-			keyword.resize(msg.header.size);
+			keyword.resize(msg.header.size - sizeof(bool));
 			msg >> keyword;
 
-			// AICI AR MAI TREBUI SA TRIMIT SI DACA E LEFT LANE SAU RIGHT LANE
 			return getLaneBasedOnKeyword(keyword);
 		}
 		case ipc::VehicleDetectionMessages::VDB:
@@ -95,8 +95,10 @@ namespace model
 	bool JunctionServer::isMessageValid(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, boost::optional<common::utile::LANE> lane)
 	{
+		//if (lane == boost::none)
 		if (lane == boost::none || trafficLightStateMachine_.isLaneMissing(lane.get()))
 		{
+			LOG_ERR << "Invalid lane";
 			rejectMessage(client, msg);
 			return false;
 		}

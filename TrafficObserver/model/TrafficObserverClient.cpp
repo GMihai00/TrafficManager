@@ -52,8 +52,8 @@ namespace model
             message.header.type = ipc::VehicleDetectionMessages::VCDR;
             message.header.id = messageIdProvider_.provideId(ipc::VehicleDetectionMessages::VCDR);
             message.header.hasPriority = false;
-            message << keyword_;
             message << leftLane;
+            message << keyword_;
             connection_->send(message);
         }
 

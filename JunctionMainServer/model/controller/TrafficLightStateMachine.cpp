@@ -12,6 +12,10 @@ namespace model
 			regLightDuration_(120), // TO CHANGE THIS UPDATED BY ML
 			usingLeftLane_(config.usingLeftLane)
 		{
+			missingLane_ = boost::none;
+			if (config.missingLane.has_value())
+				missingLane_ = config.missingLane.value();
+
 			greeLightObserverCallback_ = std::bind(&TrafficLightStateMachine::greenLightExpireCallback, this);
 			greenLightObserver_ = std::make_shared<Observer>(greeLightObserverCallback_);
 			greenLightTimer_.subscribe(greenLightObserver_);
@@ -28,7 +32,7 @@ namespace model
 
 		bool TrafficLightStateMachine::isLaneMissing(const common::utile::LANE lane) const
 		{
-			return !(missingLane_ != boost::none && lane == missingLane_.get());
+			return missingLane_ != boost::none && lane == missingLane_.get();
 		}
 
 		boost::optional<common::utile::LANE> TrafficLightStateMachine::getVehicleTrackerLane(const ipc::utile::IP_ADRESS& ip)
@@ -45,7 +49,6 @@ namespace model
 
 		bool TrafficLightStateMachine::isClientValid(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
-			std::scoped_lock lock(mutexClients_);
 			if (!isVehicleTracker(lane, ip))
 			{
 				for (const auto& laneToIPs : clientsConnected_)

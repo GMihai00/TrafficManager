@@ -19,6 +19,7 @@
 #include "utile/SignalHandler.hpp"
 #include "utile/TypeConverters.hpp"
 
+
 using namespace common::utile;
 
 LOGGER("TEST-MAIN");
@@ -349,7 +350,7 @@ int main(int argc, char* argv[])
 
     auto commandLine = CommandLineParser(argc, argv);
 
-    // hardcoded for now
+    //hardcoded for now
     g_video_path = std::filesystem::path(L"C:\\Users\\Mihai Gherghinescu\\source\\repos\\TrafficManager\\resources\\TestData\\CarTestVideo1.mp4");
 
     auto jmsConfigDir = getJMSConfigsDir(commandLine);

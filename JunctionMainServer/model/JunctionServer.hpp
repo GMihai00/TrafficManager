@@ -33,7 +33,7 @@ namespace model
 			ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, boost::optional<common::utile::LANE> lane);
 		void aproveMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 		void rejectMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
-		boost::optional<common::utile::LANE> getLaneBasedOnKeyword(std::string keyword);
+		boost::optional<common::utile::LANE> getLaneBasedOnKeyword(const std::string& keyword);
 	public:
 		JunctionServer(const common::utile::model::JMSConfig& config);
 		JunctionServer(const JunctionServer&) = delete;

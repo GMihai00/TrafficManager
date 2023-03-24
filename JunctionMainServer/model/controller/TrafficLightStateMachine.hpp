@@ -82,7 +82,7 @@ namespace model
 		private:
 			// CONFIG DATA
 			bool usingLeftLane_;
-			boost::optional<common::utile::LANE> missingLane_;
+			boost::optional<common::utile::LANE> missingLane_ = boost::none;
 
 			std::mutex mutexClients_;
 			std::map<common::utile::LANE, ipc::utile::IP_ADRESS> laneToVehicleTrackerIPAdress_;
