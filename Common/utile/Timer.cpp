@@ -7,12 +7,12 @@ namespace common
 		void Timer::startTimer()
 		{
 			threadTimer_ = std::thread([this]() {
-				while (true)
+				while (!destroy_)
 				{
 					std::unique_lock<std::mutex> ulock(mutexTimer_);
-					condVarTimer_.wait(ulock, [this]() { return (expired_ == false) && (frozen_ == false); });
+					condVarTimer_.wait(ulock, [this]() { return ((expired_ == false) && (frozen_ == false)) || destroy_; });
 					ulock.unlock();
-					while (timeLeft_ > 0)
+					while (!destroy_ && timeLeft_ > 0)
 					{
 						ulock.lock();
 						std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -25,8 +25,9 @@ namespace common
 					}
 					ulock.lock();
 					expired_ = true;
-					expirationTime_ = time(NULL);
-					if (observer_)
+					expirationTime_ = std::time(NULL);
+					LOG_DBG << "Timer expired";
+					if (!destroy_ && observer_)
 					{
 						observer_->notify();
 					}
@@ -34,6 +35,7 @@ namespace common
 				}
 				});
 		}
+
 		Timer::Timer()
 		{
 			startTimer();
@@ -52,6 +54,8 @@ namespace common
 
 		Timer::~Timer()
 		{
+			destroy_ = true;
+			condVarTimer_.notify_one();
 			if (threadTimer_.joinable())
 				threadTimer_.join();
 		}
@@ -67,9 +71,9 @@ namespace common
 
 		void Timer::resetTimer(const uint16_t& sec)
 		{
-			std::scoped_lock lock(mutexTimer_);
+			//std::scoped_lock lock(mutexTimer_);
 			timeLeft_ = sec;
-			expired_ = true;
+			expired_ = false;
 			condVarTimer_.notify_one();
 		}
 
@@ -81,7 +85,6 @@ namespace common
 
 		std::time_t Timer::getExpirationTime()
 		{
-			std::scoped_lock lock(mutexTimer_);
 			return expirationTime_;
 		}
 

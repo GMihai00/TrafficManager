@@ -1,5 +1,5 @@
 #include "TrafficLightStateMachine.hpp"
-
+#include <limits>
 #include <algorithm>
 
 namespace model
@@ -19,6 +19,18 @@ namespace model
 			greeLightObserverCallback_ = std::bind(&TrafficLightStateMachine::greenLightExpireCallback, this);
 			greenLightObserver_ = std::make_shared<Observer>(greeLightObserverCallback_);
 			greenLightTimer_.subscribe(greenLightObserver_);
+			greenLightTimer_.unfreezeTimer();
+
+			for (uint8_t laneNr = 0; laneNr < 4; laneNr++)
+			{
+				common::utile::LANE lane = (common::utile::LANE)laneNr;
+				if (!isLaneMissing(lane))
+				{
+					auto timer = std::make_shared<Timer>();
+					timer->unfreezeTimer();
+					laneToTimerMap_[lane] = timer;
+				}
+			}
 		}
 
 		bool TrafficLightStateMachine::isUsingLeftLane()
@@ -172,24 +184,35 @@ namespace model
 
 		void TrafficLightStateMachine::freezeTimers(const std::string lanes)
 		{
-			for (const auto& lane : lanes)
+			for (const auto& chrlane : lanes)
 			{
-				laneToTimerMap_.at(common::utile::CharToLane(lane).value()).freezeTimer();
+				auto lane = common::utile::CharToLane(chrlane);
+				if (!lane.has_value())
+					continue;
+
+				if (auto timer = laneToTimerMap_.find(lane.value()); timer != laneToTimerMap_.end() && (timer->second))
+					(timer->second)->freezeTimer();
 			}
 		}
 
 		void TrafficLightStateMachine::resetTimers(const std::string lanes)
 		{
-			for (const auto& lane : lanes)
+			for (const auto& chrlane : lanes)
 			{
-				laneToTimerMap_.at(common::utile::CharToLane(lane).value()).resetTimer(regLightDuration_);
+				auto lane = common::utile::CharToLane(chrlane);
+				if (!lane.has_value())
+					continue;
+
+				if (auto timer = laneToTimerMap_.find(lane.value()); timer != laneToTimerMap_.end() && (timer->second))
+					(timer->second)->resetTimer(regLightDuration_);
 			}
 		}
 
 		void TrafficLightStateMachine::decreaseTimer(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
 			std::scoped_lock lock(mutexClients_);
-			laneToTimerMap_.at(lane).decreaseTimer(calculateTimeDecrease(lane, ip));
+			if (auto timer = laneToTimerMap_.find(lane); timer != laneToTimerMap_.end() && (timer->second))
+				(timer->second)->decreaseTimer(calculateTimeDecrease(lane, ip));
 		}
 
 		void TrafficLightStateMachine::updateGreenLightDuration()
@@ -201,17 +224,23 @@ namespace model
 		void TrafficLightStateMachine::queueNextStatesWaiting()
 		{
 			std::string stateTimer[] = {"", ""};
-			std::time_t expireTime[] = {LONG_MAX, LONG_MAX};
+			std::time_t expireTime[] = { std::numeric_limits<std::time_t>::max(), std::numeric_limits<std::time_t>::max() };
 			for (uint8_t laneNr = 0; laneNr < 4; laneNr++)
 			{
+				
 				common::utile::LANE lane = (common::utile::LANE)laneNr;
-				if (laneToTimerMap_.at(lane).hasExpired())
+				if (auto timer = laneToTimerMap_.find(lane); timer != laneToTimerMap_.end() && (timer->second) && (timer->second)->hasExpired())
 				{
 					auto laneName = LaneToChar(common::utile::LANE(lane));
 					if (laneName.has_value())
 					{
-						stateTimer[laneNr % 2].push_back(laneName.value());
-						expireTime[laneNr % 2] = std::min(expireTime[laneNr % 2], laneToTimerMap_.at(lane).getExpirationTime());
+						int poz = 0;
+						if (lane == common::utile::LANE::E || lane == common::utile::LANE::W)
+							poz = 1;
+
+						stateTimer[poz].push_back(laneName.value());
+						auto timerExpireTime = (timer->second)->getExpirationTime();
+						expireTime[poz] = std::min(expireTime[poz], timerExpireTime);
 					}
 				}
 			}
@@ -223,19 +252,20 @@ namespace model
 					std::swap(stateTimer[0], stateTimer[1]);
 				}
 			}
+
 			if (stateTimer[0].size() != 0)
 			{
-				jumpTransitionQueue_.push(JumpTransition(stateTimer[0], shared_from_this()));
+				jumpTransitionQueue_.push(JumpTransition(stateTimer[0], weak_from_this()));
 			}
-			if (stateTimer[0].size() != 0)
+			if (stateTimer[1].size() != 0)
 			{
-				jumpTransitionQueue_.push(JumpTransition(stateTimer[1], shared_from_this()));
+				jumpTransitionQueue_.push(JumpTransition(stateTimer[1], weak_from_this()));
 			}
 		}
 
 		void TrafficLightStateMachine::updateTrafficState()
 		{
-			std::scoped_lock lock(mutexClients_);
+			//std::scoped_lock lock(mutexClients_);
 			queueNextStatesWaiting();
 			if (!jumpTransitionQueue_.empty())
 			{
@@ -245,10 +275,14 @@ namespace model
 					LOG_ERR << "WE HAVE A BUG";
 					return;
 				}
+				LOG_DBG << "Jumped to transition: " << nextTransition.value().nextTransitionName_;
+
 				this->process_event(nextTransition.value());
 				return;
 			}
-			this->process_event(NormalTransition(shared_from_this()));
+
+			LOG_INF << "Normal transition";
+			this->process_event(NormalTransition(weak_from_this()));
 		}
 
 		void TrafficLightStateMachine::greenLightExpireCallback()

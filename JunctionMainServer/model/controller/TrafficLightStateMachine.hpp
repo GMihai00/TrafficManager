@@ -45,31 +45,33 @@ namespace model
 
 		struct BaseTransition
 		{
-			std::shared_ptr<TrafficLightStateMachine> stateMachine_;
+			const std::weak_ptr<TrafficLightStateMachine> stateMachine_;
 			BaseTransition() = delete;
-			BaseTransition(std::shared_ptr<TrafficLightStateMachine> stateMachine)	:
+			BaseTransition(const std::weak_ptr<TrafficLightStateMachine> stateMachine)	:
 				stateMachine_(stateMachine) 
 			{}
-			std::shared_ptr<TrafficLightStateMachine> getContextStateMachine() const
+			virtual ~BaseTransition() noexcept = default;
+			std::weak_ptr<TrafficLightStateMachine> getContextStateMachine() const
 			{
 				return stateMachine_;
 			}
 		};
+		typedef std::shared_ptr<BaseTransition> BaseTransitionPtr;
 
 		struct NormalTransition : BaseTransition, sc::event<NormalTransition>
 		{
 			NormalTransition() = delete;
-			NormalTransition(std::shared_ptr<TrafficLightStateMachine> stateMachine) :
+			NormalTransition(std::weak_ptr<TrafficLightStateMachine> stateMachine) :
 				BaseTransition(stateMachine)
 			{}
 		};
 
 		struct JumpTransition : BaseTransition, sc::event<JumpTransition>
 		{
-			std::string nextTransition_;
+			std::string nextTransitionName_;
 			JumpTransition() = delete;
-			JumpTransition(const std::string nextTransition, std::shared_ptr<TrafficLightStateMachine> stateMachine) :
-				nextTransition_(nextTransition),
+			JumpTransition(const std::string nextTransition, std::weak_ptr<TrafficLightStateMachine> stateMachine) :
+				nextTransitionName_(nextTransition),
 				BaseTransition(stateMachine)
 			{}
 		};
@@ -87,7 +89,7 @@ namespace model
 			std::mutex mutexClients_;
 			std::map<common::utile::LANE, ipc::utile::IP_ADRESS> laneToVehicleTrackerIPAdress_;
 			std::map<common::utile::LANE, ipc::utile::IP_ADRESSES> clientsConnected_;
-			std::map<common::utile::LANE, common::utile::Timer> laneToTimerMap_;
+			std::map<common::utile::LANE, common::utile::TimerPtr> laneToTimerMap_;
 			common::utile::ThreadSafeQueue<JumpTransition> jumpTransitionQueue_;
 
 			// IS TREATED AS A CLIENT SO CAN CHECK INSIDE CLIENTSCONNECTED
@@ -98,6 +100,7 @@ namespace model
 			IObserverPtr greenLightObserver_;
 			std::function<void()> greeLightObserverCallback_;
 			common::utile::Timer greenLightTimer_;
+
 			LOGGER("TRAFFICLIGHT-STATEMACHINE");
 
 			uint16_t calculateTimeDecrease(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
@@ -149,12 +152,12 @@ namespace model
 			typedef  mpl::list <sc::custom_reaction <JumpTransition> > reactions;
 			virtual sc::result react(const JumpTransition& jumpTransition)
 			{
-				if (jumpTransition.nextTransition_ == "EW") { return transit<EWTransition>(); }
-				if (jumpTransition.nextTransition_ == "N") { return transit<NTransition>(); }
-				if (jumpTransition.nextTransition_ == "S") { return transit<STransition>(); }
-				if (jumpTransition.nextTransition_ == "NS") { return transit<NSTransition>(); }
-				if (jumpTransition.nextTransition_ == "E") { return transit<ETransition>(); }
-				if (jumpTransition.nextTransition_ == "W") { return transit<WTransition>(); }
+				if (jumpTransition.nextTransitionName_ == "EW") { return transit<EWTransition>(); }
+				if (jumpTransition.nextTransitionName_ == "N") { return transit<NTransition>(); }
+				if (jumpTransition.nextTransitionName_ == "S") { return transit<STransition>(); }
+				if (jumpTransition.nextTransitionName_ == "NS") { return transit<NSTransition>(); }
+				if (jumpTransition.nextTransitionName_ == "E") { return transit<ETransition>(); }
+				if (jumpTransition.nextTransitionName_ == "W") { return transit<WTransition>(); }
 				throw std::runtime_error("Tried to jump to undefined transition");
 			}
 			virtual ~BaseState() noexcept = default;
@@ -175,9 +178,9 @@ namespace model
 			{
 				auto transitionBase = dynamic_cast<const BaseTransition*> (
 					sc::simple_state <EWTransition, BaseState>::triggering_event());
-				if (transitionBase)
+				if (transitionBase && !transitionBase->getContextStateMachine().expired())
 				{
-					stateMachine_ = transitionBase->getContextStateMachine();
+					stateMachine_ = transitionBase->getContextStateMachine().lock();
 				}
 				if (stateMachine_)
 				{
@@ -203,9 +206,9 @@ namespace model
 			{
 				auto transitionBase = dynamic_cast<const BaseTransition*> (
 					sc::simple_state <NTransition, BaseState>::triggering_event());
-				if (transitionBase)
+				if (transitionBase && !transitionBase->getContextStateMachine().expired())
 				{
-					stateMachine_ = transitionBase->getContextStateMachine();
+					stateMachine_ = transitionBase->getContextStateMachine().lock();
 				}
 				if (stateMachine_)
 				{
@@ -229,9 +232,9 @@ namespace model
 			{
 				auto transitionBase = dynamic_cast<const BaseTransition*> (
 					sc::simple_state <STransition, BaseState>::triggering_event());
-				if (transitionBase)
+				if (transitionBase && !transitionBase->getContextStateMachine().expired())
 				{
-					stateMachine_ = transitionBase->getContextStateMachine();
+					stateMachine_ = transitionBase->getContextStateMachine().lock();
 				}
 				if (stateMachine_)
 				{
@@ -256,11 +259,12 @@ namespace model
 			// TO BETTER DO THIS ALL OF THIS IN BASE STATE, JUST SET STRING IN HERE
 			NSTransition()
 			{
+
 				auto transitionBase = dynamic_cast<const BaseTransition*> (
 					sc::simple_state <NSTransition, BaseState>::triggering_event());
-				if (transitionBase)
+				if (transitionBase && !transitionBase->getContextStateMachine().expired())
 				{
-					stateMachine_ = transitionBase->getContextStateMachine();
+					stateMachine_ = transitionBase->getContextStateMachine().lock();
 				}
 				if (stateMachine_)
 				{
@@ -286,9 +290,9 @@ namespace model
 			{
 				auto transitionBase = dynamic_cast<const BaseTransition*> (
 					sc::simple_state <ETransition, BaseState>::triggering_event());
-				if (transitionBase)
+				if (transitionBase && !transitionBase->getContextStateMachine().expired())
 				{
-					stateMachine_ = transitionBase->getContextStateMachine();
+					stateMachine_ = transitionBase->getContextStateMachine().lock();
 				}
 				if (stateMachine_)
 				{
@@ -314,9 +318,9 @@ namespace model
 			{
 				auto transitionBase = dynamic_cast<const BaseTransition*> (
 					sc::simple_state <WTransition, BaseState>::triggering_event());
-				if (transitionBase)
+				if (transitionBase && !transitionBase->getContextStateMachine().expired())
 				{
-					stateMachine_ = transitionBase->getContextStateMachine();
+					stateMachine_ = transitionBase->getContextStateMachine().lock();
 				}
 				if (stateMachine_)
 				{

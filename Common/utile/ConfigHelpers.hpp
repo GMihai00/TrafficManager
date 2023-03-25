@@ -9,7 +9,7 @@
 #include <map>
 #include <stack>
 
-#include "DataTypes.hpp";
+#include "DataTypes.hpp"
 #include "GeoCoordinate.hpp"
 
 namespace common

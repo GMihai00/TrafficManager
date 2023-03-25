@@ -173,6 +173,7 @@ namespace ipc
                     catch (boost::system::system_error const& err)
                     {
                         ec = err.code();
+                        return false;
                     }
                    
                     connectCallback(ec, endpoint);
