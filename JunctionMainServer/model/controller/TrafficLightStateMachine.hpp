@@ -43,37 +43,21 @@ namespace model
 		{
 		};
 
-		struct BaseTransition
-		{
-			const std::weak_ptr<TrafficLightStateMachine> stateMachine_;
-			BaseTransition() = delete;
-			BaseTransition(const std::weak_ptr<TrafficLightStateMachine> stateMachine)	:
-				stateMachine_(stateMachine) 
-			{}
-			virtual ~BaseTransition() noexcept = default;
-			std::weak_ptr<TrafficLightStateMachine> getContextStateMachine() const
-			{
-				return stateMachine_;
-			}
-		};
-		typedef std::shared_ptr<BaseTransition> BaseTransitionPtr;
 
-		struct NormalTransition : BaseTransition, sc::event<NormalTransition>
+		struct NormalTransition : sc::event<NormalTransition>
 		{
-			NormalTransition() = delete;
-			NormalTransition(std::weak_ptr<TrafficLightStateMachine> stateMachine) :
-				BaseTransition(stateMachine)
-			{}
+			NormalTransition() = default;
+			virtual ~NormalTransition() noexcept = default;
 		};
 
-		struct JumpTransition : BaseTransition, sc::event<JumpTransition>
+		struct JumpTransition : sc::event<JumpTransition>
 		{
 			std::string nextTransitionName_;
 			JumpTransition() = delete;
-			JumpTransition(const std::string nextTransition, std::weak_ptr<TrafficLightStateMachine> stateMachine) :
-				nextTransitionName_(nextTransition),
-				BaseTransition(stateMachine)
+			JumpTransition(const std::string nextTransition) :
+				nextTransitionName_(nextTransition)
 			{}
+			virtual ~JumpTransition() noexcept = default;
 		};
 
 		struct BaseState;
@@ -134,10 +118,6 @@ namespace model
 			bool registerVehicleTrackerIpAdress(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ipAdress);
 		};
 
-		struct ContextContainer
-		{
-			std::shared_ptr<TrafficLightStateMachine> stateMachine_;
-		};
 
 		// STATES
 		struct Stopped;
@@ -152,15 +132,19 @@ namespace model
 		//Caution: Any call to simple_state<>::transit<>() or simple_state<>::terminate() (see reference) will inevitably destruct the state object 
 		// (similar to delete this;)! That is, code executed after any of these calls may invoke undefined behavior!
 		// That's why these functions should only be called as part of a return statement.
+
+
+		extern bool g_is_jump; // only workaround i could find, when calling transit I can not acces outermost_context()
 		struct BaseState : sc::simple_state <BaseState, TrafficLightStateMachine, Stopped>
 		{
 			typedef  mpl::list <sc::custom_reaction <JumpTransition> > reactions;
 			virtual sc::result react(const JumpTransition& jumpTransition)
 			{
+				g_is_jump = true;
 				if (jumpTransition.nextTransitionName_ == "EW") { return transit<EWTransition>(); }
 				if (jumpTransition.nextTransitionName_ == "N") { return transit<NTransition>(); }
 				if (jumpTransition.nextTransitionName_ == "S") { return transit<STransition>(); }
-				if (jumpTransition.nextTransitionName_ == "NS") { return transit<NSTransition>(); }
+				if (jumpTransition.nextTransitionName_ == "NS") {return transit<NSTransition>(); }
 				if (jumpTransition.nextTransitionName_ == "E") { return transit<ETransition>(); }
 				if (jumpTransition.nextTransitionName_ == "W") { return transit<WTransition>(); }
 				throw std::runtime_error("Tried to jump to undefined transition");
@@ -175,170 +159,106 @@ namespace model
 
 	
 		// STATE I/IV
-		struct EWTransition : ContextContainer, sc::simple_state <EWTransition, BaseState>
+		struct EWTransition : sc::simple_state <EWTransition, BaseState>
 		{
 			typedef  mpl::list < sc::transition<NormalTransition, NTransition> > reactions;
 
 			EWTransition()
 			{
-				auto transitionBase = dynamic_cast<const BaseTransition*> (
-					sc::simple_state <EWTransition, BaseState>::triggering_event());
-				if (transitionBase && !transitionBase->getContextStateMachine().expired())
-				{
-					stateMachine_ = transitionBase->getContextStateMachine().lock();
-				}
-				if (stateMachine_)
-				{
-					stateMachine_->freezeTimers("EW");
-				}
+				if (g_is_jump == false)
+					outermost_context().freezeTimers("EW");
 			}
 
-			~EWTransition()
+			virtual ~EWTransition()
 			{
-				if (stateMachine_)
-				{
-					stateMachine_->resetTimers("EW");
-				}
+				outermost_context().resetTimers("EW");
 			}
 		};
 
 		// STATE II
-		struct NTransition : ContextContainer, sc::simple_state <NTransition, BaseState>
+		struct NTransition : sc::simple_state <NTransition, BaseState>
 		{
 			typedef  mpl::list < sc::transition<NormalTransition, STransition>> reactions;
 
 			NTransition()
 			{
-				auto transitionBase = dynamic_cast<const BaseTransition*> (
-					sc::simple_state <NTransition, BaseState>::triggering_event());
-				if (transitionBase && !transitionBase->getContextStateMachine().expired())
-				{
-					stateMachine_ = transitionBase->getContextStateMachine().lock();
-				}
-				if (stateMachine_)
-				{
-					stateMachine_->freezeTimers("N");
-				}
+				if (g_is_jump == false)
+					outermost_context().freezeTimers("N");
 			}
 
-			~NTransition()
+			virtual ~NTransition()
 			{
-				if (stateMachine_)
-					stateMachine_->resetTimers("N");
+				outermost_context().resetTimers("N");
 			}
 		};
 
 		// STATE III
-		struct STransition : ContextContainer, sc::simple_state <STransition, BaseState>
+		struct STransition : sc::simple_state <STransition, BaseState>
 		{
 			typedef  mpl::list <sc::transition<NormalTransition, NSTransition>> reactions;
 
 			STransition()
 			{
-				auto transitionBase = dynamic_cast<const BaseTransition*> (
-					sc::simple_state <STransition, BaseState>::triggering_event());
-				if (transitionBase && !transitionBase->getContextStateMachine().expired())
-				{
-					stateMachine_ = transitionBase->getContextStateMachine().lock();
-				}
-				if (stateMachine_)
-				{
-					stateMachine_->freezeTimers("S");
-				}
+				if (g_is_jump == false)
+					outermost_context().freezeTimers("S");
 			}
 
 			~STransition()
 			{
-				if (stateMachine_)
-				{
-					stateMachine_->resetTimers("S");
-				}
+				outermost_context().resetTimers("S");
 			}
 		};
 
 		// STATE V/VIII
-		struct NSTransition : ContextContainer, sc::simple_state <NSTransition, BaseState>
+		struct NSTransition : sc::simple_state <NSTransition, BaseState>
 		{
 			typedef  mpl::list <sc::transition<NormalTransition, ETransition>> reactions;
 
 			// TO BETTER DO THIS ALL OF THIS IN BASE STATE, JUST SET STRING IN HERE
 			NSTransition()
 			{
-
-				auto transitionBase = dynamic_cast<const BaseTransition*> (
-					sc::simple_state <NSTransition, BaseState>::triggering_event());
-				if (transitionBase && !transitionBase->getContextStateMachine().expired())
-				{
-					stateMachine_ = transitionBase->getContextStateMachine().lock();
-				}
-				if (stateMachine_)
-				{
-					stateMachine_->freezeTimers("NS");
-				}
+				if (g_is_jump == false)
+					outermost_context().freezeTimers("NS");
 			}
 
-			~NSTransition()
+			virtual ~NSTransition()
 			{
-				if (stateMachine_)
-				{
-					stateMachine_->resetTimers("NS");
-				}
+				outermost_context().resetTimers("NS");
 			}
 		};
 
 		// STATE VI
-		struct ETransition : ContextContainer, sc::simple_state <ETransition, BaseState>
+		struct ETransition : sc::simple_state <ETransition, BaseState>
 		{
 			typedef  mpl::list <sc::transition<NormalTransition, WTransition>> reactions;
 
 			ETransition()
 			{
-				auto transitionBase = dynamic_cast<const BaseTransition*> (
-					sc::simple_state <ETransition, BaseState>::triggering_event());
-				if (transitionBase && !transitionBase->getContextStateMachine().expired())
-				{
-					stateMachine_ = transitionBase->getContextStateMachine().lock();
-				}
-				if (stateMachine_)
-				{
-					stateMachine_->freezeTimers("E");
-				}
+				if (g_is_jump == false)
+					outermost_context().freezeTimers("E");
 			}
 
-			~ETransition()
+			virtual ~ETransition()
 			{
-				if (stateMachine_)
-				{
-					stateMachine_->resetTimers("E");
-				}
+				outermost_context().resetTimers("E");
+
 			}
 		};
 
 		// STATE VII
-		struct WTransition : ContextContainer, sc::simple_state <WTransition, BaseState>
+		struct WTransition : sc::simple_state <WTransition, BaseState>
 		{
 			typedef  mpl::list <sc::transition<NormalTransition, EWTransition>> reactions;
 
 			WTransition()
 			{
-				auto transitionBase = dynamic_cast<const BaseTransition*> (
-					sc::simple_state <WTransition, BaseState>::triggering_event());
-				if (transitionBase && !transitionBase->getContextStateMachine().expired())
-				{
-					stateMachine_ = transitionBase->getContextStateMachine().lock();
-				}
-				if (stateMachine_)
-				{
-					stateMachine_->freezeTimers("EW");
-				}
+				if (g_is_jump == false)
+					outermost_context().freezeTimers("EW");
 			}
 
-			~WTransition()
+			virtual ~WTransition()
 			{
-				if (stateMachine_)
-				{
-					stateMachine_->resetTimers("EW");
-				}
+				outermost_context().resetTimers("EW");
 			}
 		};
 

@@ -162,7 +162,7 @@ namespace cvision
     {
         cntLock++;
         // std::cout << "CNT LOCKS: " << cntLock << "\n";
-        std::scoped_lock lock(mutexGroup_);
+        //std::scoped_lock lock(mutexGroup_);
         // NEED TO INVESTIGATE WHY I CAN NOT LOCK MUTEX
         if (movingObjectStates_.empty())
         {

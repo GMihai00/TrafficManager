@@ -7,6 +7,7 @@ namespace model
 	namespace controller
 	{
 
+		bool g_is_jump = false;
 		TrafficLightStateMachine::TrafficLightStateMachine(const common::utile::model::JMSConfig& config) :
 			greenLightDuration_(config.maxWaitingTime),
 			regLightDuration_(120), // TO CHANGE THIS UPDATED BY ML
@@ -255,11 +256,11 @@ namespace model
 
 			if (stateTimer[0].size() != 0)
 			{
-				jumpTransitionQueue_.push(JumpTransition(stateTimer[0], weak_from_this()));
+				jumpTransitionQueue_.push(JumpTransition(stateTimer[0]));
 			}
 			if (stateTimer[1].size() != 0)
 			{
-				jumpTransitionQueue_.push(JumpTransition(stateTimer[1], weak_from_this()));
+				jumpTransitionQueue_.push(JumpTransition(stateTimer[1]));
 			}
 		}
 
@@ -277,12 +278,15 @@ namespace model
 				}
 				LOG_DBG << "Jumped to transition: " << nextTransition.value().nextTransitionName_;
 
+				this->freezeTimers(nextTransition.value().nextTransitionName_);
 				this->process_event(nextTransition.value());
 				return;
 			}
 
 			LOG_INF << "Normal transition";
-			this->process_event(NormalTransition(weak_from_this()));
+			// here what to do???
+			g_is_jump = false;
+			this->process_event(NormalTransition());
 		}
 
 		void TrafficLightStateMachine::greenLightExpireCallback()
