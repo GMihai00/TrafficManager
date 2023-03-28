@@ -64,7 +64,7 @@ namespace cvision
             {
                 LOG_ERR << "SECOND IMAGE WAS EMPTY!\n";
             }
-            carDetector_->setFrame(secondImageFrame_.value());
+
             auto imgThreshold = imageProcessor_->getProcessedMergedImage(
                 firstImageFrame_.value(),secondImageFrame_.value());
             /*   cv::imshow("TRESH", imgThreshold); // DISPLAY ONLY
@@ -198,6 +198,13 @@ namespace cvision
         return { closestMovingObjGroug, leastDistance };
     }
 
+    void ObjectTracker::detectCarsInOjectGroup(const MovingObjectGroupPtr& objGroup)
+    {
+        const auto& objectImg = objGroup->getCroppedImage(secondImageFrame_.value());
+        taskIdToObjGroup_[taskId_] = objGroup;
+        carDetector_->loadTask(taskId_++, objectImg);
+    }
+
     void ObjectTracker::matchFoundObjToExistingOnes(
         MovingObjPtrList& currentFrameMovingObj)
     {
@@ -220,7 +227,7 @@ namespace cvision
                     closestMovingObjGroug->updateState(true);
                     if (closestMovingObjGroug->nrCars() == 0)
                     {
-                       carDetector_->loadObjectGroup(closestMovingObjGroug);
+                        detectCarsInOjectGroup(closestMovingObjGroug);
                     }
                 }
                 else
@@ -243,7 +250,7 @@ namespace cvision
         movingObjGroup->addMovingObject(currentFrameMovingObj);
         movingObjGroup->updateState(true);
         movingObjects_.push_back(movingObjGroup);
-        carDetector_->loadObjectGroup(movingObjGroup);
+        detectCarsInOjectGroup(movingObjGroup);
         carDetector_->startDetecting();
     }
 
@@ -390,7 +397,24 @@ namespace cvision
     {
         drawObjInfoOnImage(img);
 
-        carDetector_->waitForFinish();
+        auto carCountMap = carDetector_->waitForFinish();
+        
+        for (const auto& rez : carCountMap)
+        {
+            const auto& taskId = rez.first;
+            const auto& nrCars = rez.second;
+            if (auto it = taskIdToObjGroup_.find(taskId); it != taskIdToObjGroup_.end())
+            {
+                if (it->second)
+                {
+                    it->second->updateCarState(nrCars);
+                }
+            }
+        }
+
+        taskIdToObjGroup_.clear();
+        taskId_ = 0;
+
         cv::Scalar rightLaneColor = checkIfCarsCrossedRight() ? SCALAR_GREEN : SCALAR_RED;
         cv::line(img, crossingLineRight_[0], crossingLineRight_[1], rightLaneColor, 2);
 

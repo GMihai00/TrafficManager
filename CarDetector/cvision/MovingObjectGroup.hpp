@@ -25,7 +25,7 @@ namespace cvision
 		cv::Point futurePosition_;
 		std::mutex mutexGroup_;
 		size_t nrFramesWithoutBeeingCar_;
-		size_t nrCars_;
+		uint8_t nrCars_;
 		std::atomic<size_t> cntLock = 0;
 
 		void predictNextPosition();
@@ -46,8 +46,8 @@ namespace cvision
 		MovingObjectPtr getFirstState();
 		MovingObjectPtr getLastState();
 		cv::Mat getCroppedImage(cv::Mat img);
-		void updateCarState(size_t nrCars);
-		size_t nrCars();
+		void updateCarState(uint8_t nrCars);
+		uint8_t nrCars();
 	};
 	typedef std::shared_ptr<MovingObjectGroup> MovingObjectGroupPtr;
 	typedef std::list<MovingObjectGroupPtr> MovingObjGroupPtrList;

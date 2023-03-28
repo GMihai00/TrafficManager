@@ -6,7 +6,6 @@ namespace model
 {
 	namespace controller
 	{
-
 		bool g_is_jump = false;
 		TrafficLightStateMachine::TrafficLightStateMachine(const common::utile::model::JMSConfig& config) :
 			greenLightDuration_(config.maxWaitingTime),

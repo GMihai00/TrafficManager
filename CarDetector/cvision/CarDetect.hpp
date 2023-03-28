@@ -3,9 +3,11 @@
 #define CARDETECT_CVISION_CARDETECT_HPP
 
 #include <queue>
+#include <map>
 #include "Utils.hpp"
 #include "opencv2/objdetect.hpp"
 #include "MovingObjectGroup.hpp"
+#include "utile/ThreadSafeQueue.hpp"
 
 namespace cvision
 {
@@ -13,21 +15,22 @@ namespace cvision
 	class CarDetect
 	{
 	private:
-		std::queue<MovingObjectGroupPtr> imageQueue_;
+		common::utile::ThreadSafeQueue<std::pair<uint32_t, cv::Mat>> taskQueue_;
+		std::map<uint32_t, uint8_t> carCountTaskMap_;
+
 		std::thread threadDetect_;
 		std::mutex mutexDetect_;
 		std::condition_variable condVarDetect_;
 		std::atomic<bool> shuttingDown_ = false;
-		cv::Mat frame_;
 		std::atomic<bool> isRunning_ = false;
 		cv::CascadeClassifier carCascade_;
 		size_t getCarsPresentInImage(const cv::Mat& image);
 	public:
 		CarDetect();
 		~CarDetect();
-		void setFrame(const cv::Mat& image);
-		void loadObjectGroup(const MovingObjectGroupPtr objectGroup);
-		void waitForFinish();
+
+		void loadTask(const uint32_t id ,const const cv::Mat& image);
+		std::map<uint32_t, uint8_t> waitForFinish();
 		bool startDetecting();
 		bool isRunning() const;
 		void stopDetecting();

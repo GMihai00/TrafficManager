@@ -16,15 +16,11 @@ namespace cvision
 		stopDetecting();
 	}
 
-	void CarDetect::loadObjectGroup(const MovingObjectGroupPtr objectGroup)
+	void CarDetect::loadTask(const uint32_t id, const const cv::Mat& image)
 	{
-		imageQueue_.push(objectGroup);
+		std::pair<uint32_t, cv::Mat> task = { id, image };
+		taskQueue_.push(task);
 		condVarDetect_.notify_one();
-	}
-
-	void CarDetect::setFrame(const cv::Mat& image)
-	{
-		frame_ = image;
 	}
 
 	size_t CarDetect::getCarsPresentInImage(const cv::Mat& image)
@@ -49,18 +45,18 @@ namespace cvision
 				while (!shuttingDown_)
 				{
 					std::unique_lock<std::mutex> ulock(mutexDetect_);
-					condVarDetect_.wait(ulock, [this] {	return !imageQueue_.empty() || shuttingDown_; });
+					condVarDetect_.wait(ulock, [this] {	return !taskQueue_.empty() || shuttingDown_; });
 
 					if (shuttingDown_)
 						continue;
 
-					std::shared_ptr<MovingObjectGroup> movingObjectGroup = imageQueue_.front();
-					imageQueue_.pop();
-					if (movingObjectGroup && movingObjectGroup->nrCars() == 0)
+					auto task = taskQueue_.pop();
+					if (task.has_value())
 					{
-						movingObjectGroup->updateCarState(
-							getCarsPresentInImage(movingObjectGroup->getCroppedImage(frame_.clone())));
+						auto nrCars = getCarsPresentInImage(task.value().second);
+						carCountTaskMap_[task.value().first] = nrCars;
 					}
+					
 					ulock.unlock();
 				}
 			});
@@ -80,13 +76,17 @@ namespace cvision
 			threadDetect_.join();
 	}
 
-	void CarDetect::waitForFinish()
+	std::map<uint32_t, uint8_t> CarDetect::waitForFinish()
 	{
-		while (!imageQueue_.empty())
+		while (!taskQueue_.empty())
 		{
 			condVarDetect_.notify_one();
 			std::this_thread::sleep_for(std::chrono::microseconds(10));
 			// do nothing remove busy wait somehow
 		}
+		auto rez = carCountTaskMap_;
+		carCountTaskMap_.clear();
+
+		return rez;
 	}
 } // namespace cvision

@@ -162,7 +162,7 @@ namespace cvision
     {
         cntLock++;
         // std::cout << "CNT LOCKS: " << cntLock << "\n";
-        //std::scoped_lock lock(mutexGroup_);
+        std::scoped_lock lock(mutexGroup_);
         // NEED TO INVESTIGATE WHY I CAN NOT LOCK MUTEX
         if (movingObjectStates_.empty())
         {
@@ -186,6 +186,7 @@ namespace cvision
         cntLock--;
         return movingObjectStates_.front();
     }
+
     cv::Mat MovingObjectGroup::getCroppedImage(cv::Mat img)
     {
         cntLock++;
@@ -214,7 +215,7 @@ namespace cvision
         }
     }
 
-    void MovingObjectGroup::updateCarState(size_t nrCars)
+    void MovingObjectGroup::updateCarState(uint8_t nrCars)
     {
         cntLock++;
         // std::cout << "CNT LOCKS: " << cntLock << "\n";
@@ -231,7 +232,7 @@ namespace cvision
         cntLock--;
     }
 
-    size_t MovingObjectGroup::nrCars()
+    uint8_t MovingObjectGroup::nrCars()
     {
         cntLock++;
         // std::cout << "CNT LOCKS: " << cntLock << "\n";

@@ -33,12 +33,14 @@ namespace cvision
 	class ObjectTracker
 	{
 	private:
+		uint32_t taskId_ = 0;
 		common::utile::ThreadSafeQueue<cv::Mat> imageQueue_;
 		std::shared_ptr<ImageProcessor> imageProcessor_;
 		std::shared_ptr<ImageRender> imageRender_;
 		MovingObjGroupPtrList movingObjects_;
 		std::shared_ptr<CarDetect> carDetector_;
 		MovingObjGroupPtrList cars_;
+		std::map<uint32_t, MovingObjectGroupPtr> taskIdToObjGroup_;
 		std::optional<cv::Mat> firstImageFrame_;
 		std::optional<cv::Mat> secondImageFrame_;
 		int horizontalLinePosition_;
@@ -73,7 +75,7 @@ namespace cvision
 		void drawObjInfoOnImage(cv::Mat& img);
 		void drawObjCountOnImage(cv::Mat& img);
 		void drawRezultsOnImage(cv::Mat& img);
-
+		void detectCarsInOjectGroup(const MovingObjectGroupPtr& objGroup);
 	public:
 		ObjectTracker(const uint16_t idCamera, IObserverPtr observer = nullptr);
 		ObjectTracker(const std::string videoPath, IObserverPtr observer = nullptr);
