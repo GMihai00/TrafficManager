@@ -6,7 +6,7 @@ namespace model
 {
 	namespace controller
 	{
-		bool g_is_jump = false;
+		
 		TrafficLightStateMachine::TrafficLightStateMachine(const common::utile::model::JMSConfig& config) :
 			greenLightDuration_(config.maxWaitingTime),
 			regLightDuration_(120), // TO CHANGE THIS UPDATED BY ML
@@ -168,7 +168,6 @@ namespace model
 
 		uint16_t TrafficLightStateMachine::calculateTimeDecrease(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
-			std::scoped_lock lock(mutexClients_);
 			// TO DO: CALCULATE TIME BASED ON SOURCE, WILL HAVE TO THINK ABOUT AN ALGORITHM 
 			uint16_t rez = 0;
 			if (isVehicleTracker(lane, ip))
@@ -210,7 +209,6 @@ namespace model
 
 		void TrafficLightStateMachine::decreaseTimer(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
-			std::scoped_lock lock(mutexClients_);
 			if (auto timer = laneToTimerMap_.find(lane); timer != laneToTimerMap_.end() && (timer->second))
 				(timer->second)->decreaseTimer(calculateTimeDecrease(lane, ip));
 		}
@@ -265,7 +263,6 @@ namespace model
 
 		void TrafficLightStateMachine::updateTrafficState()
 		{
-			//std::scoped_lock lock(mutexClients_);
 			queueNextStatesWaiting();
 			if (!jumpTransitionQueue_.empty())
 			{
@@ -284,8 +281,8 @@ namespace model
 
 			LOG_INF << "Normal transition";
 			// here what to do???
-			g_is_jump = false;
 			this->process_event(NormalTransition());
+			this->freezeTimers(nextNormalState_);
 		}
 
 		void TrafficLightStateMachine::greenLightExpireCallback()

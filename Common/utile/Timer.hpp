@@ -41,7 +41,7 @@ namespace common
 			Timer(const Timer&&) = delete;
 			virtual ~Timer() noexcept;
 			void decreaseTimer(const uint16_t& sec);
-			void resetTimer(const uint16_t& sec = 60);
+			void resetTimer(const uint16_t& sec = 2);
 			bool hasExpired();
 			std::time_t getExpirationTime();
 			void freezeTimer();

@@ -25,12 +25,12 @@ namespace cvision
 
 	size_t CarDetect::getCarsPresentInImage(const cv::Mat& image)
 	{
-		return 1u; 
+		//return 1u; 
 		// FOR NOW CAR DETECTION IS BEEING DISABLED UNTIL A BETTER DATASET WILL BE CREATED
-		/*std::vector<cv::Rect> cars;
+		std::vector<cv::Rect> cars;
 		carCascade_.detectMultiScale(image, cars);
 			
-		return cars.size();*/
+		return cars.size();
 	}
 
 	bool CarDetect::startDetecting()

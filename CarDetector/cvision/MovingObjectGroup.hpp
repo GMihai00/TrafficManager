@@ -26,7 +26,6 @@ namespace cvision
 		std::mutex mutexGroup_;
 		size_t nrFramesWithoutBeeingCar_;
 		uint8_t nrCars_;
-		std::atomic<size_t> cntLock = 0;
 
 		void predictNextPosition();
 	public:

@@ -65,6 +65,8 @@ namespace model
 			sc::state_machine<TrafficLightStateMachine, BaseState>,
 			std::enable_shared_from_this<TrafficLightStateMachine>
 		{
+		public:
+			std::string nextNormalState_ = "N";
 		private:
 			// CONFIG DATA
 			bool usingLeftLane_;
@@ -124,9 +126,11 @@ namespace model
 		struct EWTransition;
 		struct NTransition;
 		struct STransition;
+		struct EWTransitionCpy;
 		struct NSTransition;
 		struct ETransition;
 		struct WTransition;
+		struct NSTransitionCpy;
 		// this is what causing the issue
 		//https://www.boost.org/doc/libs/1_73_0/libs/statechart/doc/tutorial.html#TransitionActions
 		//Caution: Any call to simple_state<>::transit<>() or simple_state<>::terminate() (see reference) will inevitably destruct the state object 
@@ -134,13 +138,11 @@ namespace model
 		// That's why these functions should only be called as part of a return statement.
 
 
-		extern bool g_is_jump; // only workaround i could find, when calling transit I can not acces outermost_context()
 		struct BaseState : sc::simple_state <BaseState, TrafficLightStateMachine, Stopped>
 		{
 			typedef  mpl::list <sc::custom_reaction <JumpTransition> > reactions;
 			virtual sc::result react(const JumpTransition& jumpTransition)
 			{
-				g_is_jump = true;
 				if (jumpTransition.nextTransitionName_ == "EW") { return transit<EWTransition>(); }
 				if (jumpTransition.nextTransitionName_ == "N") { return transit<NTransition>(); }
 				if (jumpTransition.nextTransitionName_ == "S") { return transit<STransition>(); }
@@ -165,13 +167,14 @@ namespace model
 
 			EWTransition()
 			{
-				if (g_is_jump == false)
-					outermost_context().freezeTimers("EW");
+				std::cout << "State EW started";
 			}
 
 			virtual ~EWTransition()
 			{
+				std::cout << "State ended";
 				outermost_context().resetTimers("EW");
+				outermost_context().nextNormalState_ = "N";
 			}
 		};
 
@@ -182,30 +185,50 @@ namespace model
 
 			NTransition()
 			{
-				if (g_is_jump == false)
-					outermost_context().freezeTimers("N");
+				std::cout << "State N started";
 			}
 
 			virtual ~NTransition()
 			{
+				std::cout << "State ended";
 				outermost_context().resetTimers("N");
+				outermost_context().nextNormalState_ = "S";
 			}
 		};
 
 		// STATE III
 		struct STransition : sc::simple_state <STransition, BaseState>
 		{
-			typedef  mpl::list <sc::transition<NormalTransition, NSTransition>> reactions;
+			typedef  mpl::list <sc::transition<NormalTransition, EWTransitionCpy>> reactions;
 
 			STransition()
 			{
-				if (g_is_jump == false)
-					outermost_context().freezeTimers("S");
+				std::cout << "State S started";
 			}
 
 			~STransition()
 			{
+				std::cout << "State ended";
 				outermost_context().resetTimers("S");
+				outermost_context().nextNormalState_ = "EW";
+			}
+		};
+
+		// STATE I/IV
+		struct EWTransitionCpy : sc::simple_state <EWTransitionCpy, BaseState>
+		{
+			typedef  mpl::list < sc::transition<NormalTransition, NSTransition> > reactions;
+
+			EWTransitionCpy()
+			{
+				std::cout << "State EW started";
+			}
+
+			virtual ~EWTransitionCpy()
+			{
+				std::cout << "State ended";
+				outermost_context().resetTimers("EW");
+				outermost_context().nextNormalState_ = "NS";
 			}
 		};
 
@@ -217,13 +240,14 @@ namespace model
 			// TO BETTER DO THIS ALL OF THIS IN BASE STATE, JUST SET STRING IN HERE
 			NSTransition()
 			{
-				if (g_is_jump == false)
-					outermost_context().freezeTimers("NS");
+				std::cout << "State NS started";
 			}
 
 			virtual ~NSTransition()
 			{
+				std::cout << "State ended";
 				outermost_context().resetTimers("NS");
+				outermost_context().nextNormalState_ = "E";
 			}
 		};
 
@@ -234,31 +258,50 @@ namespace model
 
 			ETransition()
 			{
-				if (g_is_jump == false)
-					outermost_context().freezeTimers("E");
+				std::cout << "State E started";
 			}
 
 			virtual ~ETransition()
 			{
+				std::cout << "State ended";
 				outermost_context().resetTimers("E");
-
+				outermost_context().nextNormalState_ = "W";
 			}
 		};
 
 		// STATE VII
 		struct WTransition : sc::simple_state <WTransition, BaseState>
 		{
-			typedef  mpl::list <sc::transition<NormalTransition, EWTransition>> reactions;
+			typedef  mpl::list <sc::transition<NormalTransition, NSTransitionCpy>> reactions;
 
 			WTransition()
 			{
-				if (g_is_jump == false)
-					outermost_context().freezeTimers("EW");
+				std::cout << "State W started";
 			}
 
 			virtual ~WTransition()
 			{
+				std::cout << "State ended";
 				outermost_context().resetTimers("EW");
+			}
+		};
+
+		// STATE V/VIII
+		struct NSTransitionCpy : sc::simple_state <NSTransitionCpy, BaseState>
+		{
+			typedef  mpl::list <sc::transition<NormalTransition, EWTransition>> reactions;
+
+			// TO BETTER DO THIS ALL OF THIS IN BASE STATE, JUST SET STRING IN HERE
+			NSTransitionCpy()
+			{
+				std::cout << "State NS started";
+			}
+
+			virtual ~NSTransitionCpy()
+			{
+				std::cout << "State ended";
+				outermost_context().resetTimers("NS");
+				outermost_context().nextNormalState_ = "EW";
 			}
 		};
 
