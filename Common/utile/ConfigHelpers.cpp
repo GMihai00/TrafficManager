@@ -39,9 +39,12 @@ namespace common
 				for (auto poz = 0; poz < directions.size(); poz++)
 				{
 					const auto& jsonTreeDir = jsonTree.get().get_child_optional(directions[poz]);
-					if (jsonTreeDir != boost::none && jsonTreeDir.get().get_value_optional<std::string>() != boost::none)
+					if (jsonTreeDir == boost::none)
+						continue;
+
+					if (const auto& val = jsonTreeDir.get().get_value_optional<std::string>(); val != boost::none)
 					{
-						config.laneToKeyword[common::utile::LANE(poz)] = jsonTreeDir.get().get_value<std::string>();
+						config.laneToKeyword[common::utile::LANE(poz)] = val.get();
 						count++;
 					}
 				}
@@ -51,9 +54,12 @@ namespace common
 			bool setUsedLane(const ptree& jsonRoot, model::JMSConfig& config)
 			{
 				const auto& jsonTree = jsonRoot.get_child_optional("usingRightLane");
-				if (jsonTree != boost::none && jsonTree.get().get_value_optional<bool>() != boost::none)
+				if (jsonTree == boost::none)
+					return false;
+
+				if (const auto& val = jsonTree.get().get_value_optional<bool>(); val != boost::none)
 				{
-					config.usingLeftLane = jsonTree.get().get_value<bool>();
+					config.usingLeftLane = val.get();
 					return true;
 				}
 
@@ -63,9 +69,12 @@ namespace common
 			bool setMaxWaitingTime(const ptree& jsonRoot, model::JMSConfig& config)
 			{
 				const auto& jsonTree = jsonRoot.get_child_optional("maxWaitingTime");
-				if (jsonTree != boost::none && jsonTree.get().get_value_optional<uint16_t>() != boost::none)
+				if (jsonTree == boost::none)
+					return false;
+
+				if (const auto & val = jsonTree.get().get_value_optional<uint16_t>(); val != boost::none)
 				{
-					config.maxWaitingTime = jsonTree.get().get_value<uint16_t>();
+					config.maxWaitingTime = val.get();
 					return true;
 				}
 
@@ -76,9 +85,12 @@ namespace common
 			{
 				std::vector <std::string> directions = { "top", "down" , "left", "right" };
 				const auto& jsonTree = jsonRoot.get_child_optional("missingLane");
-				if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
+				if (jsonTree == boost::none)
+					return;
+
+				if (const auto& val = jsonTree.get().get_value_optional<std::string>(); val != boost::none)
 				{
-					const auto& direction = jsonTree.get().get_value<std::string>();
+					const auto& direction = val.get();
 					for (int poz = 0; poz < directions.size(); poz++)
 					{
 						if (direction == directions[poz])
@@ -94,9 +106,12 @@ namespace common
 			bool setServerIp(const ptree& jsonRoot, model::JMSConfig& config)
 			{
 				const auto& jsonTree = jsonRoot.get_child_optional("ip");
-				if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
+				if (jsonTree == boost::none)
+					return false;
+
+				if (const auto& val = jsonTree.get().get_value_optional<std::string>(); val != boost::none)
 				{
-					config.serverIp = jsonTree.get().get_value<std::string>();
+					config.serverIp = val.get();
 					return true;
 				}
 
@@ -106,7 +121,10 @@ namespace common
 			bool setServerPort(const ptree& jsonRoot, model::JMSConfig& config)
 			{
 				const auto& jsonTree = jsonRoot.get_child_optional("port");
-				if (jsonTree != boost::none && jsonTree.get().get_value_optional<uint16_t>() != boost::none)
+				if(jsonTree == boost::none)
+					return false;
+
+				if (const auto& val = jsonTree.get().get_value_optional<uint16_t>() ; val != boost::none)
 				{
 					config.serverPort = jsonTree.get().get_value<uint16_t>();
 					return true;
@@ -152,9 +170,12 @@ namespace common
 			bool setProxyIp(const ptree& jsonRoot, model::proxy_config_data& config)
 			{
 				const auto& jsonTree = jsonRoot.get_child_optional("ip");
-				if (jsonTree != boost::none && jsonTree.get().get_value_optional<std::string>() != boost::none)
+				if (jsonTree == boost::none)
+					return false;
+
+				if (const auto& val = jsonTree.get().get_value_optional<std::string>(); val != boost::none)
 				{
-					config.ip = jsonTree.get().get_value<std::string>();
+					config.ip = val.get();
 					return true;
 				}
 
@@ -164,9 +185,12 @@ namespace common
 			bool setProxyPort(const ptree& jsonRoot, model::proxy_config_data& config)
 			{
 				const auto& jsonTree = jsonRoot.get_child_optional("port");
-				if (jsonTree != boost::none && jsonTree.get().get_value_optional<uint16_t>() != boost::none)
+				if (jsonTree == boost::none)
+					return false;
+
+				if (const auto& val = jsonTree.get().get_value_optional<uint16_t>(); val != boost::none)
 				{
-					config.port = jsonTree.get().get_value<uint16_t>();
+					config.port = val.get();
 					return true;
 				}
 
@@ -182,9 +206,12 @@ namespace common
 			bool setCoordinateLatitude(const ptree& jsonRoot, GeoCoordinate<DecimalCoordinate> coordinate)
 			{
 				const auto& jsonTree = jsonRoot.get_child_optional("latitude");
-				if (jsonTree != boost::none && jsonTree.get().get_value_optional<double>() != boost::none)
+				if (jsonTree == boost::none)
+					return false;
+
+				if (const auto& val = jsonTree.get().get_value_optional<double>(); val != boost::none)
 				{
-					coordinate.latitude = jsonTree.get().get_value<double>();
+					coordinate.latitude = val.get();
 					return true;
 				}
 
@@ -194,9 +221,12 @@ namespace common
 			bool setCoordinateLongitude(const ptree& jsonRoot, GeoCoordinate<DecimalCoordinate> coordinate)
 			{
 				const auto& jsonTree = jsonRoot.get_child_optional("longitude");
-				if (jsonTree != boost::none && jsonTree.get().get_value_optional<double>() != boost::none)
+				if (jsonTree == boost::none)
+					return false;
+
+				if (const auto& val = jsonTree.get().get_value_optional<double>(); val != boost::none)
 				{
-					coordinate.longitude = jsonTree.get().get_value<double>();
+					coordinate.longitude = val.get();
 					return true;
 				}
 
@@ -229,11 +259,63 @@ namespace common
 				return true;
 			}
 
+			bool setDbServer(const ptree& jsonRoot, model::proxy_config_data& config)
+			{
+				const auto& jsonTree = jsonRoot.get_child_optional("server");
+				if (jsonTree == boost::none)
+					return false;
+
+				if (const auto& val = jsonTree.get().get_value_optional<std::string>(); val != boost::none)
+				{
+					config.dbServer = val.get();
+					return true;
+				}
+
+				return false;
+			}
+
+			bool setDbUsername(const ptree& jsonRoot, model::proxy_config_data& config)
+			{
+				const auto& jsonTree = jsonRoot.get_child_optional("username");
+				if (jsonTree == boost::none)
+					return false;
+
+				if (const auto& val = jsonTree.get().get_value_optional<std::string>(); val != boost::none)
+				{
+					config.dbUsername = val.get();
+					return true;
+				}
+
+				return false;
+			}
+
+			bool setDbPassword(const ptree& jsonRoot, model::proxy_config_data& config)
+			{
+				const auto& jsonTree = jsonRoot.get_child_optional("password");
+				if (jsonTree == boost::none)
+					return false;
+
+				if (const auto& val = jsonTree.get().get_value_optional<std::string>(); val != boost::none)
+				{
+					config.dbPassword = val.get();
+					return true;
+				}
+
+				return false;
+			}
+
+			bool setDbCredentials(const ptree& jsonRoot, model::proxy_config_data& config)
+			{
+				return setDbUsername(jsonRoot, config) && setDbPassword(jsonRoot, config);
+			}
+
 			bool setDbConnectionData(const ptree& jsonRoot, model::proxy_config_data& config)
 			{
 				const auto& jsonTree = jsonRoot.get_child_optional("db");
 				if (jsonTree == boost::none)
 					return false;
+
+				return setDbServer(jsonTree.get(), config) && setDbCredentials(jsonTree.get(), config);
 			}
 		}
 
@@ -351,19 +433,19 @@ namespace common
 			for (const auto& item : jsonTree.get())
 			{
 				model::proxy_config_data config;
-				if (!details::setProxyEnpoint(jsonTree.get(), config))
+				if (!details::setProxyEnpoint(item.second, config))
 				{
 					LOG_WARN << "Invalid config data. Missing proxy endpoint";
 					continue;
 				}
 
-				if (!details::setProxyCoordinates(jsonTree.get(), config))
+				if (!details::setProxyCoordinates(item.second, config))
 				{
 					LOG_WARN << "Invalid config data. Missing proxy coordinates";
 					continue;
 				}
 
-				if (!details::setDbConnectionData(jsonTree.get(), config))
+				if (!details::setDbConnectionData(item.second, config))
 				{
 					LOG_WARN << "Invalid config data. Missing DB Connection Data";
 					continue;

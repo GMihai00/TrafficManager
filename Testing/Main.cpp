@@ -119,8 +119,19 @@ void closeAllProcesses()
 {
     for (const auto& pi : g_runningProcesses)
     {
+        HANDLE processHandle = NULL;
+        processHandle = OpenProcess(PROCESS_TERMINATE | PROCESS_ALL_ACCESS, FALSE, pi.dwProcessId);
+        if (processHandle == NULL) {
+            std::cerr << "Error opening process: " << GetLastErrorAsString() << std::endl;
+            continue;
+        }
         // Wait until child process exits.
-        WaitForSingleObject(pi.hProcess, INFINITE);
+        WaitForSingleObject(pi.hProcess, 1000);
+
+        if (!TerminateProcess(pi.hProcess, 0)) {
+            std::cerr << "Error terminating process: " << GetLastErrorAsString() << std::endl;
+        }
+
 
         // Close process and thread handles. 
         CloseHandle(pi.hProcess);
@@ -351,12 +362,13 @@ int main(int argc, char* argv[])
     auto commandLine = CommandLineParser(argc, argv);
 
     //hardcoded for now
-    g_video_path = std::filesystem::path(L"C:\\Users\\Mihai Gherghinescu\\source\\repos\\TrafficManager\\resources\\TestData\\CarTestVideo1.mp4");
+    g_video_path = std::filesystem::path(L"C:\\Users\\Mihai Gherghinescu\\source\\repos\\TrafficManager\\resources\\TestData\\CarTestVideo2.mp4");
 
     auto jmsConfigDir = getJMSConfigsDir(commandLine);
     if (!jmsConfigDir.has_value() || !runJMSForAllConfigs(jmsConfigDir.value()))
     {
         LOG_ERR << "Failed to run JMS";
+        closeAllProcesses();
         return 5;
     }
 
@@ -364,6 +376,7 @@ int main(int argc, char* argv[])
     if (!proxyConfigFile.has_value() || !loadProxysFromConfigFile(proxyConfigFile.value()))
     {
         LOG_ERR << "Failed to run Proxys";
+        closeAllProcesses();
         return 5;
     }
 
@@ -371,6 +384,7 @@ int main(int argc, char* argv[])
     if (!gpsDataDir.has_value())
     {
         LOG_ERR << "GPS input is missing";
+        closeAllProcesses();
         return 5;
     }
     auto vtConfigFile = getVtConfigFile(commandLine);

@@ -1,7 +1,7 @@
 {
   "server": {
     "ip": "127.0.0.1",
-    "port": 400
+    "port": 500
   },
   "maxWaitingTime": 120,
   "missingLane": "down",
