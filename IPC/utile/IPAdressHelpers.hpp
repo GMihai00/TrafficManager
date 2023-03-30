@@ -9,8 +9,8 @@ namespace ipc
 {
 	namespace utile
 	{
-		constexpr auto G_PROXY_IP = "255.255.255.255";
-		constexpr PORT G_PROXY_PORT = 900;
+		constexpr auto G_PROXY_IP = "127.0.0.1";
+		constexpr PORT G_PROXY_PORT = 6000;
 		constexpr auto G_NETMASK = "255.0.0.0";
 
 		bool IsIPV4(IP_ADRESS adress);

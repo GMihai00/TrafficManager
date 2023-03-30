@@ -12,7 +12,7 @@
         "longitude": 9999
       },
       "db": {
-        "server": "tcp://localhost:3306/traffic_manage",
+        "server": "tcp://localhost:3306/traffic_manager",
         "username": "root",
         "password": "Calebbb1234567890*"
       }

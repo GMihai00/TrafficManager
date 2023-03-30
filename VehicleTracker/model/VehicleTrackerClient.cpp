@@ -26,7 +26,8 @@ namespace model
 					continue;
 				}
 
-				// LOG_DBG << lastVisitedProxys_.top().first << lastVisitedProxys_.top().second;
+				LOG_DBG << lastVisitedProxys_.top().first << lastVisitedProxys_.top().second;
+				// aici crash
 				if (!connect(lastVisitedProxys_.top().first, lastVisitedProxys_.top().second))
 				{
 					lastVisitedProxys_.pop();
@@ -41,7 +42,8 @@ namespace model
 				}
 
 				disconnect();
-
+				
+				//aici daca failuie nu elibereaza resursele cum trebuie
 				if (!connect(nextJunction_->getIpAdress(), nextJunction_->getPort()))
 				{
 					LOG_ERR << "FAILED TO COMMUNICATE WITH JUNCTION";

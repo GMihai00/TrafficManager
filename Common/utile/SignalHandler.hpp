@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #ifndef COMMON_UTILE_SIGNALHANDLER_HPP
 #define COMMON_UTILE_SIGNALHANDLER_HPP
 

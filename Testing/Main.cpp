@@ -126,7 +126,7 @@ void closeAllProcesses()
             continue;
         }
         // Wait until child process exits.
-        WaitForSingleObject(pi.hProcess, 1000);
+        WaitForSingleObject(pi.hProcess, 5000);
 
         if (!TerminateProcess(pi.hProcess, 0)) {
             std::cerr << "Error terminating process: " << GetLastErrorAsString() << std::endl;
