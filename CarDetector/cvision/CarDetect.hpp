@@ -8,6 +8,7 @@
 #include "opencv2/objdetect.hpp"
 #include "MovingObjectGroup.hpp"
 #include "utile/ThreadSafeQueue.hpp"
+#include <opencv2/dnn.hpp>
 
 namespace cvision
 {
@@ -23,7 +24,7 @@ namespace cvision
 		std::condition_variable condVarDetect_;
 		std::atomic<bool> shuttingDown_ = false;
 		std::atomic<bool> isRunning_ = false;
-		cv::CascadeClassifier carCascade_;
+		cv::CascadeClassifier carCascade_; //to be replaced with cv::dnn::Net net = cv::dnn::readNetFromTensorflow("model.pb");
 		size_t getCarsPresentInImage(const cv::Mat& image);
 	public:
 		CarDetect();

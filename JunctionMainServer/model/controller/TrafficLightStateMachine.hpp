@@ -131,12 +131,6 @@ namespace model
 		struct ETransition;
 		struct WTransition;
 		struct NSTransitionCpy;
-		// this is what causing the issue
-		//https://www.boost.org/doc/libs/1_73_0/libs/statechart/doc/tutorial.html#TransitionActions
-		//Caution: Any call to simple_state<>::transit<>() or simple_state<>::terminate() (see reference) will inevitably destruct the state object 
-		// (similar to delete this;)! That is, code executed after any of these calls may invoke undefined behavior!
-		// That's why these functions should only be called as part of a return statement.
-
 
 		struct BaseState : sc::simple_state <BaseState, TrafficLightStateMachine, Stopped>
 		{

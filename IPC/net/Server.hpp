@@ -55,7 +55,6 @@ namespace ipc
                 // throws boost::system::system_error
                 boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(host), port);
                 connectionAccepter_.open(endpoint.protocol());
-                // THIS IS SOMEHOW FAILING
                 //connectionAccepter_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(false));
                 //connectionAccepter_.set_option(boost::asio::ip::tcp::acceptor::broadcast(false));
                 connectionAccepter_.bind(endpoint);

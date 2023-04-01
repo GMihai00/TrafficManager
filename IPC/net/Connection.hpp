@@ -248,7 +248,6 @@ namespace ipc
                 isReading_ = false;
             }
 
-            // AICI NU VERIFIC DACA READ DATA NU CUMVA A DAT FAIL!!!
             bool readHeader()
             {
                 std::vector<uint8_t> vBuffer(sizeof(MessageHeader<T>));
@@ -273,7 +272,6 @@ namespace ipc
     
             void addToIncomingMessageQueue()
             {
-                // THIS IS SO WRONG
                 if (owner_ == Owner::Server)
                 {
                     const auto& pair = std::make_pair(
@@ -314,7 +312,6 @@ namespace ipc
                     };
                 }
                 isWriting_ = true;
-                // CONTEXT NOT RUNNING HERE SOMEHOW
 
                 if (isConnected())
                 {
@@ -367,7 +364,6 @@ namespace ipc
     
             bool writeHeader(const Message<T>& outgoingMessage)
             {
-                // this needs to be changed
                 boost::system::error_code errcode;
                 boost::asio::write(socket_, boost::asio::buffer(&outgoingMessage.header, sizeof(MessageHeader<T>)), errcode);
         

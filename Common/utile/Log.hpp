@@ -56,8 +56,6 @@ public:
 
     Log& operator <<(std::ostream& pf(std::ostream&))
     {
-        // crashin here somehow
-        // just random memory not accesible somehow
         if (pf)
         {
             return write(std::move(*pf));
@@ -213,7 +211,7 @@ private:
         const auto id = std::this_thread::get_id();
 
         std::lock_guard<std::mutex> lock{ mLogMutex };
-        // for some kind of reason lambda is failing
+
         mLogQueue.emplace_back(LogEntry{ id, [=, value = std::move(value)] {
             mStream << value;
         } });

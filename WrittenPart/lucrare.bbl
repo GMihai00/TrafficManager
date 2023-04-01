@@ -1,0 +1,432 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global}
+    \entry{Kenney2011IOT}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=0ccded58a90cf664015d5f6730da9565}{%
+           family={Aleko},
+           familyi={A\bibinitperiod},
+           given={Dex\bibnamedelima R.},
+           giveni={D\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+        {{hash=a6ad6d564ea03bfb32c963542b2d2bde}{%
+           family={Djahel},
+           familyi={D\bibinitperiod},
+           given={Soufiene},
+           giveni={S\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{d388ff49597f9afbba89e078665060c9}
+      \strng{fullhash}{d388ff49597f9afbba89e078665060c9}
+      \strng{bibnamehash}{d388ff49597f9afbba89e078665060c9}
+      \strng{authorbibnamehash}{d388ff49597f9afbba89e078665060c9}
+      \strng{authornamehash}{d388ff49597f9afbba89e078665060c9}
+      \strng{authorfullhash}{d388ff49597f9afbba89e078665060c9}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{2019 {IEEE} International Smart Cities Conference ({ISC}2)}
+      \field{month}{10}
+      \field{title}{An {IoT} {E}nabled {T}raffic {L}ight {C}ontrollers {S}ynchronization {M}ethod for {R}oad {T}raffic {C}ongestion {M}itigation}
+      \field{year}{2019}
+      \verb{doi}
+      \verb 10.1109/isc246665.2019.9071667
+      \endverb
+    \endentry
+    \entry{Deshmukh2016}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=3996098d4387acc3af1e1b9bfddcde07}{%
+           family={Deshmukh},
+           familyi={D\bibinitperiod},
+           given={Akshay\bibnamedelima D.},
+           giveni={A\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
+        {{hash=cc3e2bef90067990dc5b0f14a2dc9309}{%
+           family={Shinde},
+           familyi={S\bibinitperiod},
+           given={Ulhas\bibnamedelima B.},
+           giveni={U\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{7ee5b7ac1daf518a8a346f0c8492193f}
+      \strng{fullhash}{7ee5b7ac1daf518a8a346f0c8492193f}
+      \strng{bibnamehash}{7ee5b7ac1daf518a8a346f0c8492193f}
+      \strng{authorbibnamehash}{7ee5b7ac1daf518a8a346f0c8492193f}
+      \strng{authornamehash}{7ee5b7ac1daf518a8a346f0c8492193f}
+      \strng{authorfullhash}{7ee5b7ac1daf518a8a346f0c8492193f}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{2016 International Conference on Inventive Computation Technologies ({ICICT})}
+      \field{month}{8}
+      \field{title}{A low cost environment monitoring system using raspberry {P}i and arduino with {Z}igbee}
+      \field{year}{2016}
+      \verb{doi}
+      \verb 10.1109/inventive.2016.7830096
+      \endverb
+    \endentry
+    \entry{Jin2017}{article}{}
+      \name{author}{3}{}{%
+        {{hash=37bd13725471fd16be12911c22440192}{%
+           family={Jin},
+           familyi={J\bibinitperiod},
+           given={Junchen},
+           giveni={J\bibinitperiod}}}%
+        {{hash=e0bed6e6876c793625601b0e4240fd3b}{%
+           family={Ma},
+           familyi={M\bibinitperiod},
+           given={Xiaoliang},
+           giveni={X\bibinitperiod}}}%
+        {{hash=748d946a4cb4f2e24f72bd842c788d11}{%
+           family={Kosonen},
+           familyi={K\bibinitperiod},
+           given={Iisakki},
+           giveni={I\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier {BV}}%
+      }
+      \strng{namehash}{d5ab817065b862ec59fcfe90177fdc93}
+      \strng{fullhash}{d5ab817065b862ec59fcfe90177fdc93}
+      \strng{bibnamehash}{d5ab817065b862ec59fcfe90177fdc93}
+      \strng{authorbibnamehash}{d5ab817065b862ec59fcfe90177fdc93}
+      \strng{authornamehash}{d5ab817065b862ec59fcfe90177fdc93}
+      \strng{authorfullhash}{d5ab817065b862ec59fcfe90177fdc93}
+      \field{sortinit}{J}
+      \field{sortinithash}{b2f54a9081ace9966a7cb9413811edb4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Control Engineering Practice}
+      \field{month}{1}
+      \field{title}{An intelligent control system for traffic lights with simulation-based evaluation}
+      \field{volume}{58}
+      \field{year}{2017}
+      \field{pages}{24\bibrangedash 33}
+      \range{pages}{10}
+      \verb{doi}
+      \verb 10.1016/j.conengprac.2016.09.009
+      \endverb
+    \endentry
+    \entry{Neudecker2012}{article}{}
+      \name{author}{5}{}{%
+        {{hash=8cbc500e1c93732fcfae1eb4f8f198a0}{%
+           family={Neudecker},
+           familyi={N\bibinitperiod},
+           given={Till},
+           giveni={T\bibinitperiod}}}%
+        {{hash=792165998645b5fb1ea9e09b6e13f31d}{%
+           family={An},
+           familyi={A\bibinitperiod},
+           given={Natalya},
+           giveni={N\bibinitperiod}}}%
+        {{hash=4f820925c863318ec4540a7c740df12c}{%
+           family={Tonguz},
+           familyi={T\bibinitperiod},
+           given={O.K.},
+           giveni={O\bibinitperiod}}}%
+        {{hash=8ab0eef2683f5746041a013cf9ce027e}{%
+           family={Gaugel},
+           familyi={G\bibinitperiod},
+           given={Tristan},
+           giveni={T\bibinitperiod}}}%
+        {{hash=dd7c7cfac63543062717af7935af1e65}{%
+           family={Mittag},
+           familyi={M\bibinitperiod},
+           given={Jens},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{266e7018c8f741c320bf032dcf3ffa24}
+      \strng{fullhash}{b642a3a4f5addd77dd6dba1ebecf6e31}
+      \strng{bibnamehash}{266e7018c8f741c320bf032dcf3ffa24}
+      \strng{authorbibnamehash}{266e7018c8f741c320bf032dcf3ffa24}
+      \strng{authornamehash}{266e7018c8f741c320bf032dcf3ffa24}
+      \strng{authorfullhash}{b642a3a4f5addd77dd6dba1ebecf6e31}
+      \field{sortinit}{N}
+      \field{sortinithash}{22369a73d5f88983a108b63f07f37084}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{VANET '12: Proceedings of the ninth ACM international workshop on Vehicular inter-networking, systems, and applications}
+      \field{month}{06}
+      \field{title}{Feasibility of virtual traffic lights in non-line-of-sight environments}
+      \field{year}{2012}
+      \verb{doi}
+      \verb 10.1145/2307888.2307907
+      \endverb
+    \endentry
+    \entry{Sheeny2021}{inproceedings}{}
+      \name{author}{6}{}{%
+        {{hash=f37cd8332cade2df465ea7efb8faea50}{%
+           family={Sheeny},
+           familyi={S\bibinitperiod},
+           given={Marcel},
+           giveni={M\bibinitperiod}}}%
+        {{hash=d32aa9fc1ef1435de2a111bfee5dccb7}{%
+           family={Pellegrin},
+           familyi={P\bibinitperiod},
+           given={Emanuele\bibnamedelima De},
+           giveni={E\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
+        {{hash=d72255df1601c661c43f9fe0e8b1d9d3}{%
+           family={Mukherjee},
+           familyi={M\bibinitperiod},
+           given={Saptarshi},
+           giveni={S\bibinitperiod}}}%
+        {{hash=7bfcb35f87ab398644d7439d8816f359}{%
+           family={Ahrabian},
+           familyi={A\bibinitperiod},
+           given={Alireza},
+           giveni={A\bibinitperiod}}}%
+        {{hash=99de65e5476005b6deb7b87170202067}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Sen},
+           giveni={S\bibinitperiod}}}%
+        {{hash=95505d5f9368402de0a8ef752350300b}{%
+           family={Wallace},
+           familyi={W\bibinitperiod},
+           given={Andrew},
+           giveni={A\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{60ff3de142d9a1c7b42ba351f4528ab9}
+      \strng{fullhash}{36e33fc148e175209414a886cbf3d2a4}
+      \strng{bibnamehash}{60ff3de142d9a1c7b42ba351f4528ab9}
+      \strng{authorbibnamehash}{60ff3de142d9a1c7b42ba351f4528ab9}
+      \strng{authornamehash}{60ff3de142d9a1c7b42ba351f4528ab9}
+      \strng{authorfullhash}{36e33fc148e175209414a886cbf3d2a4}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{2021 {IEEE} International Conference on Robotics and Automation ({ICRA})}
+      \field{month}{5}
+      \field{title}{{RADIATE}: A Radar Dataset for Automotive Perception in Bad Weather}
+      \field{year}{2021}
+      \verb{doi}
+      \verb 10.1109/icra48506.2021.9562089
+      \endverb
+    \endentry
+    \entry{Teo2010}{inproceedings}{}
+      \name{author}{3}{}{%
+        {{hash=3151a177368eac91f52c7c66868e8ef5}{%
+           family={Teo},
+           familyi={T\bibinitperiod},
+           given={K.T.K.},
+           giveni={K\bibinitperiod}}}%
+        {{hash=44b6363ba0f4f16a7165850984cab063}{%
+           family={Kow},
+           familyi={K\bibinitperiod},
+           given={W.Y.},
+           giveni={W\bibinitperiod}}}%
+        {{hash=46a88844cf7ce0fc5d1e99dbf45818cf}{%
+           family={Chin},
+           familyi={C\bibinitperiod},
+           given={Y.K.},
+           giveni={Y\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{353691393b33946b8a17a8b25a1aa8d3}
+      \strng{fullhash}{353691393b33946b8a17a8b25a1aa8d3}
+      \strng{bibnamehash}{353691393b33946b8a17a8b25a1aa8d3}
+      \strng{authorbibnamehash}{353691393b33946b8a17a8b25a1aa8d3}
+      \strng{authornamehash}{353691393b33946b8a17a8b25a1aa8d3}
+      \strng{authorfullhash}{353691393b33946b8a17a8b25a1aa8d3}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{2010 Second International Conference on Computational Intelligence, Modelling and Simulation}
+      \field{month}{9}
+      \field{title}{Optimization of {T}raffic {F}low within an {U}rban {T}raffic {L}ight {I}ntersection with {G}enetic {A}lgorithm}
+      \field{year}{2010}
+      \verb{doi}
+      \verb 10.1109/cimsim.2010.95
+      \endverb
+    \endentry
+    \entry{Tomar2022}{article}{}
+      \name{author}{3}{}{%
+        {{hash=6c974fdd3e02a6d529672b17fe472c77}{%
+           family={Tomar},
+           familyi={T\bibinitperiod},
+           given={Ishu},
+           giveni={I\bibinitperiod}}}%
+        {{hash=44a673bcf8e0fa29a1d27729aebff0fb}{%
+           family={Sreedevi},
+           familyi={S\bibinitperiod},
+           given={Indu},
+           giveni={I\bibinitperiod}}}%
+        {{hash=87f21fc574e5e88ad26a5680f83f4cc1}{%
+           family={Pandey},
+           familyi={P\bibinitperiod},
+           given={Neeta},
+           giveni={N\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {{MDPI} {AG}}%
+      }
+      \strng{namehash}{7ed1b706e40c6ac5aea1c108bdcaf4f6}
+      \strng{fullhash}{7ed1b706e40c6ac5aea1c108bdcaf4f6}
+      \strng{bibnamehash}{7ed1b706e40c6ac5aea1c108bdcaf4f6}
+      \strng{authorbibnamehash}{7ed1b706e40c6ac5aea1c108bdcaf4f6}
+      \strng{authornamehash}{7ed1b706e40c6ac5aea1c108bdcaf4f6}
+      \strng{authorfullhash}{7ed1b706e40c6ac5aea1c108bdcaf4f6}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Electronics}
+      \field{month}{2}
+      \field{number}{3}
+      \field{title}{State-of-{A}rt {R}eview of {T}raffic {L}ight {S}ynchronization for {I}ntelligent {V}ehicles: {C}urrent {S}tatus, {C}hallenges, and {E}merging {T}rends}
+      \field{volume}{11}
+      \field{year}{2022}
+      \field{pages}{465}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.3390/electronics11030465
+      \endverb
+    \endentry
+    \entry{Zhang2018}{inproceedings}{}
+      \name{author}{18}{}{%
+        {{hash=528b0708ec1bf9b1677b35261fac82bf}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={R.},
+           giveni={R\bibinitperiod}}}%
+        {{hash=012131ebe89bc65e12f3143401986824}{%
+           family={Schmutz},
+           familyi={S\bibinitperiod},
+           given={F.},
+           giveni={F\bibinitperiod}}}%
+        {{hash=927d1e85ae62b41ed2d2188e1cda19b3}{%
+           family={Gerard},
+           familyi={G\bibinitperiod},
+           given={K.},
+           giveni={K\bibinitperiod}}}%
+        {{hash=121ee622c3fba216306fb1ffac453fd0}{%
+           family={Pomini},
+           familyi={P\bibinitperiod},
+           given={A.},
+           giveni={A\bibinitperiod}}}%
+        {{hash=9ec117b2f323fd14bf08babd78a11485}{%
+           family={Basseto},
+           familyi={B\bibinitperiod},
+           given={L.},
+           giveni={L\bibinitperiod}}}%
+        {{hash=e87421e15e5ad4b673bd339bca116ee5}{%
+           family={Hassen},
+           familyi={H\bibinitperiod},
+           given={S.\bibnamedelimi B.},
+           giveni={S\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+        {{hash=1386504a98bb140dd61c96f79811d6be}{%
+           family={Jaiprakash},
+           familyi={J\bibinitperiod},
+           given={A.},
+           giveni={A\bibinitperiod}}}%
+        {{hash=7d7db15da7da3a98bfdc86b8e4257ca1}{%
+           family={Ozgunes},
+           familyi={O\bibinitperiod},
+           given={I.},
+           giveni={I\bibinitperiod}}}%
+        {{hash=ba528c8faf3d76723ba1214ab29c15f7}{%
+           family={AlArifi},
+           familyi={A\bibinitperiod},
+           given={A.},
+           giveni={A\bibinitperiod}}}%
+        {{hash=a09ca5832e6228dbd0f58d8c0d3f79a2}{%
+           family={Aldossary},
+           familyi={A\bibinitperiod},
+           given={H.},
+           giveni={H\bibinitperiod}}}%
+        {{hash=578ec8848920f764e2214046119856b5}{%
+           family={AIKurtass},
+           familyi={A\bibinitperiod},
+           given={I.},
+           giveni={I\bibinitperiod}}}%
+        {{hash=2bbb4495589e2a2e100c3e180e820219}{%
+           family={Talabay},
+           familyi={T\bibinitperiod},
+           given={O.},
+           giveni={O\bibinitperiod}}}%
+        {{hash=3efdbc1576d105e94c988bdb158e8232}{%
+           family={AlMhanna},
+           familyi={A\bibinitperiod},
+           given={A.},
+           giveni={A\bibinitperiod}}}%
+        {{hash=abc02d03b298617864502183d4230580}{%
+           family={AlGhamisi},
+           familyi={A\bibinitperiod},
+           given={S.},
+           giveni={S\bibinitperiod}}}%
+        {{hash=8e6b981db6ef09a7da419cc3009728c8}{%
+           family={AlSaleh},
+           familyi={A\bibinitperiod},
+           given={M.},
+           giveni={M\bibinitperiod}}}%
+        {{hash=19bb5e9e753fb7782e21c2fbfce5a97f}{%
+           family={Biyabani},
+           familyi={B\bibinitperiod},
+           given={A.\bibnamedelimi A.},
+           giveni={A\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+        {{hash=fcd1f3ed3c0dd2d6a281b8ddbed34533}{%
+           family={Al-Ghoneim},
+           familyi={A\bibinithyphendelim G\bibinitperiod},
+           given={K.},
+           giveni={K\bibinitperiod}}}%
+        {{hash=4f820925c863318ec4540a7c740df12c}{%
+           family={Tonguz},
+           familyi={T\bibinitperiod},
+           given={O.\bibnamedelimi K.},
+           giveni={O\bibinitperiod\bibinitdelim K\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{1d775eae6db02d895a6cce72f9cf615f}
+      \strng{fullhash}{a5b33f8ed5d165cb5c51601b4e3b521b}
+      \strng{bibnamehash}{1d775eae6db02d895a6cce72f9cf615f}
+      \strng{authorbibnamehash}{1d775eae6db02d895a6cce72f9cf615f}
+      \strng{authornamehash}{1d775eae6db02d895a6cce72f9cf615f}
+      \strng{authorfullhash}{a5b33f8ed5d165cb5c51601b4e3b521b}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{{IECON} 2018 - 44th Annual Conference of the {IEEE} Industrial Electronics Society}
+      \field{month}{10}
+      \field{title}{Increasing {T}raffic {F}lows with {DSRC} {T}echnology: {F}ield {T}rials and {P}erformance {E}valuation}
+      \field{year}{2018}
+      \verb{doi}
+      \verb 10.1109/iecon.2018.8591074
+      \endverb
+    \endentry
+  \enddatalist
+  \missing{ALEKO2019}
+\endrefsection
+\endinput
+

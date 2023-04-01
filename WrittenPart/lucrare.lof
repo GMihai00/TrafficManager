@@ -1,0 +1,18 @@
+\babel@toc {english}{}\relax 
+\contentsline {figure}{\numberline {1}{\ignorespaces Rasberry PI based system \textcopyright }}{8}{figure.1}%
+\contentsline {figure}{\numberline {2}{\ignorespaces Object Recognition Based Traffic System Model \textcopyright }}{9}{figure.2}%
+\contentsline {figure}{\numberline {3}{\ignorespaces Sensor Based Traffic System Model \textcopyright }}{10}{figure.3}%
+\contentsline {figure}{\numberline {4}{\ignorespaces Traffic Signal Synchronization Model \textcopyright }}{11}{figure.4}%
+\contentsline {figure}{\numberline {5}{\ignorespaces Dedicated Short-Range Communications Radio \textcopyright }}{13}{figure.5}%
+\contentsline {figure}{\numberline {6}{\ignorespaces DSRC Based System Model \textcopyright }}{14}{figure.6}%
+\contentsline {figure}{\numberline {7}{\ignorespaces All UC Diagram}}{16}{figure.7}%
+\contentsline {figure}{\numberline {8}{\ignorespaces UC: Connect}}{17}{figure.8}%
+\contentsline {figure}{\numberline {9}{\ignorespaces UC: Disconnect}}{18}{figure.9}%
+\contentsline {figure}{\numberline {10}{\ignorespaces UC: Find cars from provided images}}{19}{figure.10}%
+\contentsline {figure}{\numberline {11}{\ignorespaces System sketch}}{21}{figure.11}%
+\contentsline {figure}{\numberline {12}{\ignorespaces UC: Send vehicle data}}{22}{figure.12}%
+\contentsline {figure}{\numberline {13}{\ignorespaces Junction Phazes}}{23}{figure.13}%
+\contentsline {figure}{\numberline {14}{\ignorespaces Phaze switching example}}{25}{figure.14}%
+\contentsline {figure}{\numberline {15}{\ignorespaces Faulty phaze switching}}{25}{figure.15}%
+\contentsline {figure}{\numberline {16}{\ignorespaces UC: Emergency Green Light Start}}{26}{figure.16}%
+\contentsline {figure}{\numberline {17}{\ignorespaces UC: Emergency Green Light Stop}}{27}{figure.17}%
