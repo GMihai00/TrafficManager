@@ -714,3 +714,6 @@ TSWLatexianTemp*
 #vscode files
 *.vscode/
 /.vs
+
+#subproject
+/MLDataTraining/Python/Tensorflow/labelimg/*
