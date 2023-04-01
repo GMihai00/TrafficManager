@@ -1,6 +1,6 @@
-PWD e:\Licenta\Traffic_Manager\Lucrare
+PWD c:\Users\Mihai Gherghinescu\source\repos\TrafficManager\WrittenPart
 INPUT C:\Users\Mihai Gherghinescu\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT e:\Licenta\Traffic_Manager\Lucrare\lucrare.tex
+INPUT c:\Users\Mihai Gherghinescu\source\repos\TrafficManager\WrittenPart\lucrare.tex
 OUTPUT lucrare.log
 INPUT C:\Users\Mihai Gherghinescu\AppData\Local\Programs\MiKTeX\tex\latex\base\article.cls
 INPUT C:\Users\Mihai Gherghinescu\AppData\Local\Programs\MiKTeX\tex\latex\base\article.cls

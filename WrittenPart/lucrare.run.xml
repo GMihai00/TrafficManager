@@ -79,7 +79,7 @@
       <file>lucrare.bcf</file>
     </requires>
     <requires type="editable">
-      <file>./../Referinte/referinte.bib</file>
+      <file>./References/referinte.bib</file>
     </requires>
   </external>
 </requests>
