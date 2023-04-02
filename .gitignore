@@ -719,4 +719,4 @@ TSWLatexianTemp*
 /MLDataTraining/Python/Tensorflow/labelimg/*
 
 #virtual env
-/MLDataTraining/Python/tenserflow_development/*
+/MLDataTraining/Python/tenserflow_env/*
