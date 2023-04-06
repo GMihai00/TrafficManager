@@ -720,3 +720,6 @@ TSWLatexianTemp*
 
 #virtual env
 /MLDataTraining/Python/tenserflow_env/*
+
+#training data
+MLDataTraining/Python\training_data/object-detection-crowdai/*
