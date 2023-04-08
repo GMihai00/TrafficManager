@@ -722,4 +722,10 @@ TSWLatexianTemp*
 /MLDataTraining/Python/tenserflow_env/*
 
 #training data
-MLDataTraining/Python\training_data/object-detection-crowdai/*
+/MLDataTraining/Python/training_data/*
+
+#model coco record
+/MLDataTraining/Python/models/ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8/setup_files/*
+
+#subrepo
+/MLDataTraining/Python/tf_repo/*

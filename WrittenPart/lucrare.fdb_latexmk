@@ -1,11 +1,11 @@
 # Fdb version 3
-["biber lucrare"] 1680355338 "lucrare.bcf" "lucrare.bbl" "lucrare" 1680355705
-  "./References/referinte.bib" 1680355523 4093 4dd96f173753c69cfb1f798fc38027c8 ""
+["biber lucrare"] 1680946649 "lucrare.bcf" "lucrare.bbl" "lucrare" 1680946657
+  "./References/referinte.bib" 1680356450 4504 af3239e55df85aceed821a19dd8822e1 ""
   "lucrare.bcf" 1680355705 107915 0b506230ff327d16710b42b823cae884 "pdflatex"
   (generated)
   "lucrare.bbl"
   "lucrare.blg"
-["pdflatex"] 1680355701 "c:/Users/Mihai Gherghinescu/source/repos/TrafficManager/WrittenPart/lucrare.tex" "lucrare.pdf" "lucrare" 1680355705
+["pdflatex"] 1680355701 "c:/Users/Mihai Gherghinescu/source/repos/TrafficManager/WrittenPart/lucrare.tex" "lucrare.pdf" "lucrare" 1680946657
   "C:/Users/Mihai" 1677568306 18988 4d0f8a4642b372c84d81a091ad94f769 ""
   "C:/Users/Mihai Gherghinescu/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1674852283 82686 2381c3433487640bf26aa76a10db7eb2 ""
   "C:/Users/Mihai Gherghinescu/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm1000.pk" 1671708489 11548 4f2c927623e8ea9296b39d31bfb9992a ""
@@ -241,7 +241,7 @@
   "images//UC/SendVehicleData.png" 1671723535 39695 2b72eed10115ad8b05073ff9653e5b1b ""
   "images//UC/UCDiagram.png" 1671728074 99041 b55f474b4f571c2085db121c9b8076bd ""
   "lucrare.aux" 1680355705 10032 fd8aa1f225795f35ba5fa3471bfd5975 "pdflatex"
-  "lucrare.bbl" 1680355677 17166 0df4b03b90124d6a03c03e94d70e5069 "biber lucrare"
+  "lucrare.bbl" 1680946657 17166 0df4b03b90124d6a03c03e94d70e5069 "biber lucrare"
   "lucrare.lof" 1680355705 1778 e5940a89b960184f1455848b7e9846c6 "pdflatex"
   "lucrare.lot" 1680355705 30 283c90c47f0e16887e96cec4ba110f76 "pdflatex"
   "lucrare.out" 1680355705 3670 c2a0876041ae392249c9afbcd9bfb8dc "pdflatex"
