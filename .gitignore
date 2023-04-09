@@ -720,6 +720,7 @@ TSWLatexianTemp*
 
 #virtual env
 /MLDataTraining/Python/tenserflow_env/*
+/MLDataTraining/Python/tenserflow_env_py3.9/*
 
 #training data
 /MLDataTraining/Python/training_data/*
