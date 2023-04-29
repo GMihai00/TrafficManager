@@ -19,6 +19,12 @@
     <Filter Include="Source Files\cvision">
       <UniqueIdentifier>{afe97c45-f16f-4d61-b61c-8aab953574e9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\tensorflow">
+      <UniqueIdentifier>{17f25935-f25f-4980-8b7c-ac1c7d6139de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\tensorflow">
+      <UniqueIdentifier>{9c718e85-0d19-4434-85b6-e4892e5c1ae3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CarDetector.cpp">
@@ -47,6 +53,9 @@
     </ClCompile>
     <ClCompile Include="cvision\Utils.cpp">
       <Filter>Source Files\cvision</Filter>
+    </ClCompile>
+    <ClCompile Include="tensorflow\TensorflowClient.cpp">
+      <Filter>Source Files\tensorflow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -78,6 +87,9 @@
     </ClInclude>
     <ClInclude Include="cvision\Camera.hpp">
       <Filter>Header Files\cvision</Filter>
+    </ClInclude>
+    <ClInclude Include="tensorflow\TensorflowClient.hpp">
+      <Filter>Header Files\tensorflow</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

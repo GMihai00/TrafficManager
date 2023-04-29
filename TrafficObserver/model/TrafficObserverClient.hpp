@@ -1,6 +1,6 @@
 #pragma once
-#ifndef MODEL_COSTUMCLIENT_HPP
-#define MODEL_COSTUMCLIENT_HPP
+#ifndef MODEL_TRAFICOBSERVERCLIENT_HPP
+#define MODEL_TRAFICOBSERVERCLIENT_HPP
 
 #include <filesystem>
 #include <utility>
@@ -37,4 +37,4 @@ namespace model
         void handleNewCarData();
     };
 } // namespace model
-#endif // #MODEL_COSTUMCLIENT_HPP
+#endif // #MODEL_TRAFICOBSERVERCLIENT_HPP

@@ -2,30 +2,37 @@
 #ifndef CARDETECT_CVISION_CARDETECT_HPP
 #define CARDETECT_CVISION_CARDETECT_HPP
 
+#include <future>
 #include <queue>
 #include <map>
+#include <filesystem>
 #include "Utils.hpp"
 #include "opencv2/objdetect.hpp"
 #include "MovingObjectGroup.hpp"
 #include "utile/ThreadSafeQueue.hpp"
 #include <opencv2/dnn.hpp>
 
+#include "utile/IPCDataTypes.hpp"
+#include "../tensorflow/TensorflowClient.hpp"
+
 namespace cvision
 {
-	const std::string trainedDataPath = "..\\resources\\carsTrainedData.xml"; // THIS PATH SEEMS TO GO BAD NEED TO CHECK WHY
 	class CarDetect
 	{
 	private:
+		const ipc::utile::IP_ADRESS TENSORFLOW_SERVER_HOST = "localhost";
+		const ipc::utile::PORT TENSORFLOW_SERVER_PORT = 8000;
+
 		common::utile::ThreadSafeQueue<std::pair<uint32_t, cv::Mat>> taskQueue_;
-		std::map<uint32_t, uint8_t> carCountTaskMap_;
+		std::map<uint32_t, std::future<uint8_t>> carCountTaskMap_;
+		tensorflow::TensorflowClient tensorflowClient_;
 
 		std::thread threadDetect_;
 		std::mutex mutexDetect_;
 		std::condition_variable condVarDetect_;
 		std::atomic<bool> shuttingDown_ = false;
 		std::atomic<bool> isRunning_ = false;
-		cv::CascadeClassifier carCascade_; //to be replaced with cv::dnn::Net net = cv::dnn::readNetFromTensorflow("model.pb");
-		size_t getCarsPresentInImage(const cv::Mat& image);
+		std::future<uint8_t> getCarsPresentInImage(const cv::Mat& image);
 	public:
 		CarDetect();
 		~CarDetect();

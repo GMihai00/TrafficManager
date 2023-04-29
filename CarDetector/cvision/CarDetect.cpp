@@ -5,10 +5,11 @@ namespace cvision
 {
 	CarDetect::CarDetect()
 	{
-		if (!carCascade_.load(trainedDataPath))
+		if (!tensorflowClient_.connect(TENSORFLOW_SERVER_HOST, TENSORFLOW_SERVER_PORT))
 		{
-			throw std::runtime_error("INVALID TRAINING DATA FILE");
+			throw std::runtime_error("Failed to connect to tensorflow server");
 		}
+
 	}
 
 	CarDetect::~CarDetect()
@@ -23,14 +24,11 @@ namespace cvision
 		condVarDetect_.notify_one();
 	}
 
-	size_t CarDetect::getCarsPresentInImage(const cv::Mat& image)
+	std::future<uint8_t> CarDetect::getCarsPresentInImage(const cv::Mat& image)
 	{
-		//return 1u; 
-		// FOR NOW CAR DETECTION IS BEEING DISABLED UNTIL A BETTER DATASET WILL BE CREATED
-		std::vector<cv::Rect> cars;
-		carCascade_.detectMultiScale(image, cars);
-			
-		return cars.size();
+		return std::async([this, image]() { 
+			return tensorflowClient_.get_car_count_inside_image(image);
+		});
 	}
 
 	bool CarDetect::startDetecting()
@@ -53,8 +51,7 @@ namespace cvision
 					auto task = taskQueue_.pop();
 					if (task.has_value())
 					{
-						auto nrCars = getCarsPresentInImage(task.value().second);
-						carCountTaskMap_[task.value().first] = nrCars;
+						carCountTaskMap_[task.value().first] = getCarsPresentInImage(task.value().second);
 					}
 					
 					ulock.unlock();
@@ -84,7 +81,13 @@ namespace cvision
 			std::this_thread::sleep_for(std::chrono::microseconds(10));
 			// do nothing remove busy wait somehow
 		}
-		auto rez = carCountTaskMap_;
+
+		std::map<uint32_t, uint8_t> rez;
+		for (auto& [key, future] : carCountTaskMap_) {
+
+			uint8_t value = future.get();
+			rez.insert(std::make_pair(key, value));
+		}
 		carCountTaskMap_.clear();
 
 		return rez;
