@@ -20,7 +20,7 @@ namespace cvision
 	class CarDetect
 	{
 	private:
-		const ipc::utile::IP_ADRESS TENSORFLOW_SERVER_HOST = "localhost";
+		const ipc::utile::IP_ADRESS TENSORFLOW_SERVER_HOST = "127.0.0.1";
 		const ipc::utile::PORT TENSORFLOW_SERVER_PORT = 8000;
 
 		common::utile::ThreadSafeQueue<std::pair<uint32_t, cv::Mat>> taskQueue_;

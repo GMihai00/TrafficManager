@@ -21,16 +21,17 @@ namespace tensorflow
 
         std::vector<uint8_t> bytes;
         cv::imencode(".jpg", image, bytes);
-            
+        
         message << bytes;
 
         connection_->send(message);
-    
+        
         while (!answearRecieved())
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
 
+        //asta poate sa dea in double locking to fix later
         auto answear = getLastUnreadAnswear();
         if (!answear.has_value()) { return 0; }
 
