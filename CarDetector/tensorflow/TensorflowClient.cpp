@@ -26,9 +26,9 @@ namespace tensorflow
 
         connection_->send(message);
         
-        while (!answearRecieved())
+        if (!waitForAnswear(5000))
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            return 0;
         }
 
         //asta poate sa dea in double locking to fix later

@@ -32,6 +32,7 @@ namespace cvision
 		std::condition_variable condVarDetect_;
 		std::atomic<bool> shuttingDown_ = false;
 		std::atomic<bool> isRunning_ = false;
+		std::atomic<bool> shoudlClearAllTasks_ = false;
 		std::future<uint8_t> getCarsPresentInImage(const cv::Mat& image);
 	public:
 		CarDetect();

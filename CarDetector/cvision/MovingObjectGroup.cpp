@@ -2,20 +2,6 @@
 
 namespace cvision
 {
-    MovingObjectGroup::MovingObjectGroup() :
-        objFoundInFrame_{ false },
-        nrFramesWithoutMatch_{0},
-        nrFramesWithoutBeeingCar_{ 0 },
-        nrCars_{ 0 },
-        sumCenterPoz_{ 0 }
-    {
-    }
-
-    MovingObjectGroup::MovingObjectGroup(const MovingObjectGroup& cpy)
-    {
-
-    }
-
     void MovingObjectGroup::predictNextPosition()
     {
         // JUST FOR EASIER READING
@@ -42,12 +28,8 @@ namespace cvision
 
     void MovingObjectGroup::addMovingObject(const std::shared_ptr<MovingObject>& obj)
     {
+        assert(obj);
         std::scoped_lock lock(mutexGroup_);
-        if (obj == nullptr)
-        {
-            // SHOULD NOT GET THERE
-            return;
-        }
 
         // TO NOT HAVE SO MANY UNNECESARY STATES STORED
         if (movingObjectStates_.size() == MAX_OBJECTS_STORED)
@@ -69,8 +51,6 @@ namespace cvision
 
     void MovingObjectGroup::updateState(bool found)
     {
-        
-        
         std::scoped_lock lock(mutexGroup_);
         if (found)
         {
@@ -81,13 +61,10 @@ namespace cvision
             nrFramesWithoutMatch_++;
             objFoundInFrame_ = false;
         }
-        
     }
 
     size_t MovingObjectGroup::getNrOfMovingObjInGroup()
     {
-        
-        
         std::scoped_lock lock(mutexGroup_);
         
         return this->centerPositions_.size();
@@ -232,8 +209,6 @@ namespace cvision
 
     uint8_t MovingObjectGroup::nrCars()
     {
-        
-        
         std::scoped_lock lock(mutexGroup_);
         
         return nrCars_;

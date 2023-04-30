@@ -30,19 +30,28 @@ print("Finished loading model")
 
 def detect_cars_inside_image(image_np):
     
+    # cv2.imshow("img", image_np)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    
+    print("-----------------------HERE1------------------------------------")
     input_tensor = tf.convert_to_tensor(image_np)
     input_tensor = input_tensor[tf.newaxis, ...]
     
+    print("-----------------------HERE2------------------------------------")
     detections = detect_fn(input_tensor)
     
+    print("-----------------------HERE3------------------------------------")
     num_detections = int(detections.pop('num_detections'))
     detections = {key: value[0, :num_detections].numpy() for key, value in detections.items()}
     detections['num_detections'] = num_detections
     
+    print("-----------------------HERE4------------------------------------")
     car_indices = detections['detection_classes'] == 1
     car_boxes = detections['detection_boxes'][car_indices]
     car_scores = detections['detection_scores'][car_indices]
     
+    print("-----------------------HERE5------------------------------------")
     indices = cv2.dnn.NMSBoxes(
         np.array(car_boxes).astype(np.int32),
         np.array(car_scores),
@@ -50,9 +59,14 @@ def detect_cars_inside_image(image_np):
         nms_threshold=OVERLAP_THRESHOLD
     )
     
-    if indices:
-        indices = indices.flatten()
+    print("-----------------------HERE6------------------------------------")
+    try:
+        if indices:
+            indices = indices.flatten()
+    except:
+        pass
     
+    print("-----------------------HERE7------------------------------------")
     return len(indices)
     
 class MessageHeader:

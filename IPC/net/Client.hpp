@@ -136,14 +136,14 @@ namespace ipc
                 if (timeout == 0)
                 {
                     std::unique_lock<std::mutex> ulock(mutexUpdate_);
-                    condVarUpdate_.wait(ulock, [&] { !incomingMessages_.empty() || shuttingDown_; });
+                    condVarUpdate_.wait(ulock, [&] { return !incomingMessages_.empty() || shuttingDown_; });
 
                     return !shuttingDown_;
                 }
 
                 std::unique_lock<std::mutex> ulock(mutexUpdate_);
 
-                if (condVarUpdate_.wait_for(ulock, std::chrono::milliseconds(timeout * 100), [&] { !incomingMessages_.empty() || shuttingDown_; }))
+                if (condVarUpdate_.wait_for(ulock, std::chrono::milliseconds(timeout), [&] { return !incomingMessages_.empty() || shuttingDown_; }))
                 {
                     return !shuttingDown_;
                 }

@@ -9,7 +9,6 @@ namespace cvision
 		{
 			throw std::runtime_error("Failed to connect to tensorflow server");
 		}
-
 	}
 
 	CarDetect::~CarDetect()
@@ -48,12 +47,28 @@ namespace cvision
 					if (shuttingDown_)
 						continue;
 
-					auto task = taskQueue_.pop();
-					if (task.has_value())
+					if (shoudlClearAllTasks_)
 					{
-						carCountTaskMap_[task.value().first] = getCarsPresentInImage(task.value().second);
+						while (!taskQueue_.empty())
+						{
+							if (shuttingDown_)
+								break;
+
+							auto task = taskQueue_.pop();
+							if (task.has_value())
+							{
+								carCountTaskMap_[task.value().first] = getCarsPresentInImage(task.value().second);
+							}
+						}
 					}
-					
+					else
+					{
+						auto task = taskQueue_.pop();
+						if (task.has_value())
+						{
+							carCountTaskMap_[task.value().first] = getCarsPresentInImage(task.value().second);
+						}
+					}
 					ulock.unlock();
 				}
 			});
@@ -75,12 +90,9 @@ namespace cvision
 
 	std::map<uint32_t, uint8_t> CarDetect::waitForFinish()
 	{
-		while (!taskQueue_.empty())
-		{
-			condVarDetect_.notify_one();
-			std::this_thread::sleep_for(std::chrono::microseconds(10));
-			// do nothing remove busy wait somehow
-		}
+		shoudlClearAllTasks_ = true;
+
+		condVarDetect_.notify_one();
 
 		std::map<uint32_t, uint8_t> rez;
 		for (auto& [key, future] : carCountTaskMap_) {
@@ -89,6 +101,8 @@ namespace cvision
 			rez.insert(std::make_pair(key, value));
 		}
 		carCountTaskMap_.clear();
+
+		shoudlClearAllTasks_ = false;
 
 		return rez;
 	}

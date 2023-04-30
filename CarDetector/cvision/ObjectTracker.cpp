@@ -426,7 +426,7 @@ namespace cvision
 
     std::pair<size_t, size_t> ObjectTracker::getCarCount()
     {
-        // double locking mutex sadly
+        // double locking mutex sadly fix shared mutex
         //std::scoped_lock<std::mutex> lock(mutexProcess_);
         return { carCountLeft_, carCountRight_ };
     }

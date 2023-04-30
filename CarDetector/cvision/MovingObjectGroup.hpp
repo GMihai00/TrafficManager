@@ -19,20 +19,16 @@ namespace cvision
 	private:
 		MovingObjPtrList movingObjectStates_;
 		std::vector<cv::Point> centerPositions_;
-		cv::Point sumCenterPoz_;
-		bool objFoundInFrame_;
-		size_t nrFramesWithoutMatch_;
+		cv::Point sumCenterPoz_ = cv::Point{ 0 };
+		bool objFoundInFrame_ = false;
+		size_t nrFramesWithoutMatch_ = 0;
 		cv::Point futurePosition_;
 		std::mutex mutexGroup_;
-		size_t nrFramesWithoutBeeingCar_;
-		uint8_t nrCars_;
+		size_t nrFramesWithoutBeeingCar_ = 0;
+		uint8_t nrCars_ = 0;
 
 		void predictNextPosition();
 	public:
-		MovingObjectGroup();
-		MovingObjectGroup(const MovingObjectGroup& cpy);
-		~MovingObjectGroup() = default;
-
 		void addMovingObject(const MovingObjectPtr& obj);
 		void updateState(bool found);
 		bool stillBeingTracked();

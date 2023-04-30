@@ -127,7 +127,10 @@ namespace model
 		send(message);
 
 		// WAIT FOR RESPONSE
-		while (!answearRecieved()) { std::this_thread::sleep_for(std::chrono::milliseconds(10)); }
+		if (!waitForAnswear(5000))
+		{
+			return false;
+		}
 
 		// GET MESSAGE AND CHECK TYPE
 		auto answear = getLastUnreadAnswear();
