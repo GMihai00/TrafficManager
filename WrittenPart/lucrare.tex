@@ -884,16 +884,6 @@ solutions to the following commonly found problems:
         \label{fig:Database Schema}
     \end{figure}
     \item[Parsing config files:] Specific json parser, data type converter
-    \begin{lstlisting}[language = C++][H]
-{ "server": { "ip": "127.0.0.1", "port": 5000 },
-  "maxWaitingTime": 2,
-  "usingRightLane": true,
-  "lanes": { 
-    "top": "keyword1", "down": "keyword2",
-    "left": "keyword3", "right": "keyword3"
-    } 
-}
-    \end{lstlisting}
     \item[Creating preplanned timed actions:] Observers, Timers 
     \item[Handling user input] command line parser, signals handler
     \item[Syncronosly logging on multiple threads:] Costumizable logger
@@ -1091,10 +1081,10 @@ simple implementation of a server using socket package.
 
 \subsection{Proxy}
 \indent \indent
-The proxy assures the connection between the vechile trackers and the next
-junction main server they will encounter. Every single one is connected to 
-their own database, that contains a list of junctions, proxys and the area 
-covered by them. \\
+The proxy is a wrapper over the server implementation that assures the connection
+between the vechile trackers and the next junction main server they will encounter.
+Every single one is connected to their own database, that contains a list of junctions,
+proxys and the area covered by them. \\
 \indent \indent
 They way it works is preaty straight forward, if a client 
 querys the proxy for the next junction it searches the database. If it finds 
@@ -1105,29 +1095,111 @@ example if the car is somewhere on a ship in the middle of the sea there is
 no reason for us to connect it to a junction).
 
 \begin{figure}[h!]
-    \includegraphics[width=\textwidth]{Sketches/ProxyFlow.png}
+    \includegraphics[width=\textwidth]{Sketches/ProxyFlowV2.png}
     \caption{Proxy querys flow}
     \label{fig:Proxy querys flow}
 \end{figure}
 
+The server themself has a range of coordinate values for the covered junctions
+and a range of coordinate values for the known connected subproxys. The coordinate 
+range of the know connected proxys lessens the more you go down the connection tree 
+until an enpoint is reached, marked with range {0,0} <=> {0,0}. If we still don't got 
+an answear from the proxy containing a junction that means that we are out of reach 
+and the client will just stop. Like this, the more server we will have to spread our 
+junction data, the faster the communication will be, as the client doesn't necessarily
+need to interogate the main server, it can interogate any of the servers.
 \pagebreak
 
+
+\subsection{JunctionMainServer}
+
+\indent \indent
+The executable is a wrapper over the server implementation that manages the traffic states.
+It keeps track of the incoming vehicles and times out each and every traffic state. The 
+implementation itself is though to be a state machine, with the states represented by the 
+traffic states and the events beeing timer expire events. Each state has associated to it 
+a timer that decreases normally or when an incoming vehicle is detected. Whenever we 
+are in a given state, it's corresponding timer is frozen and afterwards deleted. We aim to 
+minime the amount of conflicting states previously described so the amount of time decreased
+when a car arrives is ddynamically calculated. 
+
+\begin{lstlisting}[language = C++][H]
+{ 
+    "server": { "ip": "127.0.0.1", "port": 5000 },
+    "maxWaitingTime": 2,
+    "usingRightLane": true,
+    "lanes": { 
+        "top": "keyword1", "down": "keyword2",
+        "left": "keyword3", "right": "keyword3"
+    } 
+}
+\end{lstlisting}
+
+During the testing of the given module it was observed that traffic tends to keep it's 
+normal flow, there is no jumping between traffic states unless a large inflow of cars is 
+detected. Even if this happens, after the required jump transitions, traffic states will 
+be normalized back to their initial definition.
+
+% TO DO ADD PICTURE HERE
+\pagebreak
 \subsection{TrafficObserver}
 \indent \indent
-This submodule is just a wrapper over the client that combines cardetection 
-functionalities. The main difference from the other client is that it's lane 
-is predefined and it is identified by a keyword given inside the config file 
-to the JMS.
+The executable is a wrapper over the client implementation that combines
+cardetection functionalities. On startup it recieves a keyword for the junction to be able
+to determine what lane provided the incoming car message. To be able to run 
+the executable itself you will need to provide a camera as well as a way to 
+connect to the network, for example a zigbee. For testing porposes a
+video was provided instead of linking directly to a camera.
 
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{TrafficDetectionRunningExample.png}
+    \label{fig:Running client sample}
+\end{figure}
+
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{TrafficDetectionRunningExample2.png}
+
+    \label{fig:Running client sample2}
+\end{figure}
 
 \pagebreak
-\subsection{JMS-TrafficManagement}
+\subsection{VehicleTracker}
+\indent \indent
+The executable is a wrapper over the client. On startup it tries loading a
+config file that contains an ordered list with the previous queried proxies.
+If not present, it will just interogate the main server. Once the application
+shuts down a config file will be saved with all the queried proxys, so it's
+suppose to almost always load a config file.
+
+\begin{lstlisting}[language = C++][H]
+{
+    "proxys": [
+    { "ip_adress": "127.0.0.1","port": 6000},
+    { "ip_adress": "127.0.0.5","port": 5000}]
+}
+\end{lstlisting}
+
+The executable aims to be downloaded on each car system by the manufacturer
+and it requires a GPS module to be pressent as well as a wifi module. Messages
+start to be sent only when the vehicle itself is moving. To be able to
+determine this as well as it's heading GPS data is manually parsed, extracting
+latitude and longitude from NMEA GPGLL, GPGGA and GPRM inputs. For testing
+purposes data was already written inside a file and passed trough a pipe to the
+application. The data itself was taken from a \href{https://github.com/ChrisvdHoorn/NMEA_message_GPS_data}{public repository}.
 
 \indent \indent
-To implement the phase transition I chose to create a state machine
-using Boost statechart predefined template. The traffic transition are represented 
-by boost::statechart::events and and the traffic state are represented by 
-boost::statechart::simplestate.
+We first query the last visited proxy. If we are out of reach, we move up the proxy list
+until eventually we get valid junction connection data or we get back to
+the root of the connection tree(the main server). If we have reached the root node, 
+the process of searching for a junction without a config file restarts. Once we got the 
+connection data we notify the junctions whenever we aproach/disconnect from it. Once we 
+have passed a junction the whole process restarts from the begining.
+
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{Sketches/ProxyJunctionMessage.png}
+    \caption{Proxy junction data reply}
+    \label{fig:Proxy junction data reply}
+\end{figure}
 
 % ex citare \cite{Deshmukh2016}
 
