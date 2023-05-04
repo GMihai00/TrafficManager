@@ -394,6 +394,8 @@ int main(int argc, char* argv[])
         vtConfigFile = "";
     }
 
+    // aici nu ar trebui sa ia un VT pt fiecare vehicle ar trebui sa am 4 configurari pt fiecare lane care stiu ca dau in junction 
+    // clienti ar trebui sa se spawneze random!!!
     runVTForEachGPS(gpsDataDir.value(), vtConfigFile.value());
 
     std::mutex mutexEnd;
