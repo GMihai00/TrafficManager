@@ -14,11 +14,10 @@
 
 namespace model
 {
-
 	class PaintingController
 	{
 	private:
-		std::map<common::utile::LANE, std::shared_ptr<model::GLFWWindowManager>> m_lane_to_window;
+		std::shared_ptr<model::GLFWWindowManager> m_window_manager;
 	
 		void drawCar(const paint::VehicleTypes type, const common::utile::LANE& lane, const bool passing_junction);
 		void changeTrafficLights(const std::set<common::utile::LANE>& green_light_lanes);
