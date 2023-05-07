@@ -28,6 +28,8 @@
 #include "utile/Observer.hpp"
 #include "utile/IPCDataTypes.hpp"
 
+#include "GLFWWindowManager.hpp"
+
 namespace sc = boost::statechart;
 namespace mpl = boost::mpl;
 
@@ -87,13 +89,17 @@ namespace model
 			std::function<void()> greeLightObserverCallback_;
 			common::utile::Timer greenLightTimer_;
 
+			std::shared_ptr<GLFWWindowManager> windowManager_;
+
 			LOGGER("TRAFFICLIGHT-STATEMACHINE");
 
 			uint16_t calculateTimeDecrease(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
 			void updateTrafficState();
 			void updateGreenLightDuration();
+			
+			void updateWindowWithNewTrafficState(const std::string& transitioName);
 		public:
-			TrafficLightStateMachine(const common::utile::model::JMSConfig& config);
+			TrafficLightStateMachine(const common::utile::model::JMSConfig& config, bool shouldDisplay);
 			TrafficLightStateMachine(const TrafficLightStateMachine&) = delete;
 			virtual ~TrafficLightStateMachine() noexcept = default;
 
@@ -138,11 +144,11 @@ namespace model
 			virtual sc::result react(const JumpTransition& jumpTransition)
 			{
 				if (jumpTransition.nextTransitionName_ == "EW") { return transit<EWTransition>(); }
-				if (jumpTransition.nextTransitionName_ == "N") { return transit<NTransition>(); }
-				if (jumpTransition.nextTransitionName_ == "S") { return transit<STransition>(); }
-				if (jumpTransition.nextTransitionName_ == "NS") {return transit<NSTransition>(); }
-				if (jumpTransition.nextTransitionName_ == "E") { return transit<ETransition>(); }
-				if (jumpTransition.nextTransitionName_ == "W") { return transit<WTransition>(); }
+				else if (jumpTransition.nextTransitionName_ == "N") { return transit<NTransition>(); }
+				else if (jumpTransition.nextTransitionName_ == "S") { return transit<STransition>(); }
+				else if (jumpTransition.nextTransitionName_ == "NS") {return transit<NSTransition>(); }
+				else if (jumpTransition.nextTransitionName_ == "E") { return transit<ETransition>(); }
+				else if (jumpTransition.nextTransitionName_ == "W") { return transit<WTransition>(); }
 				throw std::runtime_error("Tried to jump to undefined transition");
 			}
 			virtual ~BaseState() noexcept = default;

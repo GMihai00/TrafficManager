@@ -35,7 +35,7 @@ namespace model
 		void rejectMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 		boost::optional<common::utile::LANE> getLaneBasedOnKeyword(const std::string& keyword);
 	public:
-		JunctionServer(const common::utile::model::JMSConfig& config);
+		JunctionServer(const common::utile::model::JMSConfig& config, bool shouldDisplay = false);
 		JunctionServer(const JunctionServer&) = delete;
 		virtual ~JunctionServer() noexcept = default;
 

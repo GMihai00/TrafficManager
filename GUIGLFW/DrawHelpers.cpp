@@ -15,6 +15,25 @@ void draw_square(const Point& bl_point, const GLfloat& edge, const RGBColor& col
 	glEnd();
 }
 
+
+void draw_circle(const Point& center, const GLfloat& radius, const RGBColor& color) {
+
+	double x = 0., y = 0., angle = 0.;
+
+	glBegin(GL_POLYGON);
+
+	glColor3f(color.m_red, color.m_green, color.m_blue);
+	for (int i = 0; i < 360; i++) {
+		angle = (i * PI) / 180;
+		x = radius * cos(angle);
+		y = radius * sin(angle);
+
+		glVertex2d(center.m_oX + x, center.m_oY + y);
+	}
+	glEnd();
+
+}
+
 void draw_rect(const Point& bl_point, const GLfloat& height, const GLfloat& width, const RGBColor& color)
 {
 	Point points[] = { {0.0f, 0.0f}, {0.0f, height}, {width, height}, {width, 0.0f} };
@@ -49,7 +68,7 @@ void draw_dotted_line(const Point& start_point, const Point& end_point, const GL
     glEnd();
 }
 
-void draw_traffic_lane_line(const Point& start_point, const Point& end_point, const GLfloat& line_thickness, const RGBColor& color = COLOR_WHITE)
+void draw_traffic_lane_line(const Point& start_point, const Point& end_point, const GLfloat& line_thickness, const RGBColor& color)
 {
 	Point current_point = start_point;
 

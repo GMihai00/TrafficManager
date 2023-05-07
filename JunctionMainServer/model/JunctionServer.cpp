@@ -4,9 +4,9 @@ namespace model
 {
 	// I can outomate this to make it on start that I query proxy to find the proxy it should be contained in
 	// and just post data 
-	JunctionServer::JunctionServer(const common::utile::model::JMSConfig& config):
+	JunctionServer::JunctionServer(const common::utile::model::JMSConfig& config, bool shouldDisplay):
 		ipc::net::Server<ipc::VehicleDetectionMessages>(config.serverIp, config.serverPort),
-		trafficLightStateMachine_(config),
+		trafficLightStateMachine_(config, shouldDisplay),
 		laneToKeyword_(config.laneToKeyword)
 	{
 		trafficLightStateMachine_.initiate();

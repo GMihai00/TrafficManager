@@ -35,6 +35,22 @@ std::optional<std::string> getConfigFile(const CommandLineParser& commandLine)
 	return {};
 }
 
+
+bool isInDisplayMode(const CommandLineParser& commandLine)
+{
+	constexpr std::array<std::string_view, 2> optionNames = { "-dis", "--display" };
+
+	for (const auto& optionName : optionNames)
+	{
+		if (commandLine.isFlagSet(optionName))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 //std::condition_variable g_condVarEnd;
 bool g_shouldStop = false;
 
@@ -73,7 +89,9 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		::model::JunctionServer junctionServer(maybeConfig.value());
+		bool shouldDisplay = isInDisplayMode(commandLine);
+
+		::model::JunctionServer junctionServer(maybeConfig.value(), shouldDisplay);
 
 		if (!junctionServer.start())
 		{
@@ -82,6 +100,7 @@ int main(int argc, char* argv[])
 		}
 
 		LOG_INF << "Server started";
+
 		// can't be avoided
 		while (!g_shouldStop)
 		{

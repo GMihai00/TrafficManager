@@ -1,5 +1,6 @@
 #include "CommandLineParser.hpp"
 
+#include <algorithm>
 namespace common
 {
 	namespace utile
@@ -32,6 +33,10 @@ namespace common
 			return option;
 		}
 
+		bool CommandLineParser::isFlagSet(const std::string_view& optionName) const
+		{
+			return std::any_of(args_.begin(), args_.end(), [&optionName](const auto& arg) { return arg == optionName; });
+		}
 
 	} // namespace utile
 } // namespace common

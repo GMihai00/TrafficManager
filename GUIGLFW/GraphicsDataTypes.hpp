@@ -22,3 +22,4 @@ struct RGBColor
 #define COLOR_WHITE RGBColor{255.0f, 255.0f, 255.0f}
 #define COLOR_RED RGBColor{255.0f, 0.0f, 0.0f}
 #define COLOR_LIGHT_BLUE RGBColor{0.0f, 255.0f, 255.0f}
+#define COLOR_GREEN RGBColor{0.0f, 255.0f, 0.0f}

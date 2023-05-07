@@ -7,7 +7,7 @@ namespace model
 	namespace controller
 	{
 		
-		TrafficLightStateMachine::TrafficLightStateMachine(const common::utile::model::JMSConfig& config) :
+		TrafficLightStateMachine::TrafficLightStateMachine(const common::utile::model::JMSConfig& config, bool shouldDisplay) :
 			greenLightDuration_(config.maxWaitingTime),
 			regLightDuration_(120), // TO CHANGE THIS UPDATED BY ML
 			usingLeftLane_(config.usingLeftLane)
@@ -30,6 +30,11 @@ namespace model
 					timer->unfreezeTimer();
 					laneToTimerMap_[lane] = timer;
 				}
+			}
+
+			if (shouldDisplay)
+			{
+				windowManager_ = std::make_shared<GLFWWindowManager>();
 			}
 		}
 
@@ -261,6 +266,19 @@ namespace model
 			}
 		}
 
+		void TrafficLightStateMachine::updateWindowWithNewTrafficState(const std::string& transitioName)
+		{
+			if (!windowManager_)
+				return;
+
+			if (transitioName == "EW") { windowManager_->changeTrafficLights({ LANE::E, LANE::W }); }
+			else if (transitioName == "N") { windowManager_->changeTrafficLights({ LANE::N }); }
+			else if (transitioName == "S") { windowManager_->changeTrafficLights({ LANE::S }); }
+			else if (transitioName == "NS") { windowManager_->changeTrafficLights({ LANE::N, LANE::S }); }
+			else if (transitioName == "E") { windowManager_->changeTrafficLights({ LANE::E }); }
+			else if (transitioName == "W") { windowManager_->changeTrafficLights({ LANE::W }); }
+		}
+
 		void TrafficLightStateMachine::updateTrafficState()
 		{
 			queueNextStatesWaiting();
@@ -276,13 +294,15 @@ namespace model
 
 				this->freezeTimers(nextTransition.value().nextTransitionName_);
 				this->process_event(nextTransition.value());
+				this->updateWindowWithNewTrafficState(nextTransition.value().nextTransitionName_);
 				return;
 			}
 
 			LOG_INF << "Normal transition";
-			// here what to do???
+
 			this->process_event(NormalTransition());
 			this->freezeTimers(nextNormalState_);
+			this->updateWindowWithNewTrafficState(nextNormalState_);
 		}
 
 		void TrafficLightStateMachine::greenLightExpireCallback()

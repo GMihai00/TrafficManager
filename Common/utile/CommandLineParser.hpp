@@ -20,6 +20,7 @@ namespace common
 			~CommandLineParser() noexcept = default;
 
 			std::optional<std::string_view> getOption(const std::string_view& optionName) const;
+			bool isFlagSet(const std::string_view& optionName) const;
 		};
 
 	} // namespace utile

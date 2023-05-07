@@ -233,8 +233,7 @@ namespace common
 				return false;
 			}
 
-			boost::optional<GeoCoordinate<DecimalCoordinate>> getCoordinate(const ptree& jsonRoot, 
-				model::proxy_config_data& config, std::string name)
+			boost::optional<GeoCoordinate<DecimalCoordinate>> getCoordinate(const ptree& jsonRoot, std::string name)
 			{
 				const auto& jsonTree = jsonRoot.get_child_optional(name);
 				if (jsonTree == boost::none)
@@ -249,8 +248,8 @@ namespace common
 
 			bool setProxyCoordinates(const ptree& jsonRoot, model::proxy_config_data& config)
 			{
-				auto maybeBoundSW = getCoordinate(jsonRoot, config, "bound_sw");
-				auto maybeBoundNE = getCoordinate(jsonRoot, config, "bound_ne");
+				auto maybeBoundSW = getCoordinate(jsonRoot, "bound_sw");
+				auto maybeBoundNE = getCoordinate(jsonRoot, "bound_ne");
 				if (maybeBoundSW == boost::none || maybeBoundNE == boost::none)
 					return false;
 

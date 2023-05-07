@@ -32,9 +32,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PaintingController.hpp">
-      <Filter>Header Files\model</Filter>
-    </ClInclude>
     <ClInclude Include="VehicleTypes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
