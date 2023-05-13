@@ -4,7 +4,7 @@
     "port": 5000
   },
   "maxWaitingTime": 2,
-  "usingRightLane": true,
+  "usingLeftLane": 0,
   "lanes": {
     "top": "keyword1",
     "down": "keyword2",

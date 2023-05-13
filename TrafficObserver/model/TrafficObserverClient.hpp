@@ -25,10 +25,14 @@ namespace model
         std::function<void()> observer_callback_;
         std::string keyword_;
 
+        size_t carCountLeft_ = 0;
+        size_t carCountRight_ = 0;
+        std::atomic_bool already_sent_keyword_ = false;
+
         LOGGER("TRAFFICOBSERVER-CLIENT");
         bool startTrackingCars();
         void stopTrackingCars();
-        bool sendData(size_t numberOfCars, bool leftLane = false);
+        bool sendData(size_t numberOfCars, uint8_t leftLane = 0);
     public:
         TrafficObserverClient(std::string keyword, std::filesystem::path videoPath);
         TrafficObserverClient(std::string keyword);

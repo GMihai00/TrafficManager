@@ -24,6 +24,7 @@ namespace model
 				if (lastVisitedProxys_.empty())
 				{
 					continue;
+					throw std::runtime_error("Failed to find a valid junction, client is out of reach");
 				}
 
 				LOG_DBG << lastVisitedProxys_.top().first << lastVisitedProxys_.top().second;

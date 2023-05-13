@@ -123,8 +123,6 @@ namespace model
 			m_rendering_thread.join();
 	}
 
-	// de ajustat aici valorile ca imi intra in junction efectiv si double check daca sunt ok matematic egalitatile
-
 	bool GLFWWindowManager::isAboutToCrossTheJunction(const Point& bl_point, const GLfloat& height, const GLfloat& width, const common::utile::LANE lane)
 	{
 		auto junction_border_NE = Point(junction_edge_ / 2, junction_edge_ / 2);
@@ -227,8 +225,8 @@ namespace model
 				if (auto it2 = moving_rate_base_on_lane.find(lane); it2 != moving_rate_base_on_lane.end() && bl_point.has_value())
 				{
 					Point oldPoint = bl_point.value();
-					oldPoint.m_oX += it2->second.m_oX;
-					oldPoint.m_oY += it2->second.m_oY;
+					oldPoint.m_oX -= it2->second.m_oX;
+					oldPoint.m_oY -= it2->second.m_oY;
 
 					draw_rect(oldPoint, it->second.first, it->second.second, color);
 				}

@@ -180,7 +180,7 @@ namespace model
 		uint16_t TrafficLightStateMachine::calculateTimeDecrease(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
 			// TO DO: CALCULATE TIME BASED ON SOURCE, WILL HAVE TO THINK ABOUT AN ALGORITHM 
-			uint16_t rez = 0;
+			uint16_t rez = 5;
 			if (isVehicleTracker(lane, ip))
 			{
 
@@ -228,6 +228,7 @@ namespace model
 		{
 			std::scoped_lock lock(mutexClients_);
 			// TO DO: THIS WILL BE THE ML PART 
+			// IF WE HAD SCENARIOS WHERE MORE THEN ONE TIMER EXPIRED REDUCE/INCREASE GREEN LIGHT?
 		}
 
 		void TrafficLightStateMachine::queueNextStatesWaiting()
@@ -313,8 +314,8 @@ namespace model
 
 		void TrafficLightStateMachine::greenLightExpireCallback()
 		{
-			updateTrafficState();
 			updateGreenLightDuration();
+			updateTrafficState();
 			greenLightTimer_.resetTimer(greenLightDuration_);
 		}
 

@@ -5,10 +5,14 @@ namespace model
     void TrafficObserverClient::handleNewCarData()
     {
         auto carCount = carTracker_.getCarCount();
-        carTracker_.resetCarCount();
 
-        sendData(carCount.first, true);
-        sendData(carCount.second);
+        LOG_INF << "Handling new car data carcount_left: " << carCount.first << " carcount_right: " << carCount.second;
+
+        sendData(carCount.first - carCountLeft_, 1);
+        sendData(carCount.second - carCountRight_, 0);
+
+        carCountLeft_ = carCount.first;
+        carCountRight_ = carCount.second;
     }
 
     TrafficObserverClient::TrafficObserverClient(std::string keyword) :
@@ -38,7 +42,7 @@ namespace model
         this->stopTrackingCars();
     }
 
-    bool TrafficObserverClient::sendData(size_t numberOfCars, bool leftLane)
+    bool TrafficObserverClient::sendData(size_t numberOfCars, uint8_t leftLane)
     {
         if (!connection_)
         {
@@ -48,12 +52,19 @@ namespace model
 
         for (size_t i = 0; i < numberOfCars; i++)
         {
+            LOG_INF << "-------------------------------Sending car data to the JMS---------------------------------------";
             ipc::net::Message<ipc::VehicleDetectionMessages> message;
             message.header.type = ipc::VehicleDetectionMessages::VCDR;
             message.header.id = messageIdProvider_.provideId(ipc::VehicleDetectionMessages::VCDR);
             message.header.hasPriority = false;
             message << leftLane;
-            message << keyword_;
+
+            if (!already_sent_keyword_)
+            {
+                message << keyword_;
+                already_sent_keyword_ = true;
+            }
+
             connection_->send(message);
         }
 

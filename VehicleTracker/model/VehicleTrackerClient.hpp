@@ -11,7 +11,6 @@
 #include <filesystem>
 
 #include "net/Client.hpp"
-#include "net/Client.hpp"
 #include "net/Message.hpp"
 #include "net/ProxyReply.hpp"
 #include "net/ProxyRedirect.hpp"

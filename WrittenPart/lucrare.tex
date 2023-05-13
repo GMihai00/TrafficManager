@@ -1119,15 +1119,13 @@ It keeps track of the incoming vehicles and times out each and every traffic sta
 implementation itself is though to be a state machine, with the states represented by the 
 traffic states and the events beeing timer expire events. Each state has associated to it 
 a timer that decreases normally or when an incoming vehicle is detected. Whenever we 
-are in a given state, it's corresponding timer is frozen and afterwards deleted. We aim to 
-minime the amount of conflicting states previously described so the amount of time decreased
-when a car arrives is ddynamically calculated. 
+are in a given state, it's corresponding timer is frozen and afterwards reseted.
 
 \begin{lstlisting}[language = C++][H]
 { 
     "server": { "ip": "127.0.0.1", "port": 5000 },
     "maxWaitingTime": 2,
-    "usingRightLane": true,
+    "usingLeftLane": true,
     "lanes": { 
         "top": "keyword1", "down": "keyword2",
         "left": "keyword3", "right": "keyword3"
@@ -1135,10 +1133,60 @@ when a car arrives is ddynamically calculated.
 }
 \end{lstlisting}
 
+Both the timer for the green light and the ones attached to each lane 
+dinamically update based on the traffic. To describe the way this is 
+done we must first analise what increasing/decreasing the waiting time 
+means for our system and also what could cause this scenario. 
+What we would wish to achive is that every time a state ends X
+drivers have passed the junction. To do so, we control the amount of 
+time a driver has to pass the junction. Also, the most important part 
+is to minimize the amount of time those cars have to wait to pass the 
+junction. Like so, we would want to increase/decrease the green light 
+timer as well as the driver waiting timer attached to each lane. 
+Figure ~\ref{fig:Timer Increase/Decrease Impact} illustrates
+what negative effects playing arround with those timers would bring
+to our system.
+
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{Sketches/TimerIncreaseDecreaseImpact.png}
+    \caption{Timer Increase/Decrease Impact}
+    \label{fig:Timer Increase/Decrease Impact}
+\end{figure}
+
+To achive the desired traffic flow described above while minimizing
+the waiting time as much as we can we must be aware of 2 things:
+avoiding less cars passing the junction; avoiding conflicting states
+
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{Sketches/FaultyScenariosHandling.png}
+    \caption{Faulty Scenarios Handling}
+    \label{fig:Faulty Scenarios Handling}
+\end{figure}
+
+\indent
+Figure ~\ref{fig:Timer Increase/Decrease Impact} illustrates how 
+we actually handle each combination of those scenarios. Like so 
+we can achive the desired traffic flow described above while 
+minimizing the waiting time as much as we can. Also, I have to mention 
+that the way we actually determine if enough vehicles passed is by 
+tracking the actual cars. Due to high complexity of image 
+comparison, this number is based only on the VehicleTrackers 
+input, so TrafficObserver client does not contribute to this process 
+and significant decreases in waiting time can be seen only for the 
+cars that are capable of using the VehicleTracker client.\\
+\indent
+
+As for the way the lane timer decreases when a new vehicle is
+detected we will have a value that constanly increases the more cars 
+are waiting. We also keep in mind an average of cars 
+waiting to pass the junction and whenever the value is surpassed 
+we start to drastically increase the amount of time decreased 
+for the corresponding timer.\\
+\indent
 During the testing of the given module it was observed that traffic tends to keep it's 
 normal flow, there is no jumping between traffic states unless a large inflow of cars is 
 detected. Even if this happens, after the required jump transitions, traffic states will 
-be normalized back to their initial definition.
+be normalized back to their initial flow definition.
 
 % TO DO ADD PICTURE HERE
 \pagebreak
