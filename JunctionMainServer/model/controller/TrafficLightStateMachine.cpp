@@ -2,6 +2,8 @@
 #include <limits>
 #include <algorithm>
 
+#include "VehicleTypes.hpp"
+
 namespace model
 {
 	namespace controller
@@ -38,7 +40,7 @@ namespace model
 			}
 		}
 
-		bool TrafficLightStateMachine::isUsingLeftLane()
+		uint8_t TrafficLightStateMachine::isUsingLeftLane()
 		{
 			return  usingLeftLane_;
 		}
@@ -82,7 +84,7 @@ namespace model
 		}
 
 		bool TrafficLightStateMachine::registerClient(
-			const common::utile::LANE lane, ipc::utile::IP_ADRESS ip, bool leftLane)
+			const common::utile::LANE lane, ipc::utile::IP_ADRESS ip, uint8_t leftLane)
 		{
 			std::scoped_lock lock(mutexClients_);
 			if (!isClientValid(lane, ip))
@@ -92,6 +94,10 @@ namespace model
 			if (leftLane == usingLeftLane_)
 			{
 				decreaseTimer(lane, ip);
+				if (windowManager_)
+				{
+					windowManager_->signalIncomingCar(paint::VehicleTypes::NORMAL_VEHICLE, lane);
+				}
 			}
 			else
 			{

@@ -35,7 +35,8 @@ namespace common
 					return false;
 				}
 
-				std::vector <std::string> directions = { "top", "down" , "left", "right" };
+				std::vector <std::string> directions = {"left", "right", "top", "down"};
+
 				for (auto poz = 0; poz < directions.size(); poz++)
 				{
 					const auto& jsonTreeDir = jsonTree.get().get_child_optional(directions[poz]);
@@ -53,11 +54,11 @@ namespace common
 
 			bool setUsedLane(const ptree& jsonRoot, model::JMSConfig& config)
 			{
-				const auto& jsonTree = jsonRoot.get_child_optional("usingRightLane");
+				const auto& jsonTree = jsonRoot.get_child_optional("usingLeftLane");
 				if (jsonTree == boost::none)
 					return false;
 
-				if (const auto& val = jsonTree.get().get_value_optional<bool>(); val != boost::none)
+				if (const auto& val = jsonTree.get().get_value_optional<uint8_t>(); val != boost::none)
 				{
 					config.usingLeftLane = val.get();
 					return true;
@@ -333,7 +334,7 @@ namespace common
 			if (!details::setUsedLane(jsonRoot, config))
 			{
 				LOG_WARN << "Lane not specified, defaulting to right lane";
-				config.usingLeftLane = false;
+				config.usingLeftLane = 0;
 			}
 
 			if (!details::setMaxWaitingTime(jsonRoot, config))

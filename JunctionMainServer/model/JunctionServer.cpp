@@ -43,7 +43,6 @@ namespace model
 
 	boost::optional<common::utile::LANE> JunctionServer::getLaneBasedOnKeyword(const std::string& keyword)
 	{
-		std::cout << keyword;
 		for (const auto& entry : laneToKeyword_)
 		{
 			if (entry.second == keyword)
@@ -68,7 +67,7 @@ namespace model
 			}
 			
 			std::string keyword;
-			keyword.resize(msg.header.size - sizeof(bool));
+			keyword.resize(msg.header.size - sizeof(uint8_t));
 			msg >> keyword;
 
 			return getLaneBasedOnKeyword(keyword);
@@ -109,7 +108,7 @@ namespace model
 	void JunctionServer::handleMessage(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, common::utile::LANE lane)
 	{
-		bool leftLane = trafficLightStateMachine_.isUsingLeftLane();
+		uint8_t isFromLeftLane = trafficLightStateMachine_.isUsingLeftLane();
 		if (msg.header.type == ipc::VehicleDetectionMessages::VCDR)
 		{
 			if (!trafficLightStateMachine_.registerVehicleTrackerIpAdress(lane, client->getIpAdress()))
@@ -117,8 +116,10 @@ namespace model
 				rejectMessage(client, msg);
 				return;
 			}
-			msg >> leftLane;
+
+			msg >> isFromLeftLane;
 		}
+
 
 		if (msg.header.hasPriority)
 		{
@@ -128,7 +129,7 @@ namespace model
 				return;
 			}
 		}
-		trafficLightStateMachine_.registerClient(lane, client->getIpAdress(), leftLane);
+		trafficLightStateMachine_.registerClient(lane, client->getIpAdress(), isFromLeftLane);
 		aproveMessage(client, msg);
 	}
 

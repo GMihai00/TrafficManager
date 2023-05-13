@@ -27,7 +27,7 @@ namespace common
 			struct JMSConfig
 			{
 				std::map<LANE, std::string> laneToKeyword;
-				bool usingLeftLane;
+				uint8_t usingLeftLane;
 				uint16_t maxWaitingTime;
 				utile::IP_ADRESS serverIp;
 				utile::PORT serverPort;

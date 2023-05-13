@@ -29,6 +29,8 @@ namespace model
 
 		GLFWwindow* m_window = nullptr;
 
+		const GLfloat junction_edge_ = 0.5f;
+
 		void draw_junction();
 
 		void render(int window_weight, int window_height);
@@ -39,6 +41,7 @@ namespace model
 			const GLfloat& height,
 			const GLfloat& width,
 			GLfloat moving_rate);
+		bool isAboutToCrossTheJunction(const Point& bl_point, const GLfloat& height, const GLfloat& width, const common::utile::LANE lane);
 
 	public:
 		GLFWWindowManager(int window_weight = 1080, int window_height = 1080);
