@@ -1013,24 +1013,62 @@ inside the module and remove any kind of process interactions.
 
 \section{ObjectDetectionServer} 
 \indent \indent
-To be able to able to detect if cars were present Tenserflow was used. Due to the fact 
-that the model will be loaded by a microcontroller a
+To be able to able to detect if cars were present we made use of Tenserflow 
+Object Detection API ~\ref{fig:TensorFlow}. It is a powerful framework provided by Google's TensorFlow
+library that facilitates training, evaluating, and deploying object detection
+models. It offers a collection of pre-trained models and tools for building custom
+models to detect and localize objects in images and videos. 
+
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{TensorFlow.png}
+    \caption{TensorFlow}
+    \label{fig:TensorFlow}
+\end{figure}
+
+Due to the fact that the model will be loaded by a microcontroller a
 \href{https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md}{SSD MobileNet model}
 was trained by using a \href{https://universe.roboflow.com/pedro-azevedo-3c9ol/bdd100k-3zgda/dataset/5}{public dataset}.
-The training took about 15h on an RTX 3060 and the model is capable of detecting cars,
-street lights and other traffic related objects but it will be used just for detecting cars.
-The model speed is the most important thing here beeing able to evaluate 22 frames/s,
-as it's accuracy is not that great averaging 60\%. The overcome the low accuracy any object 
+SSD MobileNet is a combination of two popular deep learning architectures:
+Single Shot MultiBox Detector (SSD) and MobileNet. \\
+\indent
+SSD is an object detection algorithm that provides real-time object detection in images.
+It achieves this by predicting the bounding boxes and class labels of multiple objects
+in a single pass through a neural network. Unlike other object detection methods that
+require region proposal generation, SSD directly predicts object detections at different scales
+and aspect ratios.\\
+\indent
+MobileNet is a lightweight convolutional neural network architecture designed for efficient use on
+mobile and embedded devices. It utilizes depthwise separable convolutions, which separate the spatial\
+filtering and channel-wise filtering operations, reducing the computational complexity and model size.
+MobileNet achieves a good balance between accuracy and efficiency, making it suitable for
+resource-constrained environments.\\
+\indent
+By combining SSD and MobileNet, the SSD MobileNet model achieves real-time object detection on mobile
+and embedded devices with limited computational resources. It provides a good trade-off between accuracy
+and efficiency, making it a popular choice for various applications such as autonomous vehicles,
+surveillance systems, and mobile applications requiring object detection capabilities.\\
+\indent
+The training was done with the use of tenserflow repository and it took about 15h
+on an RTX 3060 and the model is capable of detecting cars, street lights and other
+traffic related objects but it will be used just for detecting cars. The model speed
+is the most important thing here beeing able to evaluate 22 frames/s, as it's
+accuracy is not that great averaging 60\%. The overcome the low accuracy any object 
 that is more then 50\% likely to be a car will be taken into account.\\
-
-\indent \indent
-The model itself is loaded just once, on a server, because it seems to be a really time consuming 
-operation and used whenever a new message is recieved. Once the predictions are done, we 
-remove the overlapping objects detected with the help of OpenCv NMSBoxes and return just the size 
-of the remaining list of objects, not the bounding boxes themself. To keep the consistency of
-the IPC implementation I imported the C++ message definitions and implemented the created a
-simple implementation of a server using socket package.  
-
+\indent
+The model itself is loaded just once on a server, because it is a really
+time consuming operation, and used whenever a new valid message is recieved.
+Once the predictions are calculated, we remove the overlapping objects
+detected with the help of OpenCv NMSBoxes and return just the size 
+of the remaining list of objects, not the bounding boxes themself, representing 
+the amount of cars detected in the given image. To keep the consistency of the IPC
+implementation I imported the C++ message definitions and implemented the created
+a simple implementation of a server using socket package. To further improve
+the response time of the server, the request handling can be done in a asynchronous
+manner, having multiple threads working on different messages for the same client. \\
+\indent
+Related to the actual device that will run the server, it is better to just have 
+them tied down to every proxy, due to the high resource need of loading the actual 
+model that can not be achived on the microcontrollers.
 
 
 \pagebreak
@@ -1122,9 +1160,7 @@ avoiding less cars passing the junction; avoiding conflicting states
 
 \indent
 Figure ~\ref{fig:Faulty Scenarios Handling} illustrates how 
-we actually handle each combination of those scenarios. Like so 
-we can achive the desired traffic flow described above while 
-minimizing the waiting time as much as we can. The way we actually determine if enough vehicles passed is by 
+we actually handle each combination of those scenarios. The way we determine if enough vehicles passed is by 
 tracking the actual cars. Due to high complexity of image 
 comparison, this number is based only on the VehicleTrackers 
 input, so TrafficObserver client does not contribute to this process 
@@ -1170,8 +1206,8 @@ video was provided instead of linking directly to a camera. ~\ref{fig:Running cl
 The executable is a wrapper over the client. On startup it tries loading a
 config file that contains an ordered list with the previous queried proxies.
 If not present, it will just interogate the main server. Once the application
-shuts down a config file will be saved with all the queried proxys, so it's
-suppose to almost always load a config file.
+shuts down a config file will be saved with all the queried proxys, so it will
+almost always load a config file.
 
 \begin{lstlisting}[language = C++][H]
 {
@@ -1191,11 +1227,11 @@ application. The data itself was taken from a \href{https://github.com/ChrisvdHo
 
 \indent \indent
 We first query the last visited proxy. If we are out of reach, we move up the proxy list
-until eventually we get valid junction connection data or we get back to
+until eventually we get valid junction connection data ~\ref{fig:Proxy junction data reply} or we get back to
 the root of the connection tree(the main server). If we have reached the root node, 
 the process of searching for a junction without a config file restarts. Once we got the 
-connection data we notify the junctions whenever we aproach/disconnect from it. Once we 
-have passed a junction the whole process restarts from the begining.
+connection data we notify the junctions whenever we aproach/disconnect from it. When we 
+have passed a junction the whole process restarts from the last queried proxy.
 
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{Sketches/ProxyJunctionMessage.png}
