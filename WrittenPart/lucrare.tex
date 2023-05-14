@@ -1,5 +1,5 @@
 % \documentclass[conference]{IEEEtran}
-\documentclass[17pt]{article}
+\documentclass[17pt]{report}
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}
@@ -55,13 +55,11 @@ BACHELOR STUDY PROGRAM: Computer Science}}
 \vspace{160pt}
 \end{center}
 
-{\large\noindent{\bf SUPERVISOR: Todor Ivașcu
-\hspace{30pt} GRADUATE: Mihai \indent \indent \indent \indent
-\indent \indent \indent \indent \indent \indent \indent \indent 
-\indent \indent \indent Andrei Gherghinescu}
+{\large\noindent{\bf SUPERVISOR:
+\hspace{100pt} GRADUATE:}
 
-\noindent Prof./Conf./Lect. Dr. Firstname Lastname \hfill 
-\noindent  Firstname Lastname
+\noindent Lect. Todor Ivașcu \hfill 
+\noindent Mihai Andrei Gherghinescu
 }
 
 \vfill
@@ -85,13 +83,13 @@ BACHELOR STUDY PROGRAM:  Computer Science}}
 \vspace{153pt}
 \end{center}
 
-{\large\noindent{\bf SUPERVISOR: Todor Ivașcu
-\hspace{30pt} GRADUATE: Mihai \indent \indent \indent \indent
-\indent \indent \indent \indent \indent \indent \indent \indent 
-\indent \indent \indent Andrei Gherghinescu}
+{\large\noindent{\bf SUPERVISOR:
+\hspace{100pt} GRADUATE:}
 
-\noindent Prof./Conf./Lect. Dr. Firstname  Lastname\hfill
-\noindent Firstname  Lastname}
+\noindent Lect. Todor Ivașcu \hfill 
+\noindent Mihai Andrei Gherghinescu
+}
+
 
 
 \vfill
@@ -129,22 +127,18 @@ on our daily lifes, but on the environment as well.
 
 \pagebreak
 
-\listoftables
-
-\pagebreak
-
 \listoffigures
 \pagebreak
 
-\section{Introduction}
+\chapter{Introduction}
 \indent \indent
 Intersections are the points where two or more
 routes overlap with one another. As a result, for drivers, 
 they act as an obstruction for smooth traffic
 flow especially within urban areas where the
-infrastructure demands them the most. This leads to
-traffic interruption, congestion, and poor control and
-management of the traffic.\\
+infrastructure demands them the most. This leads to unwanted 
+traffic scenarios like interruptions, congestions, and
+overall poor control and management of the traffic.\\
 \indent \indent
 To minimize the amount of time lost at crossroads while
 maintining the safety of the drivers, Intelligent
@@ -166,14 +160,24 @@ quality of citizens. It is based on different arhitectural
 approaches that involve modernizing and upgrading our current 
 environment by applying new concepts and technologies on top
 of the ones currently in use.\\
-
-\section{Overview of the Technology Developed}
+\indent \indent
+Smart city traffic management refers to the implementation of advanced
+technologies and intelligent systems to optimize the flow of traffic within
+urban areas. It involves the use of various sensors, data analytics,
+and communication networks to monitor, control, and manage traffic conditions
+efficiently. The goal is to improve traffic flow, reduce congestion, enhance safety,
+and minimize environmental impacts. Smart city traffic management often includes
+the following key elements: ITS, Data Analystics, Adaptive Traffic Control Systems,
+Integrated Traffic Managemen, Connected Vehicles, Multi-modal Transportation,
+Smart Parking Systems, Sustainable Transportation
+\chapter{Overview of the Technology Developed}
 
 \indent \indent
-To better understand the problem we must first know what solutions
-were used to fix the issue through out the time and how they evolved.\\
+To better understand the problem we must first know what fix attempts 
+were used to minimize the negative effects of this issue through
+out the time and how they evolved.\\
 \indent \indent
-The first solution that was put in use was created long time ago and required
+The first fix attempt that was put in use was created long time ago and required
 the use of actual human resources to control the traffic. Policemans were
 responsible to manage the traffic at junctions. Once with the  technological
 era, we were able to remove the need of this kind of resources by creating
@@ -184,7 +188,7 @@ GO phase. To prevent collisions and maintain drivers safety amber was
 introduced as well. It notifys the drivers that STOP and GO phases will soon
 switch and they should take the corresponding measures.\\
 \indent \indent
-As the time passed by and the number of cars on the road increased drivers 
+As the time passed by and the number of cars on the road increased, drivers 
 started experiencing traffic jams scenarios. Also there was clearly a better
 option then having a standard fixed time to change the lights. Many times
 the green signal was turned on even though there were no cars crossing that
@@ -200,7 +204,8 @@ new solution and use them to design an intelligent Traffic Light Control
 System (TSC)\\
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{PiSystems.png}
-    \caption{Rasberry PI based system \textcopyright }
+    \caption{Rasberry PI based system 
+    (\href{https://www.semanticscholar.org/paper/A-low-cost-environment-monitoring-system-using-Pi-Deshmukh-Shinde/e05a1fb72b08803d40dc06fa202241636fb82c21}{Image Source} \textcopyright ) }
     \label{fig:PI}
 \end{figure}
 \\
@@ -210,9 +215,10 @@ By the time writing, TSC is an active research topic that proved to be really
 challenging. Continuous work has been done on designing and developing
 intelligent traffic signal control systems that could address the issue.\\
 \indent \indent
-So new methods and advanced systems based on fuzzy logic, evolutionary
-algorithms, image processing, neural network and many other algorithms have
-been proposed by the researchers to solve this TSC problem \cite{Tomar2022}.
+So new methods and advanced systems and many other algorithms have
+been proposed by the researchers to solve this TSC problem, mostly 
+beeing based on fuzzy logic, evolutionary algorithms,
+image processing, neural network, etc. \cite{Tomar2022}.
 All of the methods aimed to reduce the overall waiting time and prevent traffic
 jams from occurring while maintaining drivers safety. In this section we will
 discuss about some of the methods that were put in to use and their ups and
@@ -220,25 +226,30 @@ downs. After describing each and every tehnology we will have a brief
 comparison to highlight some of their characteristics.
 
 % sectiunile devin capitole
+
 \pagebreak
-\subsection{Object recognition based systems}
+
+\section{Object recognition based systems}
 \indent \indent
 One way to determine traffic scenarios was done with
 the help of cameras. To be more specific we wanted to 
-calculate the traffic waiting queue by using the 
-images provided by the cameras. This problem was addressed by the
-help of vehicle tracking and image segmentation algorithms.
+calculate the traffic waiting queue by detecting cars 
+present int the images provided by our hardware components (Figure ~\ref{fig:ObjectRecognitionSystem}).
+This problem was addressed by the help of vehicle tracking
+and image segmentation algorithms.
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{ObjectRecognitionSystemRepresentation.png}
-    \caption{Object Recognition Based Traffic System Model \textcopyright}
+    \caption{Object Recognition Based Traffic System Model 
+    (\href{https://english.mathrubhumi.com/news/kerala/knowing-traffic-camera-locations-isn-t-enough-to-escape-from-them-mvd-can-move-them-easily-1.7427787}{Image Source} \textcopyright)}
     \label{fig:ObjectRecognitionSystem}
 \end{figure}
 \\
 \indent \indent
-However, the techniques used to solve the problem
-become ineffective for real-time operations because of the 
-computational complexity and longer execution time. Also,
-some are not even able to operate in bad weather conditions,
+However, the techniques used to solve the problem proved to 
+be ineffective in real-time scenarios due to it's high
+computational complexity that made the system unable to keep up 
+with the traffic flow especially at high speeds.
+Also, some are not even able to operate in bad weather conditions,
 so they were doomed to failure. Studies had shown that whenever
 visibility is reduced due to rain, fog or other external factors that
 the pecentage of vehicles that will be detected will significantly drop.
@@ -248,22 +259,31 @@ Even if the problems stated above were known,
 neural networks systems have been developed with the help of
 object recognition algorithms.
 They were designed to predict the upcoming traffic volume
-from a X-min daylight traffic flow on an expressway. 
+from a X-min daylight traffic flow on different traffic conditions. 
 Like so we would be able to overcome the high computational
 complexity of the algorithm by avoiding 
 recalculations. This lead to high memory needs,
 that could not be overcomed, so this approach is
-unsuitable for real-time systems.\\
-\indent \indent
-To sum it up, unless the memory
-issue is somehow fixed in the near future they are not a
-viable option for tracking vehicles.\\
+unsuitable for real-time systems. Also, we believe that it 
+is almost unpossible to predict traffic on a constant manner, 
+and our best way to handle it is to dynamically adapt to it.
+We can still make use of a model that pools all traffic states 
+for detection, but the actual "prediction" of the next traffic 
+state should be calculated dinamically from real-time data.\\
 
-\subsection{Vehicle sensor detection based systems}
+\section{Vehicle sensor detection based systems}
 \indent \indent
 Another approach would be to collect data about the vehicles 
 approaching junctions with the help of GPS sensors.
 (Figure ~\ref{fig:SensorRecognitionSystem})\\
+
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{SensorsBasedTrafficControlSystemRepresentation.png}
+    \caption{Sensor Based Traffic System Model 
+    (\href{https://www.researchgate.net/figure/Communications-chain-of-data-feeds-in-smart-transportation_fig3_309740417}{Image Source} \textcopyright)}
+    \label{fig:SensorRecognitionSystem}
+\end{figure}
+
 \indent \indent
 One way to do it is to track the position, speed and direction of the given
 vehicles. Sadly, this method would work only for a road network,
@@ -278,26 +298,20 @@ the traffic monitoring system through GSM/GPRS. The drawbacks of this method
 are the fact thats it involves very high implementation cost and, sadly, some
 vehicles can not be tracked using radio detection systems. This problem can
 be also aproached with the help of in-road sensors, but it would require even higher 
-costs as you would need often change the sensors because roads often need to be
-rebuilt due to wear or ongoing costructions.
+costs as you would need to often change the sensors because roads need to be
+rebuilt due to wear or ongoing costructions periodically.
 
-\begin{figure}[h!]
-    \includegraphics[width=\textwidth]{SensorsBasedTrafficControlSystemRepresentation.png}
-    \caption{Sensor Based Traffic System Model \textcopyright}
-    \label{fig:SensorRecognitionSystem}
-\end{figure}
 
-\pagebreak
-
-\subsection{Traffic Lights Synchronization based systems}
+\section{Traffic Lights Synchronization based systems}
 \indent \indent
 Traffic Lights Synchronization (TSC) \cite{Tomar2022} systems aim  to minimize
 the number of STOP and GO occurrences by adapting the traffic light phases at junctions.
-It is a technique in which a vehicle traveling along one side of the road at a specific
-speed can continue to the opposite end of the road indefinitely by obtaining the maximum
-number of green lights at the intersections. Studies had shown that in comparison with
-other fixed time and non-synchronized traffic control strategies it reduces overall travel
-time by up to 39\%. \cite{ALEKO2019}\\
+This technique involves all vehicle maintaining a consistent speed while traveling on one side
+of the road, allowing them to continue indefinitely to the opposite end of the road by consistently
+encountering green lights at intersections by maximizing their number.
+Studies had shown that in comparison with other fixed time and
+non-synchronized traffic control strategies it reduces overall travel time by
+up to 39\%. \cite{ALEKO2019}\\
 \indent \indent
 Just like most of the others methods, it collects and procces data from real traffic
 scenarios to determine the green light timer. When vehicles pass through a juction the
@@ -309,7 +323,8 @@ junctions do you want to synchronize with one another, but must of the the times
 was handled as a 2 level system.
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{TrafficSignalSynchronization.jpg}
-    \caption{Traffic Signal Synchronization Model \textcopyright}
+    \caption{Traffic Signal Synchronization Model 
+    (\href{https://www.cityofirvine.org/signal-operations-maintenance/traffic-signal-synchronization}{Image Source} \textcopyright)}
     \label{fig:TrafficSignalSynchronization}
 \end{figure}\\
 \indent \indent
@@ -321,16 +336,15 @@ mind is that, as result of this phenomenon, the wear of the vehicles will be
 drastically reduced.\\
 \indent \indent
 The main disadvantages of this method is the fact that you will eventually have to
-prioritize one route. This would be problematic if multiple main rouds colide with
+prioritize one route. This would be problematic if multiple main roads collide with
 one another. Also, the algorithm will not always provide an optimal solution as
-drives following sideroads may have longer waiting times. One more thing to keep in mind
+drivers following sideroads may have longer waiting times. One more thing to keep in mind
 is that this method is reliant on drivers speed consistency. Most of the cases, there 
 will be a decent amount of speeding vehicles that will not be able to pass multile
-junctions without any kind of stops as algorithm does not expect this from drivers side.
+junctions without any kind of stops as the algorithm itself does not intend to handle those 
+edge scenarios.
 
-\pagebreak
-
-\subsection{Fuzzy Intelligent Traffic Signal Control System}
+\section{Fuzzy Intelligent Traffic Signal Control System}
 \indent \indent
 Fuzzy Intelligent Traffic Signal Control (FITS) \cite{Teo2010} \cite{Jin2017}
 systems were originally designed to mimic a human policeman in controlling
@@ -338,8 +352,8 @@ traffic lights at an intersection. They are systems that take
 different types of traffic input and apply fuzzy rules to 
 manage the traffic. Like so data is converted into fuzzy truth
 values between 0 and 1. For instance, the green light extension
-time can be modeled by a number of fuzzy sets including “none”,
-“short”, “moderate” and “long”. The only thing that you are left to do is
+time can be modeled by a number of fuzzy sets including “none”(1),
+“short”(2), “moderate”(3) and “long”(4). The only thing that you are left to do is
 to define your membership functions for the given set. For example we can
 use the following functions to do so:\\
 
@@ -362,7 +376,7 @@ use the following functions to do so:\\
 
 Like so we would alternate base on other fuzzy values or randomly, between
 choosing "none", "short", "moderate" and "long" fuzzy values, to determine 
-the time that out green light should last using.\\
+the time that our green light should last.\\
 \indent \indent
 Depending on the actual improvements of the traffic flow the algorithm will 
 adapt, altering it's member functions and decreasing/increasing the odds to 
@@ -380,7 +394,7 @@ non optimal solution that may or may not lead to traffic jams.
 
 \pagebreak
 
-\subsection{Dedicated Short-Range Communications systems}
+\section{Dedicated Short-Range Communications systems}
 \indent \indent
 To explain why this kind of systems would work, first we have to understand what
 are Dedicated Short-Range Communications (DSRC) \cite{Zhang2018}
@@ -396,16 +410,16 @@ control that relies on Vehicle-to-Vehicle (V2V) communication by using the
 Signal Phase and Timing (SPaT) message and Basic Safety Message (BSM) from
 the DSRC OBU. (Figure ~\ref{fig:DSRCRadio})
 \begin{figure}[h!]
-    \includegraphics[width=\textwidth]{DSRCRadio.jpeg}
-    \caption{Dedicated Short-Range Communications Radio \textcopyright}
+    \includegraphics[width=\textwidth]{DSRCRadio.png}
+    \caption{Dedicated Short-Range Communications Radio 
+    (\href{https://www.researchgate.net/figure/DSRC-radios-used-in-the-prototype-system_fig1_326198424}{Image Source} \textcopyright)}
     \label{fig:DSRCRadio}
 \end{figure}\\
 
 \indent \indent 
 The radio is capable of broadcasting several messages defined by the SAE 2735
 \cite{Kenney2011IOT} protocol with the most important beeing BSMs. This kind of 
-messages contain vehicle's current information (GPS location, speed and where they
-are heading) that are associated with a temporary ID. As a result, by broadcasting
+messages contain vehicle's current information (GPS location, speed and heading) that are associated with a temporary ID. As a result, by broadcasting
 BSM messages we are able to detect the vehicles approaching the intersection in a
 continuous manner, unlike traditional methods that only detect the presence of the
 vechile using loop detectors.\\
@@ -413,15 +427,16 @@ vechile using loop detectors.\\
 You can image the cars beeing "moving routers", and the junctions beeing
 "stationary routers". Whenever one "gateway" or in our case one traffic route is
 overfilled with vehicles it blocks the others and starts letting them pass just like
-RIP protocol. Like so we are not actually introducing new sorts of technology that may
-or not fail, we just adapt already existing algorithms that proved to be great
-solutions to fit one specific use case.
-%NOT SURE IF RIP IS THE RIGHT ONE DOUBLE CHECK LATTER!!
+RIP protocol. Like so we are not actually introducing new sorts of technologys that may
+or may not fail, we just adapt already existing algorithms, that proved to be great
+solutions, to fit one specific use case.
+
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{DSRCSystemModel.jpg}
-    \caption{DSRC Based System Model \textcopyright}
+    \caption{DSRC Based System Model 
+    (\href{https://www.frost.com/frost-perspectives/what-is-required-for-a-scalable-and-industry-wide-vehicle-to-everything-v2x-deployment/}{Image Source} \textcopyright)}
     \label{fig:DSRCSystemModel}
-\end{figure}\\
+\end{figure}
 
 \indent \indent
 With the help of this approach we can drastically reduce
@@ -433,27 +448,23 @@ Different aspects of VTL technology, including system simulation, carbon
 emission, algorithm design and deployment policy have been researched in the
 last few years. \cite{Neudecker2012}\\
 \indent \indent
-The drawback of this approach is that it requires vehicles
-to support DSRC technologies, which is not possible at the present time.
-Furthermore, V2V communications in VTL could come across partial obstruction by
-a physical object present in the innermost Fresnel zone (non-LoS conditions),
-which makes rapid decision making extremely challenging. However, even if DSRC
+The main drawback of this approach is that it requires vehicles
+to support DSRC technologies, which might me problematic at the given time.
+Moreover, within V2V communications in VTL systems, there is a possibility of
+encountering partial obstruction by physical object present in the innermost
+Fresnel zone (non-LoS conditions). This presents a significant challenge in terms
+of making quick decisions effectively. However, even if DSRC
 technology isn't totally supported by vehicles and we might colide with non-Los
 conditions, it proved to be effective in reducing the average waiting time at
 juctions. So, maybe the next step on improving traffic flow, would be to create
 an infrastructure for this kind of technologie, but only time will tell. In the mean
-time the best thing we can do is to develop a cost-effective transition scheme
-between current traffic control systems and VTL systems.
+time the best thing we can do is to develop an economically efficient plan for
+transitioning from existing traffic control systems to  VTL systems.
 
 \pagebreak
 
 
-% tables for all comparatie
-
-% \paragraph{Advantages}
-% \paragraph{Disadvantages}
-
-\section{A new flexible economic approach}
+\chapter{A new flexible economic approach}
 \indent \indent
 We belive that the future of traffic light management will be
 based on DSRC like signals. No matter if it will still be based 
@@ -461,14 +472,14 @@ on DSRC, 5G or even 6G will take lead, we aim to provide a some kind of
 software system that would be able to handle any kind message based 
 tehnology. Also, because at the given moment, the infrastructure for
 DSRC systems hasn't been fully developed and deployed we want to
-provide a economic approach to the given problem that would also bennefit
+provide a economic approach to the given problem that would bennefit
 on the already working systems, but also can simulate the already
 working traffic light management protocol.\\
 \indent \indent
 Even if DSRC will be fully deployed on a globas bases, there will still be
 alot of poor countries that will have a hard time upgrading their infrastructure.
 Because of that, we wanted to be able to have a working system even without 
-investing any kind of money. Thing about a PC for example. Even one of the worst
+investing any kind of money. Think about a PC for example, even one of the worst
 ones can run an OS and if you want to updgrade them, to make it run faster or
 handle a newer software, you would just add or replace a component with a better
 performing one. Not only you will be able to add "performance boosts" as needed
@@ -490,13 +501,12 @@ and one that would handle all of the messages and change the actual traffic ligh
 For the simplicity on things we will name them as follows:
 \begin{itemize}
     \item \textbf{Traffic Observer (TO)} - the stationary client.
-    \item \textbf{Vehicle Tracker (VT)} - the moving client
+    \item \textbf{Vehicle Tracker (VT)} - the moving client installed on our vehicles
     \item \textbf{Junction Main Server (JMS)} - the server that handles the traffic lights
     \item \textbf{Proxy} - the server that will guide the clients to the corresponding
     servers
 \end{itemize}
 
-\pagebreak
 The system would work as follows: We would constanly have a TCP-IP connection
 between our clients and the corresponding JMS. Once they are connected
 clients would send various data about the traffic that would be further 
@@ -518,7 +528,7 @@ ever waiting at the red light.\\
 
 \pagebreak
 
-\subsection{Proxy}
+\section{Proxy}
 \indent \indent
 The first problem that needs to be addressed is the fact that VTs will 
 constanly have to switch between JMSs, but how do we know what server to 
@@ -533,7 +543,7 @@ address of the corresponding JMS (Figure ~\ref{fig:UC_Connect}).\\
 \indent \indent
 As we want this to be scaled on a global level, the system supports
 horizontal scalling, as we can just stack proxys one on top of the 
-other and instead of having stored only to the JMS coordinates we 
+other and instead of having stored only the JMS coordinates we 
 will also store all the proxys that are in the subarea of the owner. To 
 not overload any kind of servers we also implemented a load balancing
 mechanism that prevents this kind of issue.
@@ -556,11 +566,15 @@ that he broke the law so we would be able to further punish him. We can lower th
 roads that do not respect safety norms and reduce the number of
 accidents. For this to work we will need to also disallow owners to 
 change their hardware without any kind of approval as a new radio
-would lead to a different IP address and this would be problematic.\\
+would lead to a different serial number and this would be problematic.\\
 \indent \indent 
 Once passing the area of coverage of that given junction we would also need
-to disconnect from that given JMS (Figure ~\ref{fig:UC_Disconnect}).
-
+to disconnect from that given JMS (Figure ~\ref{fig:UC_Disconnect}). By doing 
+this we will be able to always track the vehicles and react accordingly when
+one or multile leave the junction. One thing that we have to mention is that if
+we further think about this we could in theory keep a constant track of ALL
+the vehicles ON A GLOBAL BASES and no longer require licence plates, if, of 
+course all the vehicles would support sending DSRC signals.  
 
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{UC/Disconnect.png}
@@ -570,15 +584,15 @@ to disconnect from that given JMS (Figure ~\ref{fig:UC_Disconnect}).
 
 \pagebreak
 
-\subsection{Traffic Observer}
+\section{Traffic Observer}
 \indent \indent
 The second thing we need to do is provide a way to detect the
 waiting vechiles withot the help of DSRC messages. This can be
 done in mutiple ways, but for the simplicity of things and to keep
 costs as low as possible we went with an camera based system.
-The way it works is as follows: a camera is mounted on the road we 
-want to keep track of, that is connected to a microcontroller that can 
-run our software.
+The way it works is as follows: multiple cameras are mounted on the road 
+that are connected to microcontrollers, we take the images provided and 
+apply object recognition algorithms to detect the passing cars.
 
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{UC/ProcessImageAndFindTheCars.png}
@@ -587,12 +601,12 @@ run our software.
 \end{figure}
 
 \pagebreak
-With the help of the provided images we first and
-foremost detect the moving objects on the given frames and second of all
+The first thing we actually do is preprocess the given images and 
+detect the moving objects inside our frames and second of all
 determine if that moving object is or is not a vechile (Figure ~\ref{fig:UC_FindCars}).
 Like this we can speed up the image detection process as we will have less pixels
-to keep track off. The car detection speedup of the movement detection can be 
-seen in Figure ~\ref{fig:Comparison}. The blue line represents the amount of cars 
+to keep track off. This overall speeds up the system as can be seen in
+Figure ~\ref{fig:Comparison}. The blue line represents the amount of cars 
 detected with it running and the red one without it.
 %TO PROVIDE REAL DATA WHEN APP IS DONE
 \begin{figure}[h!]
@@ -607,37 +621,36 @@ detected with it running and the red one without it.
         \end{axis}
     \end{tikzpicture}
     \label{fig:Comparison}
+    \caption{Car tracking performance}
 \end{figure}
 
-\subsection{Vehicle Tracker}
+\section{Vehicle Tracker}
 \indent \indent
-We want to be able to handle DSRC signals. But how can we achieve that?
-We do not want to add additional hardware requirments as this will just
-make the deployment of our app much much slower and more costly. Well,
-we make use of already integrated hardware components, to be more specific we 
-make use of the radios and GPS trackers. With the use of the GPS we get the
-coordinates of the vehicle as well as it's heading. The radio allows us to
-establish TCP-IP connection and send messages. So the only things that is left to do
-is to download our app and keep it running while travelling.\\
+We want to be able to be able to send DSRC signals from any given vehicle.
+To do that, we make use of already integrated hardware components, to be more
+specific we make use of the radios and GPS installed on our vehicles. Like this,
+we get the coordinates of the vehicle as well as it's heading and the radio
+allows us to establish TCP-IP connection and send messages. So the only things
+that is left to do is to download our service and keep it running while travelling.\\
 \indent \indent
-To identify the vehicles we allocate them an IP adress when installing the app. But how can we
-make sure the user isn't amble to freely change their adress? We would want an "immutable
-storage space" to achieve that. To do so we require the manufacturer to encrypt their storage
-data so that only they will be able to modify it if needed. We just talked about the fortunate
-case, if for example we just unplug the radio module from the car how would we be able to send
-data in the system? Well we couldn't, but thats not necessarily what we want to achive. We want
-to prevent the sending of invalid data to the system and we achived that for now, when it comes
-to actual vehicles. Other faulty scenarios like driving a car without a radio, basically in
-"incognito mode", should be punished by the law and is something that we just shouldn't handle.
-
-%PHOTO HERE
+Whenever a vehicle wants to connect to a junction, it will have to specify it's 
+serial number, like this we will be able to deny/accept it's connection. The only 
+tricky part that is left to do is prevent anyone from changing thir serial number.
+This can be done in many ways, like changing the ACL of the executable to be 
+ran or overwritten only by the system or simply putting a flag in memory to 
+prevent any kind of acces in the location where the executable itself is stored or 
+just encrypt the whole storage space of the vehicle. The security part of the
+system itself is not yet defined, it will be developed only if the project will gain momentum.
 \pagebreak
-\subsection{Junction Main Server}
+\section{Junction Main Server}
 \indent \indent
 To handle all of those messages and change the actual flow of traffic we
 need to have a main command unit that acts as a server. Now 
 that we know about all the components of the system we can 
-start vizualing it(Figure ~\ref{fig:System_sketch}).
+start vizualing it(Figure ~\ref{fig:System_sketch}). Clients will query the 
+2 time of servers and connect their corresponding junction. Once connected, 
+they will send varios type of data to the junction server and the server itselft 
+will change the traffic phases based on the data recieved.
 
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{Sketches/SchitaSistem.png}
@@ -662,7 +675,7 @@ TO as well as it's data is sent to the JMS trough a VT.
 Well, because of this scenario we chose to aproximate the 
 traffic based on the number of cars determined by the TO 
 and the number of VT that sent messages to the JMS. Like this
-we make sure that, if one of the 2 components fail the system
+we make sure that, if one of the 2 components or both fail the system
 will still work. Also because noone is suppose to wait to long
 for the green light we can set a maximum timer for the red light.
 Imagine beeing alone on one road waiting for the green light and
@@ -678,26 +691,15 @@ and acts just like an "aging mechanism" (Figure ~\ref{fig:UC_SendVehicleData}).
 
 As far as the main algorithm for the traffic management goes we have 8 phazes of
 the traffic (Figure ~\ref{fig:Junction_Phazes}). The most basic scenarios is that the 
-traffic will follow that 8 phaezes going trough phaezes 1 to phaze 8 in order. That's
-what is already implement for the current way the traffic works, we want to also be
+traffic will follow that 8 phaezes going trough phaezes 1 to phaze 8 in order and cycle. That's
+the implementation for the way the traffic works, but we want to also be
 able to jump from one phaze to any other at any given time, to be able to shorcut
 the system. For that we are basing on several things.\\
 
 \indent \indent
 First and foremost we need to take into 
-account the number of cars waiting. We do that by combing the results from the 
-VT and TO and take their maximum. Because in the TO scope we use Image Recognition 
-and it may sometimes fail we will be using both entering and leaving counts and use 
-ML(Machine Learning) to determine the actual number of cars that crossed the road.
-The algorithm will want to make the entering vehicles at least as high as the leaving ones,
-so we will be using the following equation:
-\begin{math}
-    vehicles = max(x, f(y)) 
-\end{math}
-;x being the number of the vechiles from the VT, y the number of vehicles from the TO,
-and f beeing the function constantly beeing changed by our ML.\\
-
-\pagebreak
+account the number of cars waiting. We do that by combining the provided data from the 
+VT and TO and calculate an average of cars waiting.
 
 \indent \indent
 Second of all we will need to fully understand our traffic pahzes, why the are required
@@ -715,45 +717,15 @@ phazes based on the acting vehicles.\\
 \end{itemize}
 
 \indent \indent
-Now we want to know when to switch from one phaze to another. For that we will have
+We want to know when to switch from one phaze to another. For that we will have
 timers for each direction: E, W, N and S. At first all the timers will be set to 
-300 sec (5 min) waiting time, but the waiting time will be changed by the use of
-another ML updated function. This will be further described as right now, the reasons
-behind it will not be fully understood.\\
+a costum amount, but the waiting time will be changed dinamically based on the 
+traffic conditions as well as the green light waiting time.\\
 \indent \indent
-Now, to start the whole mechanism we would want to just start the traffic as usual, 
+To start the whole mechanism we want to initiate the traffic as usual, 
 having the normal order of phazez running and for us to switch to and abnormal 
-phaze we'll just need one or more timers to expire. As any other timer, it will decrease normally,
-but also when a car starts waiting at the crossroad timer will be decreased by f(x), x beeing 
-the time left for the timer to expire. We want to have as little cars waiting at the junction
-and as many cars crossing. For that we use yet another ML algorithm to update the function that 
-determines how much time will be taken from the timer. The criteria for it will be that 
-we want to stick to a not that low but not that high fix number of cars. For now we will be wanting
-to have at least 10 cars crossing at once. The check for the jump to an abnormal phaze
+phaze we'll just need one or more timers to expire. The check for the jump to an abnormal phaze
 will be done ONLY when GREEN LIGHT ENDS.\\
-\indent \indent
-The green light can be intrerupted only be emergency states(will talk about this later)
-and is based on yet another ML algorithm. To maintain traffic safety conditions,
-we have a fix time set for the drivers to notice the green light switch, to be prices
-5 sec. You may think that this is very low, but it can actually be extended to 15 sec as 
-the maximum number of phazes we can go trough without any cars waiting is 3 and we want to
-keep wasted time as low as possible, that's the main reason of creating the system so any
-bigger time perios would be a waste. The green light time will take the following form:
-\begin{math}
-    time = 5 + f(x)
-\end{math}
-where x is the number of cars waiting and f is the function updated by the ML algorithm.
-The criteria of the algorithm is to make as close to x cars pass the junction during the 
-green light and is really usefull when it comes to the speed the vechiles are moving on 
-different roads.
-
-\pagebreak
-
-\begin{lstlisting}[language = C++]
-
-\end{lstlisting}
-\pagebreak
-
 \indent \indent
 Last but not least we need to define the way our algorithm jumps from one phaze to 
 another, for that we will use the following example
@@ -768,61 +740,45 @@ another, for that we will use the following example
 At the end of every green light phaze we check the timers. If any of 
 them expired we jump to it's corresponding phaze. If, for example the following state
 coresponds to the phaze we want to jump to, we do not short circuit the normal flow of
-things. Every time we are trough green light phazes it's timer is frozen and then 
-reset to it's maximum value.\\
+things. Every time we are trough green light phazes the timers corresponding to 
+each lane that has a green signal is frozen and afterwards reseted.\\
 \indent \indent
-We need to talk also about the situations we want to avoid
-as much as possible. This are caused as a result of letting the cars from only one
-road cross (phazes II, III, VI and VII)(Figure ~\ref{fig:FaultyPhazeSwitching}). 
-As mentioned before we use FIFO logic and take the phaze that corresponds to the first 
-timer(s) that expired as a fix.
+There are also "traffic conflicts" that can occur, for example, what if 
+both the timers from E and S lanes has expired, we can not give a green light 
+to both lanes, there isn't a corresponding traffic state. This are the edge 
+scenarios that we want to avoid the most. The way we handle them at the given moment is 
+that we just use FIFO logic, take the timers that expired first and build an existing traphic 
+phase. When this happens we afterwards update the green and red light timers 
+duration accordingly to prevent any more occurances. An example of the given 
+scenario can be seen in Figure ~\ref{fig:FaultyPhazeSwitching}. 
+
+
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{Sketches/PhazeSwitchingCaseToBeAvoided.png}
     \caption{Faulty phaze switching}
     \label{fig:FaultyPhazeSwitching}
 \end{figure}
 
-\pagebreak
-\subsubsection{Emergency states}
+\section{Emergency states}
 \indent \indent
-Because every lifes matter we wanted to make sure that the
+The system also recognizes and treats accordingly
 special vechiles like ambulances, police cars and fire trucks
-crossing the junctions will be treated differently. For that,
-whenever one of those vehicle is detected our server turns on
-the green light corresponding to the lane they are following
-and keeps it on until it crosses the junction. If we are already
-in an so called emergency green light state, the procces will
-just be queued and be restarted when the already incoming 
-emergency vehicle passes. (Figure ~\ref{fig:UC_EmergencyGreenLightStart}).
-\begin{figure}[h!]
-    \includegraphics[width=\textwidth]{UC/EmergencyStart.png}
-    \caption{UC: Emergency Green Light Start}
-    \label{fig:UC_EmergencyGreenLightStart}
-\end{figure}
-
-\pagebreak
-
-\indent \indent 
-Of course when finishing with an emergency state we should
-try to first of determine if another one should be started right
-after or we should come back to the normal flow of traffic. Also
-we should restart the maxium wait time timers, as they were frozen 
-during the whole emergency state. (Figure ~\ref{fig:UC_EmergencyGreenLightStop}).
-\begin{figure}[h!]
-    \includegraphics[width=\textwidth]{UC/EmergencyStop.png}
-    \caption{UC: Emergency Green Light Stop}
-    \label{fig:UC_EmergencyGreenLightStop}
-\end{figure}
-% TO HAVE EXAMPLE FOR EMERGENCY STATE AS WELL WE JUST WANT 
-% TO LOCK THE GREEN LIGHT TIMER, OTHER TIMERS ARE WORKING AS
-% WITH THE NORMAL ABOVE SCENARIO
-\pagebreak
+crossing the junctions. Whenever one of those vehicle is detected
+our server turns on the green light corresponding to the lane they are
+following and keeps it on until it crosses the junction. This is called 
+and emergency green light state. If we are already
+in one to begin with, we will queue the next state by using FIFO rule.
+The whole communication is done only by using VTs as the process of detecting 
+special vehicles in mission would take to much time when it comes to object 
+detection algorithms and time is key for us in those critical moments.
+When no more emergency vehicles are present, tarffic will just go 
+back to it's original flow, from where it left off.
 
 \pagebreak
 
 
 
-\section{Implementation details}
+\chapter{Implementation details}
 \indent \indent
 The whole system was developed using C++17, Python, Boost, GLFW, MSVC WinAPI, OpenCV,
 Tensorflow  and MySQL. The system itself is treated as a big project 
@@ -863,7 +819,7 @@ the testing module, as it is using WinAPI to spawn and handle processes.
 
 
 \pagebreak
-\subsection{Common}
+\section{Common}
 \indent \indent
 The main ideea of the common submodule is to act as a helper library. It provides 
 solutions to the following commonly found problems:
@@ -891,10 +847,10 @@ solutions to the following commonly found problems:
 
 
 \pagebreak
-\subsection{IPC}
+\section{IPC}
 \indent \indent
-To establish the communication amoung all the executables I choose to come up with 
-my own IPC implementation, while using Boost Asio for socket handling. The loggic 
+To establish the communication amoung all the executables an costum made IPC system
+was develop, while using Boost Asio for socket handling. The loggic 
 itself runs on 4 threads: one for keeping the context running, one for reading,
 one for writing and one for notifying progress.
 
@@ -1034,10 +990,10 @@ one for writing and one for notifying progress.
 \end{lstlisting}   
 \pagebreak
 
-\subsection{CarDetector}
+\section{CarDetector}
 \indent \indent
 To be able to connect to the road traffic cameras and count the number of 
-incoming/outgoing vehicles I made wrappers over OpenCV library. The whole process 
+incoming/outgoing vehicles wrappers over OpenCV library were made. The whole process 
 works as follows: it starts detecting the moving objects inside a give frame, try to 
 predict their next position and once they cross a imaginary lines inside the picture
 they are accounted if they were matched to be cars. To boost performance, the 
@@ -1050,12 +1006,12 @@ The car classification itself is
 not done by the given module due to current C++ Tensorflow - OpenCV outdated compatibility,
 but by the ObjectDetectionServer written in Python. The CarDetector module just acts 
 like a client and sends the actual bytes of the cropped image of the detected moving objects 
-to the server. I have to note that if, in the near future, the compatibility issues
+to the server. It is important to note that if, in the near future, the compatibility issues
 will be fixed, it would server as a great performance upgrade to move this logic
 inside the module and remove any kind of process interactions.
 
 
-\subsection{ObjectDetectionServer} 
+\section{ObjectDetectionServer} 
 \indent \indent
 To be able to able to detect if cars were present Tenserflow was used. Due to the fact 
 that the model will be loaded by a microcontroller a
@@ -1067,7 +1023,7 @@ The model speed is the most important thing here beeing able to evaluate 22 fram
 as it's accuracy is not that great averaging 60\%. The overcome the low accuracy any object 
 that is more then 50\% likely to be a car will be taken into account.\\
 
-\indent \indent6
+\indent \indent
 The model itself is loaded just once, on a server, because it seems to be a really time consuming 
 operation and used whenever a new message is recieved. Once the predictions are done, we 
 remove the overlapping objects detected with the help of OpenCv NMSBoxes and return just the size 
@@ -1079,7 +1035,7 @@ simple implementation of a server using socket package.
 
 \pagebreak
 
-\subsection{Proxy}
+\section{Proxy}
 \indent \indent
 The proxy is a wrapper over the server implementation that assures the connection
 between the vechile trackers and the next junction main server they will encounter.
@@ -1100,24 +1056,25 @@ no reason for us to connect it to a junction).
     \label{fig:Proxy querys flow}
 \end{figure}
 
-The server themself has a range of coordinate values for the covered junctions
+The servers themself have a range of coordinate values for the covered junctions
 and a range of coordinate values for the known connected subproxys. The coordinate 
 range of the know connected proxys lessens the more you go down the connection tree 
-until an enpoint is reached, marked with range {0,0} <=> {0,0}. If we still don't got 
+until an enpoint is reached, marked with range {0,0} \textless = \textgreater {0,0}.
+(Figure ~\ref{fig:Proxy querys flow}). If we still don't got 
 an answear from the proxy containing a junction that means that we are out of reach 
-and the client will just stop. Like this, the more server we will have to spread our 
+and the client will just stop. Like this, the more servers we will have to spread our 
 junction data, the faster the communication will be, as the client doesn't necessarily
 need to interogate the main server, it can interogate any of the servers.
 \pagebreak
 
 
-\subsection{JunctionMainServer}
+\section{JunctionMainServer}
 
 \indent \indent
 The executable is a wrapper over the server implementation that manages the traffic states.
 It keeps track of the incoming vehicles and times out each and every traffic state. The 
-implementation itself is though to be a state machine, with the states represented by the 
-traffic states and the events beeing timer expire events. Each state has associated to it 
+implementation itself is thought to be a state machine, with the states represented by the 
+traffic states and the events being timer expire events. Each state has associated to it 
 a timer that decreases normally or when an incoming vehicle is detected. Whenever we 
 are in a given state, it's corresponding timer is frozen and afterwards reseted.
 
@@ -1164,18 +1121,16 @@ avoiding less cars passing the junction; avoiding conflicting states
 \end{figure}
 
 \indent
-Figure ~\ref{fig:Timer Increase/Decrease Impact} illustrates how 
+Figure ~\ref{fig:Faulty Scenarios Handling} illustrates how 
 we actually handle each combination of those scenarios. Like so 
 we can achive the desired traffic flow described above while 
-minimizing the waiting time as much as we can. Also, I have to mention 
-that the way we actually determine if enough vehicles passed is by 
+minimizing the waiting time as much as we can. The way we actually determine if enough vehicles passed is by 
 tracking the actual cars. Due to high complexity of image 
 comparison, this number is based only on the VehicleTrackers 
 input, so TrafficObserver client does not contribute to this process 
 and significant decreases in waiting time can be seen only for the 
 cars that are capable of using the VehicleTracker client.\\
 \indent
-
 As for the way the lane timer decreases when a new vehicle is
 detected we will have a value that constanly increases the more cars 
 are waiting. We also keep in mind an average of cars 
@@ -1188,16 +1143,15 @@ normal flow, there is no jumping between traffic states unless a large inflow of
 detected. Even if this happens, after the required jump transitions, traffic states will 
 be normalized back to their initial flow definition.
 
-% TO DO ADD PICTURE HERE
 \pagebreak
-\subsection{TrafficObserver}
+\section{TrafficObserver}
 \indent \indent
 The executable is a wrapper over the client implementation that combines
 cardetection functionalities. On startup it recieves a keyword for the junction to be able
 to determine what lane provided the incoming car message. To be able to run 
 the executable itself you will need to provide a camera as well as a way to 
 connect to the network, for example a zigbee. For testing porposes a
-video was provided instead of linking directly to a camera.
+video was provided instead of linking directly to a camera. ~\ref{fig:Running client samples}
 
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{TrafficDetectionRunningExample.png}
@@ -1207,11 +1161,11 @@ video was provided instead of linking directly to a camera.
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{TrafficDetectionRunningExample2.png}
 
-    \label{fig:Running client sample2}
+    \label{fig:Running client samples}
 \end{figure}
 
 \pagebreak
-\subsection{VehicleTracker}
+\section{VehicleTracker}
 \indent \indent
 The executable is a wrapper over the client. On startup it tries loading a
 config file that contains an ordered list with the previous queried proxies.
@@ -1249,7 +1203,7 @@ have passed a junction the whole process restarts from the begining.
     \label{fig:Proxy junction data reply}
 \end{figure}
 
-% ex citare \cite{Deshmukh2016}
+\chapter{Further Directions}
 
 \pagebreak
 \printbibliography
