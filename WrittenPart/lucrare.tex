@@ -1264,7 +1264,43 @@ have passed a junction the whole process restarts from the last queried proxy.
     \label{fig:Proxy junction data reply}
 \end{figure}
 
-\chapter{Further Directions}
+\chapter{Conclusions and Further Directions}
+\indent \indent
+In this paper, through an analysis of existing research,
+implementation examples, and emerging trends, we have gained valuable
+insights into the effectiveness and potential of traffic management
+systems. With the data collected, we have provided a new alternative 
+way of managing traffic by defining and implementing a new traffic 
+system that we believe will significantly improve traffic flow. \\
+\indent
+The new system itself attempts to bennefit on already existing V2V and V2I
+communication and provides an IPC based system with multiple clients, servers
+and proxys that can achive data car collection and processing on a global scale.
+It servers as a new economic aproach, due to the low hardware requirements,
+and acts as a bridge between current traffic flow handling and a fully 
+DSRC signal based traffic control system that we believe will be the 
+future of traffic handling systems. \\
+\indent 
+We mainly focused on the performance part to be able to provide
+the smoothest traffic conditions that we could offer at minimal costs,
+so many other branches, especially the vulnerability defense area,
+were mostly neglected. \\
+\indent
+One thing that should be done in the near future, if the system will be chosen to be 
+applied in real time scenarios would be to implement a securtiy 
+layer or protocol that would prevent attackers from distur
+bing the 
+normal traffic flow. Also, right now messages are not encrypted and 
+can be captured by anyone, so another step into protecting our system 
+would be to add a public-private key mechanism or try adding some 
+security protocols like Cerberus. \\
+\indent 
+Another thing that should be done before deploying our system on a 
+global level is to create a real time test environment, as for now,
+no real-time testing was done, so the system may or may not fail. 
+We tried to provide as close to reality data to our system, but there 
+are almost always room for error when dealing with such vast subjects
+like traffic management
 
 \pagebreak
 \printbibliography
