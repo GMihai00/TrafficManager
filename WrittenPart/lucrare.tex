@@ -104,23 +104,48 @@ BACHELOR STUDY PROGRAM:  Computer Science}}
 
 \section*{Abstract}
 \indent \indent
-The paper introduces an intelligent system for traffic
-signal applications that is designed to be as adaptive
-as possible and combines multiple technologies.
-At base, it is programmed on an micro controller and it
-uses fuzzy logic, but can be upgraded. This can be done by
-linking other hardware components to it with the help of a
-configuration file. So we can utilize multiple technologies
-like image recognition or speed/radio detection and get the
-best from all of them.\\
-\indent The system aims to be used in real time
-traffic scenarios, as an affordable and upgradable option,
-to decrease the waiting time at crossroads.
-This would lead to shorter travel times from point
-A to point B and would have a significant impact not only
-on our daily lifes, but on the environment as well.
+Effective traffic management is a vital component in ensuring
+the smooth and efficient movement of vehicles, reducing congestion,
+and enhancing overall transportation systems. As urban populations
+continue to grow, the challenges associated with traffic congestion,
+environmental impact, and safety concerns become more pronounced.
+Therefore, the need for innovative and intelligent traffic management
+solutions is imperative.\\
+\indent
+This paper provides an overview of various approaches and
+technologies employed to tackle traffic management challenges as 
+well as a new traffic management system that would solve most of 
+the traffic congestion problems in the near future. It highlights
+the significance of intelligent transportation systems (ITS),
+which leverage advancements in communication networks, sensors,
+and data analytics to enhance traffic flow and optimize resource
+allocation.\\
+\indent
+One key aspect of traffic management is traffic signal optimization.
+Traditional fixed-time signal systems are being replaced by dynamic
+adaptive systems that continuously monitor traffic patterns in
+real-time and adjust signal timings accordingly. By dynamically
+responding to traffic conditions, these systems optimize traffic flow,
+reduce delays, and minimize congestion.\\
+\indent
+The new system itself attempts to bennefit on already existing V2V and 
+V2I communication and provides an IPC based system with multiple 
+clients, servers and proxys that can achive data car collection and processing
+on a global scale. Also the system bases on 8 traffic states that 
+in normal conditions follow one after the onether in a cycle, just like
+with any other junctions at the give moment, but the normal 
+flow can be altered in specific scenarios to imrpove traffic flow.\\
+\indent
+Unlike other traffic systems, that try to predict the traffic, a simpler,
+more effective approach was provided that dinamically adapts based on 
+traffic conditions. To be more precise green light time and waiting time 
+are determined based on the number of vehicles that crossed or are 
+waiting at the junction. The data is collected in various ways, either
+from the vehicles themself or with the help of additional hardware
+like microcontrollers, cameras, GPS, zigbees, radios etc. To achive
+that we defined a new message standard and trained an objecte detection
+neural networks model that could recognize our vehicles.
 
-%add more to abstract sadly
 \pagebreak
 
 \tableofcontents
