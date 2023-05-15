@@ -89,13 +89,21 @@ namespace model
 			std::function<void()> greeLightObserverCallback_;
 			common::utile::Timer greenLightTimer_;
 
+			std::map <common::utile::LANE, uint16_t> carsWaiting_;
+			std::map <common::utile::LANE, uint16_t> carsThatPassedJunction_;
+			uint16_t averageWaitingCars_ = 10;
+			uint16_t numberOfTransitionsTakenIntoAccount_ = 1;
+
 			std::shared_ptr<GLFWWindowManager> windowManager_;
 
 			LOGGER("TRAFFICLIGHT-STATEMACHINE");
 
 			uint16_t calculateTimeDecrease(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+
+			bool isInConflictScenario();
+
 			void updateTrafficState();
-			void updateGreenLightDuration();
+			void updateTimersDuration();
 			
 			void updateWindowWithNewTrafficState(const std::string& transitioName);
 		public:
@@ -124,6 +132,8 @@ namespace model
 			void queueNextStatesWaiting();
 
 			bool registerVehicleTrackerIpAdress(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ipAdress);
+
+			void updateCarCount(const std::set<common::utile::LANE> lanes);
 		};
 
 
@@ -173,6 +183,7 @@ namespace model
 			virtual ~EWTransition()
 			{
 				std::cout << "State ended";
+				outermost_context().updateCarCount({ common::utile::LANE::E, common::utile::LANE::W });
 				outermost_context().resetTimers("EW");
 				outermost_context().nextNormalState_ = "N";
 			}
@@ -191,6 +202,7 @@ namespace model
 			virtual ~NTransition()
 			{
 				std::cout << "State ended";
+				outermost_context().updateCarCount({ common::utile::LANE::N });
 				outermost_context().resetTimers("N");
 				outermost_context().nextNormalState_ = "S";
 			}
@@ -209,6 +221,7 @@ namespace model
 			~STransition()
 			{
 				std::cout << "State ended";
+				outermost_context().updateCarCount({ common::utile::LANE::S });
 				outermost_context().resetTimers("S");
 				outermost_context().nextNormalState_ = "EW";
 			}
@@ -227,6 +240,7 @@ namespace model
 			virtual ~EWTransitionCpy()
 			{
 				std::cout << "State ended";
+				outermost_context().updateCarCount({ common::utile::LANE::E, common::utile::LANE::W });
 				outermost_context().resetTimers("EW");
 				outermost_context().nextNormalState_ = "NS";
 			}
@@ -246,6 +260,7 @@ namespace model
 			virtual ~NSTransition()
 			{
 				std::cout << "State ended";
+				outermost_context().updateCarCount({ common::utile::LANE::N, common::utile::LANE::S });
 				outermost_context().resetTimers("NS");
 				outermost_context().nextNormalState_ = "E";
 			}
@@ -264,6 +279,7 @@ namespace model
 			virtual ~ETransition()
 			{
 				std::cout << "State ended";
+				outermost_context().updateCarCount({ common::utile::LANE::E });
 				outermost_context().resetTimers("E");
 				outermost_context().nextNormalState_ = "W";
 			}
@@ -282,6 +298,7 @@ namespace model
 			virtual ~WTransition()
 			{
 				std::cout << "State ended";
+				outermost_context().updateCarCount({ common::utile::LANE::W });
 				outermost_context().resetTimers("EW");
 			}
 		};
@@ -300,6 +317,7 @@ namespace model
 			virtual ~NSTransitionCpy()
 			{
 				std::cout << "State ended";
+				outermost_context().updateCarCount({ common::utile::LANE::N, common::utile::LANE::S });
 				outermost_context().resetTimers("NS");
 				outermost_context().nextNormalState_ = "EW";
 			}

@@ -69,6 +69,11 @@ namespace common
 				timeLeft_ -= sec;
 		}
 
+		uint16_t Timer::getTimeLeft()
+		{
+			return timeLeft_;
+		}
+
 		void Timer::resetTimer(const uint16_t& sec)
 		{
 			//std::scoped_lock lock(mutexTimer_);

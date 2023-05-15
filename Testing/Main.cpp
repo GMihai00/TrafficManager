@@ -159,9 +159,8 @@ bool tryToRun4TOsForEachJMS(const model::JMSConfig& config)
         cmd.m_arguments.push_back(g_video_path.wstring());
         commandsToBeRan.push_back(cmd);
         
-
-        // just 1 camera so unselss i have 4 cameras connected can't really test it out
-        break;
+        
+        // just 1 camera so unselss I have 4 cameras connected can't really test it out
     }
 
     return std::all_of(commandsToBeRan.begin(), commandsToBeRan.end(), [](const auto& comand) { return createProcessFromSameDirectory(comand); });
@@ -212,6 +211,7 @@ bool runJMSForAllConfigs(const std::filesystem::path& jmsConfigDir)
             cmd.m_exe = L"JunctionMainServer.exe";
             cmd.m_arguments.push_back(L"-conf");
             cmd.m_arguments.push_back(entry.path().wstring());
+            cmd.m_arguments.push_back(L"--display");
             commandsToBeRan.push_back(cmd);
 
             auto config = loadJMSConfig(entry.path().string()); // IN CASE FAULTY FILES ARE PRESENT
@@ -396,7 +396,7 @@ int main(int argc, char* argv[])
 
     // aici nu ar trebui sa ia un VT pt fiecare vehicle ar trebui sa am 4 configurari pt fiecare lane care stiu ca dau in junction 
     // clienti ar trebui sa se spawneze random!!!
-    runVTForEachGPS(gpsDataDir.value(), vtConfigFile.value());
+    //runVTForEachGPS(gpsDataDir.value(), vtConfigFile.value());
 
     std::mutex mutexEnd;
     std::unique_lock<std::mutex> ulock(mutexEnd);

@@ -1,6 +1,7 @@
 #include "TrafficLightStateMachine.hpp"
 #include <limits>
 #include <algorithm>
+#include <cmath>
 
 #include "VehicleTypes.hpp"
 
@@ -99,9 +100,10 @@ namespace model
 					windowManager_->signalIncomingCar(paint::VehicleTypes::NORMAL_VEHICLE, lane);
 				}
 			}
-			else
+
+			if (!isVehicleTracker(lane, ip))
 			{
-				// update NR OF CARS THAT PASSED JUNCTION
+				carsWaiting_[lane]++;
 			}
 
 			return true;
@@ -128,7 +130,12 @@ namespace model
 			}
 
 			clientsConnected_[corespondingLane.value()].erase(ip);
-			// HERE I SHOULD UPDATE TIMER AS WELL
+			
+			if (!isVehicleTracker(corespondingLane.value(), ip))
+			{
+				carsThatPassedJunction_[corespondingLane.value()]++;
+			}
+
 			return true;
 		}
 
@@ -177,19 +184,44 @@ namespace model
 			return true;
 		}
 
+		namespace details
+		{
+			uint16_t lgput(uint16_t nr, uint16_t power) {
+				uint16_t res = 1;
+
+				while (power > 0) {
+					if (nr % 2 == 1) {
+						res = (res * nr);
+						power--;
+					}
+					nr = (nr * nr);
+					power = power / 2;
+				}
+
+				return res;
+			}
+
+		}
+
 		uint16_t TrafficLightStateMachine::calculateTimeDecrease(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
-			// TO DO: CALCULATE TIME BASED ON SOURCE, WILL HAVE TO THINK ABOUT AN ALGORITHM 
-			uint16_t rez = 5;
+			auto timeLeft = laneToTimerMap_[lane]->getTimeLeft();
+
 			if (isVehicleTracker(lane, ip))
 			{
-
+				return std::ceil( (1.0 * timeLeft) / 100);
 			}
 			else
 			{
-
+				if (carsWaiting_[lane] - carsThatPassedJunction_[lane] <= averageWaitingCars_)
+				{
+					return std::ceil((1.0 * timeLeft) / 100) * (carsWaiting_[lane] - carsThatPassedJunction_[lane]);
+				}
+				else
+				{
+					return std::ceil((1.0 * timeLeft) / 100) * details::lgput(carsWaiting_[lane] - carsThatPassedJunction_[lane], 2);
+				}
 			}
-			return rez;
 		}
 
 		void TrafficLightStateMachine::freezeTimers(const std::string lanes)
@@ -224,11 +256,46 @@ namespace model
 				(timer->second)->decreaseTimer(calculateTimeDecrease(lane, ip));
 		}
 
-		void TrafficLightStateMachine::updateGreenLightDuration()
+		bool TrafficLightStateMachine::isInConflictScenario()
+		{
+			return jumpTransitionQueue_.size() > 1;
+		}
+
+		void TrafficLightStateMachine::updateTimersDuration()
 		{
 			std::scoped_lock lock(mutexClients_);
-			// TO DO: THIS WILL BE THE ML PART 
-			// IF WE HAD SCENARIOS WHERE MORE THEN ONE TIMER EXPIRED REDUCE/INCREASE GREEN LIGHT?
+			
+			uint8_t numberOfCarsThatPassed = 0;
+
+			for (const auto& pair : carsThatPassedJunction_)
+			{
+				numberOfCarsThatPassed += pair.second;
+			}
+
+			// formulas to be changed, it's just an example
+			if (numberOfCarsThatPassed > averageWaitingCars_)
+			{
+				if (isInConflictScenario())
+				{
+					greenLightDuration_ -= (numberOfCarsThatPassed - averageWaitingCars_) * jumpTransitionQueue_.size();
+				}
+				else
+				{
+					regLightDuration_ -= (numberOfCarsThatPassed - averageWaitingCars_);
+				}
+
+			}
+			else 
+			{
+				if (isInConflictScenario())
+				{
+					regLightDuration_ += (averageWaitingCars_ - numberOfCarsThatPassed) * jumpTransitionQueue_.size();
+				}
+				else
+				{
+					greenLightDuration_ += (averageWaitingCars_ - numberOfCarsThatPassed);
+				}
+			}
 		}
 
 		void TrafficLightStateMachine::queueNextStatesWaiting()
@@ -314,7 +381,7 @@ namespace model
 
 		void TrafficLightStateMachine::greenLightExpireCallback()
 		{
-			updateGreenLightDuration();
+			updateTimersDuration();
 			updateTrafficState();
 			greenLightTimer_.resetTimer(greenLightDuration_);
 		}
@@ -329,6 +396,20 @@ namespace model
 			}
 			laneToVehicleTrackerIPAdress_[lane] = ipAdress;
 			return true;
+		}
+
+		void TrafficLightStateMachine::updateCarCount(const std::set<common::utile::LANE> lanes)
+		{
+			uint8_t numberOfCarsThatDidntPassed = 0;
+
+			for (const auto& lane : lanes)
+			{
+				carsWaiting_[lane] -= carsThatPassedJunction_[lane];
+				numberOfCarsThatDidntPassed += carsWaiting_[lane];
+			}
+
+			averageWaitingCars_ = ((averageWaitingCars_ * numberOfTransitionsTakenIntoAccount_) + numberOfCarsThatDidntPassed) / (numberOfTransitionsTakenIntoAccount_ + 1);
+			numberOfTransitionsTakenIntoAccount_++;
 		}
 
 	} // namespace controller
