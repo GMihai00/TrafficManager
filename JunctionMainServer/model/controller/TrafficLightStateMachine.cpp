@@ -12,7 +12,7 @@ namespace model
 		
 		TrafficLightStateMachine::TrafficLightStateMachine(const common::utile::model::JMSConfig& config, bool shouldDisplay) :
 			greenLightDuration_(config.maxWaitingTime),
-			regLightDuration_(120), // TO CHANGE THIS UPDATED BY ML
+			regLightDuration_(15), // TO CHANGE THIS UPDATED BY ML
 			usingLeftLane_(config.usingLeftLane)
 		{
 			missingLane_ = boost::none;
@@ -273,7 +273,7 @@ namespace model
 			}
 
 			// formulas to be changed, it's just an example
-			if (numberOfCarsThatPassed > averageWaitingCars_)
+			if (numberOfCarsThatPassed >= averageWaitingCars_)
 			{
 				if (isInConflictScenario())
 				{

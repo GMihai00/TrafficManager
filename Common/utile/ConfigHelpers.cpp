@@ -5,6 +5,8 @@
 #include <stack>
 #include <regex>
 
+#include <nlohmann/json.hpp>
+
 #include <boost/property_tree/ptree.hpp>                                        
 #include <boost/property_tree/json_parser.hpp> 
 #include <boost/optional.hpp>
@@ -26,124 +28,166 @@ namespace common
 
 		namespace details
 		{
-			bool setLaneKeywords(const ptree& jsonRoot, model::JMSConfig& config)
+			bool setLaneKeywords(const nlohmann::json& json, model::JMSConfig& config)
 			{
 				int count = 0;
-				const auto& jsonTree = jsonRoot.get_child_optional("lanes");
-				if (jsonTree == boost::none)
+				nlohmann::json lanes;
+				if (auto it = json.find("lanes"); it == json.end())
 				{
+					LOG_WARN << "Missing \"lanes\" tag";
 					return false;
 				}
+				else
+				{
+					lanes = *it;
+				}
 
-				std::vector <std::string> directions = {"left", "right", "top", "down"};
+				std::vector <std::string> directions = { "left", "right", "top", "down" };
 
 				for (auto poz = 0; poz < directions.size(); poz++)
 				{
-					const auto& jsonTreeDir = jsonTree.get().get_child_optional(directions[poz]);
-					if (jsonTreeDir == boost::none)
-						continue;
-
-					if (const auto& val = jsonTreeDir.get().get_value_optional<std::string>(); val != boost::none)
+					auto val = lanes.find(directions[poz]);
+					if (val == lanes.end())
 					{
-						config.laneToKeyword[common::utile::LANE(poz)] = val.get();
+						LOG_WARN << "Missing lane: " << directions[poz];
+						continue;
+					}
+
+					try
+					{
+						auto keyword = val->get<std::string>();
+						config.laneToKeyword[common::utile::LANE(poz)] = std::move(keyword);
 						count++;
 					}
+					catch (const std::exception& ec)
+					{
+						LOG_ERR << "Failed to read data err: " << ec.what();
+						return false;
+					}
 				}
-				return count != 0;
+				return count >= 3;
 			}
 
-			bool setUsedLane(const ptree& jsonRoot, model::JMSConfig& config)
+			bool setUsedLane(const nlohmann::json& json, model::JMSConfig& config)
 			{
-				const auto& jsonTree = jsonRoot.get_child_optional("usingLeftLane");
-				if (jsonTree == boost::none)
-					return false;
-
-				if (const auto& val = jsonTree.get().get_value_optional<uint8_t>(); val != boost::none)
+				auto val = json.find("usingLeftLane");
+				if (val == json.end())
 				{
-					config.usingLeftLane = val.get();
+					LOG_ERR << "\"usingLeftLane\" tag missing";
+					return false;
+				}
+
+				try
+				{
+					config.usingLeftLane = val->get<uint8_t>();
 					return true;
 				}
-
-				return false;
-			}
-
-			bool setMaxWaitingTime(const ptree& jsonRoot, model::JMSConfig& config)
-			{
-				const auto& jsonTree = jsonRoot.get_child_optional("maxWaitingTime");
-				if (jsonTree == boost::none)
-					return false;
-
-				if (const auto & val = jsonTree.get().get_value_optional<uint16_t>(); val != boost::none)
+				catch (const std::exception& ec)
 				{
-					config.maxWaitingTime = val.get();
-					return true;
+					LOG_ERR << "Invalid data err: " << ec.what();
+					return false;
+				}
+			}
+			bool setMaxWaitingTime(const nlohmann::json& json, model::JMSConfig& config)
+			{
+				auto val = json.find("maxWaitingTime");
+				if (val == json.end())
+				{
+					LOG_ERR << "\"maxWaitingTime\" tag missing";
+					return false;
 				}
 
-				return false;
+				try
+				{
+					config.maxWaitingTime = val->get<uint16_t>();
+					return true;
+				}
+				catch (const std::exception& ec)
+				{
+					LOG_ERR << "Invalid data err: " << ec.what();
+					return false;
+				}
 			}
 
-			void setMissingRoadIfPresent(const ptree& jsonRoot, model::JMSConfig& config)
+			void setMissingRoadIfPresent(const nlohmann::json& json, model::JMSConfig& config)
 			{
-				std::vector <std::string> directions = { "top", "down" , "left", "right" };
-				const auto& jsonTree = jsonRoot.get_child_optional("missingLane");
-				if (jsonTree == boost::none)
+				auto val = json.find("missingLane");
+				if (val == json.end())
 					return;
 
-				if (const auto& val = jsonTree.get().get_value_optional<std::string>(); val != boost::none)
+				try
 				{
-					const auto& direction = val.get();
+					auto lane = val->get<std::string>();
+
+					std::vector <std::string> directions = { "top", "down" , "left", "right" };
 					for (int poz = 0; poz < directions.size(); poz++)
 					{
-						if (direction == directions[poz])
+						if (lane == directions[poz])
 						{
 							config.missingLane = (common::utile::LANE)poz;
 							return;
 						}
 					}
-					LOG_WARN << "Invalid missingLane value: " << direction;
+					LOG_WARN << "Invalid missingLane value: " << lane;
+				}
+				catch (const std::exception& ec)
+				{
+					LOG_ERR << "Invalid data err: " << ec.what();
 				}
 			}
 
-			bool setServerIp(const ptree& jsonRoot, model::JMSConfig& config)
+			bool setServerIp(const nlohmann::json& json, model::JMSConfig& config)
 			{
-				const auto& jsonTree = jsonRoot.get_child_optional("ip");
-				if (jsonTree == boost::none)
-					return false;
-
-				if (const auto& val = jsonTree.get().get_value_optional<std::string>(); val != boost::none)
+				auto val = json.find("ip");
+				if (val == json.end())
 				{
-					config.serverIp = val.get();
+					LOG_ERR << "\"ip\" tag missing";
+					return false;
+				}
+
+				try
+				{
+					config.serverIp = val->get<std::string>();
 					return true;
 				}
-
-				return false;
+				catch (const std::exception& ec)
+				{
+					LOG_ERR << "Invalid data err: " << ec.what();
+					return false;
+				}
 			}
 
-			bool setServerPort(const ptree& jsonRoot, model::JMSConfig& config)
+			bool setServerPort(const nlohmann::json& json, model::JMSConfig& config)
 			{
-				const auto& jsonTree = jsonRoot.get_child_optional("port");
-				if(jsonTree == boost::none)
-					return false;
-
-				if (const auto& val = jsonTree.get().get_value_optional<uint16_t>() ; val != boost::none)
+				auto val = json.find("port");
+				if (val == json.end())
 				{
-					config.serverPort = jsonTree.get().get_value<uint16_t>();
-					return true;
+					LOG_ERR << "\"port\" tag missing";
+					return false;
 				}
 
-				return false;
+				try
+				{
+					config.serverPort = val->get<uint16_t>();
+					return true;
+				}
+				catch (const std::exception& ec)
+				{
+					LOG_ERR << "Invalid data err: " << ec.what();
+					return false;
+				}
 			}
 
-			bool setServerEnpoint(const ptree& jsonRoot, model::JMSConfig& config)
+			bool setServerEnpoint(const nlohmann::json& json, model::JMSConfig& config)
 			{
-				const auto& jsonTree = jsonRoot.get_child_optional("server");
-				if (jsonTree == boost::none)
+				auto val = json.find("server");
+				if (val == json.end())
 				{
 					LOG_ERR << "\"server\" tag missing";
 					return false;
 				}
 
-				return setServerIp(jsonTree.get(), config) && setServerPort(jsonTree.get(), config);
+				return setServerIp(*val, config) && setServerPort(*val, config);
 			}
 
 			bool write_jsonEx(const std::string& path, const ptree& ptree)
@@ -322,36 +366,47 @@ namespace common
 		std::optional<model::JMSConfig> loadJMSConfig(const std::string& pathToConfigFile) noexcept
 		{
 			model::JMSConfig config;
-			ptree jsonRoot;
+			nlohmann::json data;
 
-			read_json(pathToConfigFile, jsonRoot);
+			std::ifstream input_file(pathToConfigFile);
 
-			if (!details::setLaneKeywords(jsonRoot, config))
+			if (!input_file.is_open())
+			{
+				LOG_ERR << "Failed to open: " << pathToConfigFile;
+				return {};
+			}
+
+			data = nlohmann::json::parse(input_file);
+
+			input_file.close();
+
+			if (!details::setLaneKeywords(data, config))
 			{
 				LOG_WARN << "TOs keywords not found. The server will read messages only from VTs";
 			}
 
-			if (!details::setUsedLane(jsonRoot, config))
+			if (!details::setUsedLane(data, config))
 			{
 				LOG_WARN << "Lane not specified, defaulting to right lane";
 				config.usingLeftLane = 0;
 			}
 
-			if (!details::setMaxWaitingTime(jsonRoot, config))
+			if (!details::setMaxWaitingTime(data, config))
 			{
 				LOG_WARN << "Maximum waiting time not specified, defaulting to 300s";
 				config.maxWaitingTime = 300;
 			}
 
-			if (!details::setServerEnpoint(jsonRoot, config))
+			if (!details::setServerEnpoint(data, config))
 			{
 				LOG_ERR << "Ip and Port not specified";
 				return {};
 			}
 
-			details::setMissingRoadIfPresent(jsonRoot, config);
+			details::setMissingRoadIfPresent(data, config);
 
 			return config;
+
 		}
 
 		std::stack<std::pair<utile::IP_ADRESS, utile::PORT>> getLastVisitedProxys(const std::string& pathToConfigFile) noexcept

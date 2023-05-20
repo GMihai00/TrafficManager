@@ -16,7 +16,6 @@
 #include "utile/GeoCoordinate.hpp"
 #include "utile/ConfigHelpers.hpp"
 #include "utile/CommandLineParser.hpp"
-#include "utile/SignalHandler.hpp"
 #include "utile/TypeConverters.hpp"
 
 
@@ -24,7 +23,6 @@ using namespace common::utile;
 
 LOGGER("TEST-MAIN");
 
-std::condition_variable g_condVarEnd;
 std::vector<PROCESS_INFORMATION> g_runningProcesses;
 std::filesystem::path g_video_path;
 // TO BE ADDED INSIDE COMMON
@@ -349,16 +347,6 @@ std::optional<std::filesystem::path> getProxyConfigFile(const CommandLineParser&
 int main(int argc, char* argv[])
 {
 
-    SignalHandler sigHandler{};
-    sigHandler.setAction(SIGINT, [](int singal)
-        {
-            g_condVarEnd.notify_one();
-        });
-    sigHandler.setAction(SIGTERM, [](int singal)
-        {
-            g_condVarEnd.notify_one();
-        });
-
     auto commandLine = CommandLineParser(argc, argv);
 
     //hardcoded for now
@@ -387,20 +375,21 @@ int main(int argc, char* argv[])
         closeAllProcesses();
         return 5;
     }
-    auto vtConfigFile = getVtConfigFile(commandLine);
-    if (!vtConfigFile.has_value())
-    {
-        LOG_WARN << "VT config file is missing";
-        vtConfigFile = "";
-    }
-
     // aici nu ar trebui sa ia un VT pt fiecare vehicle ar trebui sa am 4 configurari pt fiecare lane care stiu ca dau in junction 
     // clienti ar trebui sa se spawneze random!!!
+
+    //auto vtConfigFile = getVtConfigFile(commandLine);
+    //if (!vtConfigFile.has_value())
+    //{
+    //    LOG_WARN << "VT config file is missing";
+    //    vtConfigFile = "";
+    //}
+
     //runVTForEachGPS(gpsDataDir.value(), vtConfigFile.value());
 
-    std::mutex mutexEnd;
-    std::unique_lock<std::mutex> ulock(mutexEnd);
-    g_condVarEnd.wait(ulock);
+    std::cout << "Press any key to stop\n";
+    char input;
+    std::cin >> input;
 
     closeAllProcesses();
 	return 0;

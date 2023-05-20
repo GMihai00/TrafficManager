@@ -91,7 +91,7 @@ namespace model
 
 			std::map <common::utile::LANE, uint16_t> carsWaiting_;
 			std::map <common::utile::LANE, uint16_t> carsThatPassedJunction_;
-			uint16_t averageWaitingCars_ = 10;
+			uint8_t averageWaitingCars_ = 0;
 			uint16_t numberOfTransitionsTakenIntoAccount_ = 1;
 
 			std::shared_ptr<GLFWWindowManager> windowManager_;
