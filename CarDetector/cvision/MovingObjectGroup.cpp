@@ -20,8 +20,8 @@ namespace cvision
                 / (((n * (n - 1)) / 2) * 1.0);
             const auto deltaY = (centerPositions_[n - 1].y * (n - 1) - sumCenterPoz_.y)
                 / (((n * (n - 1)) / 2) * 1.0);
-            futurePosition_.x = centerPositions_.back().x + deltaX;
-            futurePosition_.y = centerPositions_.back().y + deltaY;
+            futurePosition_.x = static_cast<int>(centerPositions_.back().x + deltaX);
+            futurePosition_.y = static_cast<int>(centerPositions_.back().y + deltaY);
             break;
         }
 	}
@@ -176,8 +176,8 @@ namespace cvision
         try
         {
             cv::Rect rect = movingObjectStates_.back()->getBoudingRect();
-            rect.width *= 1.5;
-            rect.height *= 1.5;
+            rect.width = static_cast<int>(rect.width * 1.5);
+            rect.height = static_cast<int>(rect.height * 1.5);
             rect.x -= 20;
             rect.y -= 20;
             

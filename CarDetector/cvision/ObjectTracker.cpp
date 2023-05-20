@@ -160,9 +160,9 @@ namespace cvision
         horizontalLinePosition_ = firstImageFrame_.value().rows / 2;
 
         crossingLineRight_[0].x = firstImageFrame_.value().cols / 2;
-        crossingLineRight_[0].y = horizontalLinePosition_ * 0.75;
+        crossingLineRight_[0].y = static_cast<int>(horizontalLinePosition_ * 0.75);
         crossingLineRight_[1].x = firstImageFrame_.value().cols - 1;
-        crossingLineRight_[1].y = horizontalLinePosition_ * 0.75;
+        crossingLineRight_[1].y = static_cast<int>(horizontalLinePosition_ * 0.75);
 
         crossingLineLeft_[0].x = 0;
         crossingLineLeft_[0].y = horizontalLinePosition_;

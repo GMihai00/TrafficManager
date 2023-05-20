@@ -187,16 +187,16 @@ namespace ipc
             }
     
         protected:
-            virtual bool onClientConnect(std::shared_ptr<Connection<T>> client)
+            virtual bool onClientConnect(std::shared_ptr<Connection<T>> /*client*/)
             {
                 return false;
             }
     
-            virtual void onClientDisconnect(std::shared_ptr<Connection<T>> client)
+            virtual void onClientDisconnect(std::shared_ptr<Connection<T>> /*client*/)
             {
             }
     
-            virtual void onMessage(std::shared_ptr<Connection<T>> client, Message<T>& msg)
+            virtual void onMessage(std::shared_ptr<Connection<T>> /*client*/, Message<T>& /*msg*/)
             {
             }
         };

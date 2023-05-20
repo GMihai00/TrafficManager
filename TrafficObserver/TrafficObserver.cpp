@@ -83,11 +83,11 @@ bool g_shouldStop = false;
 int main(int argc, char* argv[])
 {
 	SignalHandler sigHandler{};
-	sigHandler.setAction(SIGINT, [](int singal)
+	sigHandler.setAction(SIGINT, [](int /*singal*/)
 		{
 			g_shouldStop = true;
 		});
-	sigHandler.setAction(SIGTERM, [](int singal)
+	sigHandler.setAction(SIGTERM, [](int /*singal*/)
 		{
 			g_shouldStop = true;
 		});

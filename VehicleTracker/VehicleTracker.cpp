@@ -68,7 +68,7 @@ std::condition_variable g_condVarEnd;
 int main(int argc, char* argv[])
 {
 	SignalHandler sigHandler{};
-	sigHandler.setAction(SIGINT, [](int singal)
+	sigHandler.setAction(SIGINT, [](int /*singal*/)
 		{
 			if (!(g_vtClient && g_vtClient->saveDataToJson()))
 			{
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 
 			g_condVarEnd.notify_one();
 		});
-	sigHandler.setAction(SIGTERM, [](int singal)
+	sigHandler.setAction(SIGTERM, [](int /*singal*/)
 		{
 			if(!(g_vtClient && g_vtClient->saveDataToJson()))
 			{

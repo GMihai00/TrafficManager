@@ -2,8 +2,6 @@
 
 #include <functional>
 
-#include <Windows.h>
-
 #include "DrawHelpers.hpp"
 
 
@@ -58,7 +56,7 @@ namespace model
 			if (auto it = semaphor_location_based_on_lane.find(lane); it == semaphor_location_based_on_lane.end())
 				continue;
 			else
-				draw_circle(it->second, 0.1, color);
+				draw_circle(it->second, GLfloat(0.1), color);
 		}
 			
 	}
@@ -170,18 +168,18 @@ namespace model
 	{
 		const static std::map<common::utile::LANE, Point> starting_lane_points =
 		{
-			{common::utile::LANE::E, Point(1., 0.05)},
-			{common::utile::LANE::N, Point(-0.05, 1.)},
-			{common::utile::LANE::S, Point(0.05, -1.)},
-			{common::utile::LANE::W,  Point(-1., -0.05)}
+			{common::utile::LANE::E, Point(GLfloat(1.), GLfloat(0.05))},
+			{common::utile::LANE::N, Point(GLfloat(-0.05), GLfloat(1.))},
+			{common::utile::LANE::S, Point(GLfloat(0.05), GLfloat(-1.))},
+			{common::utile::LANE::W, Point(GLfloat(- 1.), GLfloat(-0.05))}
 		};
 
 		const static std::map<common::utile::LANE, Point> ending_lane_points = 
 		{
-			{common::utile::LANE::E, Point(-1., 0.05)},
-			{common::utile::LANE::N, Point(-0.05, -1.)},
-			{common::utile::LANE::S, Point(0.05, 1.)},
-			{common::utile::LANE::W, Point(1., -0.05)}
+			{common::utile::LANE::E, Point(GLfloat(-1.), GLfloat(0.05))},
+			{common::utile::LANE::N, Point(GLfloat(-0.05), GLfloat(-1.))},
+			{common::utile::LANE::S, Point(GLfloat(0.05), GLfloat(1.))},
+			{common::utile::LANE::W, Point(GLfloat(1.), GLfloat(-0.05))}
 		};
 
 		if (bl_point == std::nullopt)

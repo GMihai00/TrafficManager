@@ -209,17 +209,17 @@ namespace model
 
 			if (isVehicleTracker(lane, ip))
 			{
-				return std::ceil( (1.0 * timeLeft) / 100);
+				return static_cast<uint16_t>(std::ceil( (1.0 * timeLeft) / 100));
 			}
 			else
 			{
 				if (carsWaiting_[lane] - carsThatPassedJunction_[lane] <= averageWaitingCars_)
 				{
-					return std::ceil((1.0 * timeLeft) / 100) * (carsWaiting_[lane] - carsThatPassedJunction_[lane]);
+					return static_cast<uint16_t>(std::ceil((1.0 * timeLeft) / 100) * (carsWaiting_[lane] - carsThatPassedJunction_[lane]));
 				}
 				else
 				{
-					return std::ceil((1.0 * timeLeft) / 100) * details::lgput(carsWaiting_[lane] - carsThatPassedJunction_[lane], 2);
+					return static_cast<uint16_t>(std::ceil((1.0 * timeLeft) / 100) * details::lgput(carsWaiting_[lane] - carsThatPassedJunction_[lane], 2));
 				}
 			}
 		}
@@ -277,7 +277,7 @@ namespace model
 			{
 				if (isInConflictScenario())
 				{
-					greenLightDuration_ -= (numberOfCarsThatPassed - averageWaitingCars_) * jumpTransitionQueue_.size();
+					greenLightDuration_ -= static_cast<uint16_t>((numberOfCarsThatPassed - averageWaitingCars_) * jumpTransitionQueue_.size());
 				}
 				else
 				{
@@ -289,7 +289,7 @@ namespace model
 			{
 				if (isInConflictScenario())
 				{
-					regLightDuration_ += (averageWaitingCars_ - numberOfCarsThatPassed) * jumpTransitionQueue_.size();
+					regLightDuration_ += static_cast<uint16_t>((averageWaitingCars_ - numberOfCarsThatPassed) * jumpTransitionQueue_.size());
 				}
 				else
 				{

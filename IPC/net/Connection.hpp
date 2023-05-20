@@ -138,7 +138,7 @@ namespace ipc
                     std::function<void(std::error_code errcode, boost::asio::ip::tcp::endpoint endpoint)> connectCallback;
                     if (isReading_)
                     {
-                        connectCallback = [this](std::error_code errcode, boost::asio::ip::tcp::endpoint endpoint)
+                        connectCallback = [this](std::error_code errcode, boost::asio::ip::tcp::endpoint /*endpoint*/)
                         {
                             if (errcode)
                             {
@@ -149,7 +149,7 @@ namespace ipc
                     }
                     else
                     {
-                        connectCallback = [this](std::error_code errcode, boost::asio::ip::tcp::endpoint endpoint)
+                        connectCallback = [this](std::error_code errcode, boost::asio::ip::tcp::endpoint /*endpoint*/)
                         {
                             if (!errcode)
                             {
@@ -185,6 +185,7 @@ namespace ipc
 
                     return false;
                 }
+                return false;
             }
     
             bool connectToClient(uint32_t id)

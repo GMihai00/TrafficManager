@@ -15,7 +15,6 @@ namespace ipc
 
 		bool IsIPV4(IP_ADRESS adress);
 		bool IsIPV6(IP_ADRESS adress);
-		bool ChangeIPAdress(IP_ADRESS address, IP_ADRESS mask);
 	} // namespace utile
 } // namespace ipc
 #endif // #IPC_UTILE_IPADRESSHELPERS_HPP

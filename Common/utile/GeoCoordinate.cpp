@@ -59,7 +59,7 @@ namespace common
 			rez.minutues = numbersFound[1];
 			rez.seconds = numbersFound[2];
 			// read last character for direction
-			rez.direction = toupper(value[value.size() - 1]);
+			rez.direction = (char) toupper(value[value.size() - 1]);
 			if (!(rez.direction == 'N' || rez.direction == 'S' || rez.direction == 'E' || rez.direction == 'W'))
 			{
 				return {};

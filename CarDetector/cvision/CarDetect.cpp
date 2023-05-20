@@ -16,7 +16,7 @@ namespace cvision
 		stopDetecting();
 	}
 
-	void CarDetect::loadTask(const uint32_t id, const const cv::Mat& image)
+	void CarDetect::loadTask(const uint32_t id, const cv::Mat& image)
 	{
 		std::pair<uint32_t, cv::Mat> task = { id, image };
 		taskQueue_.push(task);

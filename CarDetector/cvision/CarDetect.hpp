@@ -38,7 +38,7 @@ namespace cvision
 		CarDetect();
 		~CarDetect();
 
-		void loadTask(const uint32_t id ,const const cv::Mat& image);
+		void loadTask(const uint32_t id, const cv::Mat& image);
 		std::map<uint32_t, uint8_t> waitForFinish();
 		bool startDetecting();
 		bool isRunning() const;
