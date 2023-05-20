@@ -1,40 +1,50 @@
 #include "ConfigHelpers.hpp"
 
+#include <fstream>
 #include <string>
 #include <vector>
 #include <stack>
-#include <regex>
-
-#include <nlohmann/json.hpp>
-
-#include <boost/property_tree/ptree.hpp>                                        
-#include <boost/property_tree/json_parser.hpp> 
-#include <boost/optional.hpp>
 
 #include "Logger.hpp"
-
-#include <boost/algorithm/string/trim.hpp>
-#include <cstring>
-#include <exception>
-
 
 namespace common
 {
 	namespace utile
 	{
-		using namespace boost::property_tree;
-
 		LOGGER("CONFIG");
 
 		namespace details
 		{
+			bool readJson(const std::string& pathToConfigFile, nlohmann::json& data)
+			{
+				std::ifstream input_file(pathToConfigFile);
+
+				if (!input_file.is_open())
+				{
+					LOG_ERR << "Failed to open: " << pathToConfigFile;
+					return false;
+				}
+
+				try
+				{
+					data = nlohmann::json::parse(input_file);
+				}
+				catch (const std::exception& ec)
+				{
+					LOG_ERR << "Failed to read config file, err = " << ec.what();
+				}
+
+				input_file.close();
+				return true;
+			}
+
 			bool setLaneKeywords(const nlohmann::json& json, model::JMSConfig& config)
 			{
 				int count = 0;
 				nlohmann::json lanes;
 				if (auto it = json.find("lanes"); it == json.end())
 				{
-					LOG_WARN << "Missing \"lanes\" tag";
+					LOG_WARN << "Missing \"lanes\" key";
 					return false;
 				}
 				else
@@ -70,43 +80,12 @@ namespace common
 
 			bool setUsedLane(const nlohmann::json& json, model::JMSConfig& config)
 			{
-				auto val = json.find("usingLeftLane");
-				if (val == json.end())
-				{
-					LOG_ERR << "\"usingLeftLane\" tag missing";
-					return false;
-				}
-
-				try
-				{
-					config.usingLeftLane = val->get<uint8_t>();
-					return true;
-				}
-				catch (const std::exception& ec)
-				{
-					LOG_ERR << "Invalid data err: " << ec.what();
-					return false;
-				}
+				return getData(json, "usingLeftLane", config.usingLeftLane);
 			}
+
 			bool setMaxWaitingTime(const nlohmann::json& json, model::JMSConfig& config)
 			{
-				auto val = json.find("maxWaitingTime");
-				if (val == json.end())
-				{
-					LOG_ERR << "\"maxWaitingTime\" tag missing";
-					return false;
-				}
-
-				try
-				{
-					config.maxWaitingTime = val->get<uint16_t>();
-					return true;
-				}
-				catch (const std::exception& ec)
-				{
-					LOG_ERR << "Invalid data err: " << ec.what();
-					return false;
-				}
+				return getData(json, "maxWaitingTime", config.maxWaitingTime);
 			}
 
 			void setMissingRoadIfPresent(const nlohmann::json& json, model::JMSConfig& config)
@@ -138,44 +117,12 @@ namespace common
 
 			bool setServerIp(const nlohmann::json& json, model::JMSConfig& config)
 			{
-				auto val = json.find("ip");
-				if (val == json.end())
-				{
-					LOG_ERR << "\"ip\" tag missing";
-					return false;
-				}
-
-				try
-				{
-					config.serverIp = val->get<std::string>();
-					return true;
-				}
-				catch (const std::exception& ec)
-				{
-					LOG_ERR << "Invalid data err: " << ec.what();
-					return false;
-				}
+				return getData(json, "ip", config.serverIp);
 			}
 
 			bool setServerPort(const nlohmann::json& json, model::JMSConfig& config)
 			{
-				auto val = json.find("port");
-				if (val == json.end())
-				{
-					LOG_ERR << "\"port\" tag missing";
-					return false;
-				}
-
-				try
-				{
-					config.serverPort = val->get<uint16_t>();
-					return true;
-				}
-				catch (const std::exception& ec)
-				{
-					LOG_ERR << "Invalid data err: " << ec.what();
-					return false;
-				}
+				return getData(json, "port", config.serverPort);
 			}
 
 			bool setServerEnpoint(const nlohmann::json& json, model::JMSConfig& config)
@@ -183,183 +130,96 @@ namespace common
 				auto val = json.find("server");
 				if (val == json.end())
 				{
-					LOG_ERR << "\"server\" tag missing";
+					LOG_ERR << "\"server\" key missing";
 					return false;
 				}
 
 				return setServerIp(*val, config) && setServerPort(*val, config);
 			}
 
-			bool write_jsonEx(const std::string& path, const ptree& ptree)
+			bool setProxyIp(const nlohmann::json& json, model::proxy_config_data& config)
 			{
-				std::ostringstream oss;
-				write_json(oss, ptree);
-				std::regex reg("\\\"([0-9]+\\.{0,1}[0-9]*)\\\"");
-				std::string result = std::regex_replace(oss.str(), reg, "$1");
-
-				std::ofstream file;
-				try
-				{
-					file.open(path, std::ofstream::trunc);
-					file << result;
-					file.close();
-					return true;
-				}
-				catch (...)
-				{
-					std::cerr << "Failed to write to file";
-					return false;
-				}
+				return getData(json, "ip", config.ip);
 			}
 
-			bool setProxyIp(const ptree& jsonRoot, model::proxy_config_data& config)
+			bool setProxyPort(const nlohmann::json& json, model::proxy_config_data& config)
 			{
-				const auto& jsonTree = jsonRoot.get_child_optional("ip");
-				if (jsonTree == boost::none)
-					return false;
+				return getData(json, "port", config.port);
+			}
 
-				if (const auto& val = jsonTree.get().get_value_optional<std::string>(); val != boost::none)
+			bool setProxyEnpoint(const nlohmann::json& json, model::proxy_config_data& config)
+			{
+				return setProxyIp(json, config) && setProxyPort(json, config);
+			}
+
+			bool setCoordinateLatitude(const nlohmann::json& json, GeoCoordinate<DecimalCoordinate> coordinate)
+			{
+				return getData(json, "latitude", coordinate.latitude);
+			}
+
+			bool setCoordinateLongitude(const nlohmann::json& json, GeoCoordinate<DecimalCoordinate> coordinate)
+			{
+				return getData(json, "longitude", coordinate.longitude);
+			}
+
+			std::optional<GeoCoordinate<DecimalCoordinate>> getCoordinate(const nlohmann::json& json, std::string name)
+			{
+				auto val = json.find(name);
+				if (val == json.end())
 				{
-					config.ip = val.get();
-					return true;
+					LOG_ERR << "\"" + name + "\" key missing";
+					return {};
 				}
 
-				return false;
-			}
-
-			bool setProxyPort(const ptree& jsonRoot, model::proxy_config_data& config)
-			{
-				const auto& jsonTree = jsonRoot.get_child_optional("port");
-				if (jsonTree == boost::none)
-					return false;
-
-				if (const auto& val = jsonTree.get().get_value_optional<uint16_t>(); val != boost::none)
-				{
-					config.port = val.get();
-					return true;
-				}
-
-				return false;
-			}
-
-			bool setProxyEnpoint(const ptree& jsonRoot, model::proxy_config_data& config)
-			{
-
-				return setProxyIp(jsonRoot, config) && setProxyPort(jsonRoot, config);
-			}
-
-			bool setCoordinateLatitude(const ptree& jsonRoot, GeoCoordinate<DecimalCoordinate> coordinate)
-			{
-				const auto& jsonTree = jsonRoot.get_child_optional("latitude");
-				if (jsonTree == boost::none)
-					return false;
-
-				if (const auto& val = jsonTree.get().get_value_optional<double>(); val != boost::none)
-				{
-					coordinate.latitude = val.get();
-					return true;
-				}
-
-				return false;
-			}
-
-			bool setCoordinateLongitude(const ptree& jsonRoot, GeoCoordinate<DecimalCoordinate> coordinate)
-			{
-				const auto& jsonTree = jsonRoot.get_child_optional("longitude");
-				if (jsonTree == boost::none)
-					return false;
-
-				if (const auto& val = jsonTree.get().get_value_optional<double>(); val != boost::none)
-				{
-					coordinate.longitude = val.get();
-					return true;
-				}
-
-				return false;
-			}
-
-			boost::optional<GeoCoordinate<DecimalCoordinate>> getCoordinate(const ptree& jsonRoot, std::string name)
-			{
-				const auto& jsonTree = jsonRoot.get_child_optional(name);
-				if (jsonTree == boost::none)
-					return boost::none;
-
-				GeoCoordinate<DecimalCoordinate>  coordinate;
-				if (!(setCoordinateLatitude(jsonTree.get(), coordinate) && setCoordinateLongitude(jsonTree.get(), coordinate)))
-					return boost::none;
+				GeoCoordinate<DecimalCoordinate> coordinate;
+				if (!(setCoordinateLatitude(*val, coordinate) && setCoordinateLongitude(*val, coordinate)))
+					return {};
 
 				return coordinate;
 			}
 
-			bool setProxyCoordinates(const ptree& jsonRoot, model::proxy_config_data& config)
+			bool setProxyCoordinates(const nlohmann::json& json, model::proxy_config_data& config)
 			{
-				auto maybeBoundSW = getCoordinate(jsonRoot, "bound_sw");
-				auto maybeBoundNE = getCoordinate(jsonRoot, "bound_ne");
-				if (maybeBoundSW == boost::none || maybeBoundNE == boost::none)
+				auto maybeBoundSW = getCoordinate(json, "bound_sw");
+				auto maybeBoundNE = getCoordinate(json, "bound_ne");
+				if (!maybeBoundSW.has_value() || !maybeBoundNE.has_value())
 					return false;
 
-				config.boundSW = maybeBoundSW.get();
-				config.boundNE = maybeBoundNE.get();
+				config.boundSW = maybeBoundSW.value();
+				config.boundNE = maybeBoundNE.value();
 				return true;
 			}
 
-			bool setDbServer(const ptree& jsonRoot, model::proxy_config_data& config)
+			bool setDbServer(const nlohmann::json& json, model::proxy_config_data& config)
 			{
-				const auto& jsonTree = jsonRoot.get_child_optional("server");
-				if (jsonTree == boost::none)
-					return false;
+				return getData(json, "server", config.dbServer);
+			}
 
-				if (const auto& val = jsonTree.get().get_value_optional<std::string>(); val != boost::none)
+			bool setDbUsername(const nlohmann::json& json, model::proxy_config_data& config)
+			{
+				return getData(json, "username", config.dbUsername);
+			}
+
+			bool setDbPassword(const nlohmann::json& json, model::proxy_config_data& config)
+			{
+				return getData(json, "password", config.dbPassword);
+			}
+
+			bool setDbCredentials(const nlohmann::json& json, model::proxy_config_data& config)
+			{
+				return setDbUsername(json, config) && setDbPassword(json, config);
+			}
+
+			bool setDbConnectionData(const nlohmann::json& json, model::proxy_config_data& config)
+			{
+				auto val = json.find("db");
+				if (val == json.end())
 				{
-					config.dbServer = val.get();
-					return true;
+					LOG_ERR << "\"db\" key missing";
+					return false;
 				}
 
-				return false;
-			}
-
-			bool setDbUsername(const ptree& jsonRoot, model::proxy_config_data& config)
-			{
-				const auto& jsonTree = jsonRoot.get_child_optional("username");
-				if (jsonTree == boost::none)
-					return false;
-
-				if (const auto& val = jsonTree.get().get_value_optional<std::string>(); val != boost::none)
-				{
-					config.dbUsername = val.get();
-					return true;
-				}
-
-				return false;
-			}
-
-			bool setDbPassword(const ptree& jsonRoot, model::proxy_config_data& config)
-			{
-				const auto& jsonTree = jsonRoot.get_child_optional("password");
-				if (jsonTree == boost::none)
-					return false;
-
-				if (const auto& val = jsonTree.get().get_value_optional<std::string>(); val != boost::none)
-				{
-					config.dbPassword = val.get();
-					return true;
-				}
-
-				return false;
-			}
-
-			bool setDbCredentials(const ptree& jsonRoot, model::proxy_config_data& config)
-			{
-				return setDbUsername(jsonRoot, config) && setDbPassword(jsonRoot, config);
-			}
-
-			bool setDbConnectionData(const ptree& jsonRoot, model::proxy_config_data& config)
-			{
-				const auto& jsonTree = jsonRoot.get_child_optional("db");
-				if (jsonTree == boost::none)
-					return false;
-
-				return setDbServer(jsonTree.get(), config) && setDbCredentials(jsonTree.get(), config);
+				return setDbServer(*val, config) && setDbCredentials(*val, config);
 			}
 		}
 
@@ -368,17 +228,10 @@ namespace common
 			model::JMSConfig config;
 			nlohmann::json data;
 
-			std::ifstream input_file(pathToConfigFile);
-
-			if (!input_file.is_open())
+			if (!details::readJson(pathToConfigFile, data))
 			{
-				LOG_ERR << "Failed to open: " << pathToConfigFile;
 				return {};
 			}
-
-			data = nlohmann::json::parse(input_file);
-
-			input_file.close();
 
 			if (!details::setLaneKeywords(data, config))
 			{
@@ -413,41 +266,39 @@ namespace common
 		{
 			std::stack<std::pair<utile::IP_ADRESS, utile::PORT>> rez;
 
-			ptree jsonRoot;
+			nlohmann::json data;
 
-			try
+			if (!details::readJson(pathToConfigFile, data))
 			{
-				read_json(pathToConfigFile, jsonRoot);
-			}
-			catch (...)
-			{
-				LOG_ERR << "Failed to read file";
 				return {};
 			}
 
-			const auto& jsonTree = jsonRoot.get_child_optional("proxys");
-			if (jsonTree == boost::none)
+			auto proxys = data.find("proxys");
+			if (proxys == data.end())
 			{
-				LOG_ERR << "Main key missing from config file";
+				LOG_ERR << "\"proxys\" key missing from config file";
 				return {};
 			}
 
-			for (const auto& item : jsonTree.get())
+			for (const auto& item : *proxys)
 			{
-				auto keyIp_adress = item.second.get_child_optional("ip_adress");
-				auto keyPort = item.second.get_child_optional("port");
-				if (keyIp_adress != boost::none && keyPort != boost::none)
+				auto ip_adress = item.find("ip_adress");
+				auto port = item.find("port");
+
+				if (ip_adress != item.end() && port != item.end())
 				{
-					auto ip_adress = keyIp_adress.get().get_value_optional<std::string>();
-					auto port = keyPort.get().get_value_optional<int>();
-					if (ip_adress != boost::none && port != boost::none)
+					try
 					{
-						rez.push({ ip_adress.get(), port.get() });
+						rez.push({ ip_adress->get<std::string>(), port->get<uint16_t>() });
 					}
-					else
+					catch(const std::exception& err)
 					{
-						LOG_WARN << "Invalid data present in config file";
+						LOG_WARN << "Invalid data present in config file, err=" << err.what();
 					}
+				}
+				else
+				{
+					LOG_WARN << "Invalid data present, keys missing";
 				}
 			}
 
@@ -456,51 +307,75 @@ namespace common
 
 		bool saveVTConfig(std::stack<std::pair<utile::IP_ADRESS, utile::PORT>> lastVisitedProxys) noexcept
 		{
-			ptree jsonRoot, array;
+			nlohmann::json proxys;
 
 			while (!lastVisitedProxys.empty())
 			{
 				auto ipPortPair = lastVisitedProxys.top();
 				lastVisitedProxys.pop();
-				ptree elem;
-				elem.put<std::string>("ip_adress", ipPortPair.first);
-				elem.put<int>("port", ipPortPair.second);
-				array.push_back(std::make_pair("", elem));
+				nlohmann::json elem;
+				elem.emplace("ip_adress", ipPortPair.first);
+				elem.emplace("port", ipPortPair.second);
+				proxys.push_back(elem);
 			}
+			auto data = nlohmann::json{ "proxys", std::move(proxys)};
 
-			jsonRoot.put_child("proxys", array);
-			return details::write_jsonEx("VTConfig.json", jsonRoot);
+
+			std::ofstream config("VTConfig.json");
+
+			if (!config.is_open())
+			{
+				LOG_ERR << "Failed to open file VTConfig.json";
+				return false;
+			}
+			try
+			{
+				config << data.dump(4);
+				config.close();
+
+				return true;
+			}
+			catch (const std::exception& err)
+			{
+				LOG_ERR << "Failed to backup config data err= " << err.what();
+				config.close();
+				return false;
+			}
 		}
 
 		std::vector<model::proxy_config_data> loadProxyConfigs(const std::string& pathToConfigFile) noexcept
 		{
 			std::vector<model::proxy_config_data> rez;
-			ptree jsonRoot;
+			nlohmann::json data;
 
-			read_json(pathToConfigFile, jsonRoot);
-			const auto& jsonTree = jsonRoot.get_child_optional("proxys");
-
-			if (jsonTree == boost::none)
+			if (!details::readJson(pathToConfigFile, data))
 			{
 				return {};
 			}
 
-			for (const auto& item : jsonTree.get())
+			auto proxys = data.find("proxys");
+
+			if (proxys == data.end())
+			{
+				return {};
+			}
+
+			for (const auto& item : *proxys)
 			{
 				model::proxy_config_data config;
-				if (!details::setProxyEnpoint(item.second, config))
+				if (!details::setProxyEnpoint(item, config))
 				{
 					LOG_WARN << "Invalid config data. Missing proxy endpoint";
 					continue;
 				}
 
-				if (!details::setProxyCoordinates(item.second, config))
+				if (!details::setProxyCoordinates(item, config))
 				{
 					LOG_WARN << "Invalid config data. Missing proxy coordinates";
 					continue;
 				}
 
-				if (!details::setDbConnectionData(item.second, config))
+				if (!details::setDbConnectionData(item, config))
 				{
 					LOG_WARN << "Invalid config data. Missing DB Connection Data";
 					continue;

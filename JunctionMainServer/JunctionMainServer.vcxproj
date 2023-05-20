@@ -71,19 +71,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\PathPrograms\glfw-3.3.8.bin.WIN64\include;C:\PathPrograms\vcpkg\installed\x64-windows\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>C:\PathPrograms\json-master\include;C:\PathPrograms\glfw-3.3.8.bin.WIN64\include;C:\PathPrograms\vcpkg\installed\x64-windows\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>C:\PathPrograms\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\PathPrograms\vcpkg\installed\x64-windows\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\PathPrograms\glfw-3.3.8.bin.WIN64\include;C:\PathPrograms\vcpkg\installed\x64-windows\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>C:\PathPrograms\json-master\include;C:\PathPrograms\glfw-3.3.8.bin.WIN64\include;C:\PathPrograms\vcpkg\installed\x64-windows\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>C:\PathPrograms\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\PathPrograms\vcpkg\installed\x64-windows\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\PathPrograms\glfw-3.3.8.bin.WIN64\include;C:\PathPrograms\vcpkg\installed\x64-windows\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>C:\PathPrograms\json-master\include;C:\PathPrograms\glfw-3.3.8.bin.WIN64\include;C:\PathPrograms\vcpkg\installed\x64-windows\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>C:\PathPrograms\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\PathPrograms\vcpkg\installed\x64-windows\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\PathPrograms\glfw-3.3.8.bin.WIN64\include;C:\PathPrograms\vcpkg\installed\x64-windows\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>C:\PathPrograms\json-master\include;C:\PathPrograms\glfw-3.3.8.bin.WIN64\include;C:\PathPrograms\vcpkg\installed\x64-windows\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>C:\PathPrograms\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\PathPrograms\vcpkg\installed\x64-windows\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <stack>
+#include <nlohmann/json.hpp>
 
 #include "DataTypes.hpp"
 #include "GeoCoordinate.hpp"
@@ -16,8 +17,6 @@ namespace common
 {
 	namespace utile
 	{
-		// dublicated I know
-
 		typedef uint16_t PORT;
 		typedef std::string IP_ADRESS;
 		typedef std::set<IP_ADRESS> IP_ADRESSES;
@@ -45,6 +44,28 @@ namespace common
 				std::string dbPassword;
 			};
 
+		}
+
+		template<typename T>
+		bool getData(const nlohmann::json& json, const std::string& key,  T& data)
+		{
+			auto val = json.find(key);
+			if (val == json.end())
+			{
+				std::cerr << "\"" + key + "\" key missing";
+				return false;
+			}
+
+			try
+			{
+				data = val->get<T>();
+				return true;
+			}
+			catch (const std::exception& ec)
+			{
+				std::cerr << "Invalid data err: " << ec.what();
+				return false;
+			}
 		}
 
 		std::optional<model::JMSConfig> loadJMSConfig(const std::string& pathToConfigFile) noexcept;
