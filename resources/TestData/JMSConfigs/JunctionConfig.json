@@ -1,11 +1,10 @@
 {
   "server": {
     "ip": "127.0.0.1",
-    "port": 500
+    "port": 5000
   },
-  "maxWaitingTime": 120,
-  "missingLane": "down",
-  "usingRightLane": true,
+  "maxWaitingTime": 5,
+  "usingLeftLane": 0,
   "lanes": {
     "top": "keyword1",
     "down": "keyword2",

@@ -389,7 +389,7 @@ namespace model
 		bool TrafficLightStateMachine::registerVehicleTrackerIpAdress(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ipAdress)
 		{
 			std::scoped_lock lock(mutexClients_);
-			if (laneToVehicleTrackerIPAdress_.find(lane) != laneToVehicleTrackerIPAdress_.end() && laneToVehicleTrackerIPAdress_.at(lane) != ipAdress)
+			if (auto it = laneToVehicleTrackerIPAdress_.find(lane); it != laneToVehicleTrackerIPAdress_.end() && it->second != ipAdress)
 			{
 				LOG_ERR << "Camera already connect to the give lane. Please disable it";
 				return false;

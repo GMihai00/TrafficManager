@@ -70,7 +70,8 @@ namespace model
 			keyword.resize(msg.header.size - sizeof(uint8_t));
 			msg >> keyword;
 
-			return getLaneBasedOnKeyword(keyword);
+			auto lane = getLaneBasedOnKeyword(keyword);
+			return lane;
 		}
 		case ipc::VehicleDetectionMessages::VDB:
 		{
@@ -94,7 +95,6 @@ namespace model
 	bool JunctionServer::isMessageValid(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, boost::optional<common::utile::LANE> lane)
 	{
-		//if (lane == boost::none)
 		if (lane == boost::none || trafficLightStateMachine_.isLaneMissing(lane.get()))
 		{
 			LOG_ERR << "Invalid lane";

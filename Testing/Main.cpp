@@ -18,7 +18,7 @@
 #include "utile/CommandLineParser.hpp"
 #include "utile/TypeConverters.hpp"
 
-
+#include "utile/SignalHandler.hpp"
 using namespace common::utile;
 
 LOGGER("TEST-MAIN");
@@ -123,15 +123,14 @@ void closeAllProcesses()
             std::cerr << "Error opening process: " << GetLastErrorAsString() << std::endl;
             continue;
         }
-        // Wait until child process exits.
-        WaitForSingleObject(pi.hProcess, 5000);
+
+        WaitForSingleObject(pi.hProcess, 1000);
 
         if (!TerminateProcess(pi.hProcess, 0)) {
             std::cerr << "Error terminating process: " << GetLastErrorAsString() << std::endl;
         }
 
 
-        // Close process and thread handles. 
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
     }
@@ -156,9 +155,7 @@ bool tryToRun4TOsForEachJMS(const model::JMSConfig& config)
         cmd.m_arguments.push_back(L"-vp");
         cmd.m_arguments.push_back(g_video_path.wstring());
         commandsToBeRan.push_back(cmd);
-        
-        
-        // just 1 camera so unselss I have 4 cameras connected can't really test it out
+
     }
 
     return std::all_of(commandsToBeRan.begin(), commandsToBeRan.end(), [](const auto& comand) { return createProcessFromSameDirectory(comand); });
@@ -349,8 +346,19 @@ int main(int argc, char* argv[])
 
     auto commandLine = CommandLineParser(argc, argv);
 
-    //hardcoded for now
-    g_video_path = std::filesystem::path(L"C:\\Users\\Mihai Gherghinescu\\source\\repos\\TrafficManager\\resources\\TestData\\CarTestVideo2.mp4");
+    SignalHandler sigHandler{};
+    sigHandler.setAction(SIGINT, [](int /*singal*/)
+        {
+            LOG_ERR << "SIGINT RECIEVED";
+            closeAllProcesses();
+        });
+    sigHandler.setAction(SIGTERM, [](int /*singal*/)
+        {
+            LOG_ERR << "SIGTERM RECIEVED";
+            closeAllProcesses();
+        });
+
+    g_video_path = std::filesystem::path(L"..\\resources\\TestData\\CarTestVideo2.mp4");
 
     auto jmsConfigDir = getJMSConfigsDir(commandLine);
     if (!jmsConfigDir.has_value() || !runJMSForAllConfigs(jmsConfigDir.value()))
