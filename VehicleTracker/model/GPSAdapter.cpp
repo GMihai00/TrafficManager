@@ -13,7 +13,8 @@ namespace model
 		while (!shuttingDown_)
 		{
 			std::unique_lock<std::mutex> ulock(mutexProcess_);
-			condVarProcess_.wait(ulock, [&] { return ((lastCoordinates_.has_value() == false && !shouldPause_) || shuttingDown_); });
+			if ((lastCoordinates_.has_value() || shouldPause_) && !shuttingDown_)
+				condVarProcess_.wait(ulock, [&] { return ((!lastCoordinates_.has_value() && !shouldPause_) || shuttingDown_); });
 
 			if (shuttingDown_)
 			{
@@ -74,7 +75,8 @@ namespace model
 	{
 		condVarProcess_.notify_one();
 		std::unique_lock<std::mutex> ulock(mutexProcess_);
-		condVarProcess_.wait(ulock, [&] { return lastCoordinates_.has_value() || shuttingDown_; });
+		if (!lastCoordinates_.has_value() && !shuttingDown_)
+			condVarProcess_.wait(ulock, [&] { return lastCoordinates_.has_value() || shuttingDown_; });
 
 		if (shuttingDown_)
 		{

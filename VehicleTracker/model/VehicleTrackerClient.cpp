@@ -12,7 +12,8 @@ namespace model
 		while (!shuttingDown_)
 		{
 			std::unique_lock<std::mutex> ulock(mutexProcess_);
-			condVarProcess_.wait(ulock, [&] { return (shouldPause_ == false || shuttingDown_); });
+			if (!shouldPause_ && !shuttingDown_)
+				condVarProcess_.wait(ulock, [&] { return (shouldPause_ == false || shuttingDown_); });
 
 			if (shuttingDown_)
 			{
@@ -23,12 +24,12 @@ namespace model
 			{
 				if (lastVisitedProxys_.empty())
 				{
-					continue;
+					continue; // this written in here for my program not to crash for testing porposes
 					throw std::runtime_error("Failed to find a valid junction, client is out of reach");
 				}
 
 				LOG_DBG << lastVisitedProxys_.top().first << lastVisitedProxys_.top().second;
-				// aici crash
+				
 				if (!connect(lastVisitedProxys_.top().first, lastVisitedProxys_.top().second))
 				{
 					lastVisitedProxys_.pop();
@@ -44,7 +45,6 @@ namespace model
 
 				disconnect();
 				
-				//aici daca failuie nu elibereaza resursele cum trebuie
 				if (!connect(nextJunction_->getIpAdress(), nextJunction_->getPort()))
 				{
 					LOG_ERR << "FAILED TO COMMUNICATE WITH JUNCTION";
@@ -103,8 +103,7 @@ namespace model
 		gpsAdapter_.stop();
 		condVarProcess_.notify_one();
 	}
-	// TO DO: FOR SECURITY PROXY WILL SEND A CRYPTED MESSAGE LOOK AT KERBEROS PROTOCOL
-	// https://www.youtube.com/watch?v=5N242XcKAsM
+
 	bool VehicleTrackerClient::queryProxy()
 	{
 		isRedirected_ = false;
@@ -215,7 +214,7 @@ namespace model
 		return true;
 	}
 	
-	// AICI PASSED SI IS PASSING SOMEHOW IS FAILING 
+	// AICI PASSED SI IS PASSING SOMEHOW IS FAILING ??? to check if still valid
 	void VehicleTrackerClient::waitToPassJunction()
 	{
 		auto pointA = gpsAdapter_.getCurrentCoordinates();

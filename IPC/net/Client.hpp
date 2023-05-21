@@ -37,6 +37,7 @@ namespace ipc
             boost::asio::io_context context_;
             std::thread threadContext_;
             std::mutex mutexUpdate_;
+            std::mutex mutexGet_;
             std::condition_variable condVarUpdate_;
             std::unique_ptr<Connection<T>> connection_;
             std::atomic<bool> shuttingDown_ = false;
@@ -117,12 +118,9 @@ namespace ipc
 
             std::optional<std::pair<OwnedMessage<T>, bool>> getLastUnreadAnswear()
             {
-                return incomingMessages_.pop();
-            }
+                std::scoped_lock lock(mutexGet_);
 
-            common::utile::ThreadSafePriorityQueue<OwnedMessage<T>>& getIncomingMessages()
-            {
-                return incomingMessages_;
+                return incomingMessages_.pop();
             }
     
             void send(const Message<T>& msg)
@@ -136,12 +134,17 @@ namespace ipc
                 if (timeout == 0)
                 {
                     std::unique_lock<std::mutex> ulock(mutexUpdate_);
-                    condVarUpdate_.wait(ulock, [&] { return !incomingMessages_.empty() || shuttingDown_; });
+                    if (incomingMessages_.empty() && !shuttingDown_)
+                        condVarUpdate_.wait(ulock, [&] { return !incomingMessages_.empty() || shuttingDown_; });
 
                     return !shuttingDown_;
                 }
 
                 std::unique_lock<std::mutex> ulock(mutexUpdate_);
+                if (!incomingMessages_.empty() || shuttingDown_)
+                {
+                    return !shuttingDown_;
+                }
 
                 if (condVarUpdate_.wait_for(ulock, std::chrono::milliseconds(timeout), [&] { return !incomingMessages_.empty() || shuttingDown_; }))
                 {

@@ -9,7 +9,6 @@ namespace common
 			port_(port),
 			coveredArea_(coveredArea)
 		{
-
 		}
 		
 		bool Junction::isContained(const GeoCoordinate<DecimalCoordinate>& point) const
@@ -17,7 +16,6 @@ namespace common
 			return coveredArea_->isContained(point);
 		}
 
-		// CRAPA SOMEHOW AICI
 		bool Junction::isPassing(const GeoCoordinate<DecimalCoordinate> pointA, const GeoCoordinate<DecimalCoordinate> pointB) const
 		{
 			return coveredArea_ && isContained(pointB) && (calculateDirection(pointA, pointB) == calculateDirection(pointB, coveredArea_->getCenter()));

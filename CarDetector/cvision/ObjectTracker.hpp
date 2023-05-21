@@ -53,7 +53,9 @@ namespace cvision
 		std::thread threadCamera_;
 		Camera camera_;
 		std::mutex mutexProcess_;
+		std::mutex mutexCamera_;
 		std::condition_variable condVarProcess_;
+		std::condition_variable condVarCamera_;
 		bool shouldRender_ = false;
 
 		common::utile::IObserverPtr attachedObserver_;

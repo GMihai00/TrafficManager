@@ -234,9 +234,12 @@ namespace ipc
             }
             void readMessages()
             {
-                std::unique_lock<std::mutex> ulock(mutexRead_);
-                condVarRead_.wait(ulock, [this]() { return isReading_ || shuttingDown_; });
-                ulock.unlock();
+                if (!isReading_ && !shuttingDown_)
+                {
+                    std::unique_lock<std::mutex> ulock(mutexRead_);
+                    condVarRead_.wait(ulock, [this]() { return isReading_ || shuttingDown_; });
+                    ulock.unlock();
+                }
 
                 while (!shuttingDown_)
                 {
@@ -328,9 +331,12 @@ namespace ipc
             {
                 while (!shuttingDown_)
                 {
-                    std::unique_lock<std::mutex> ulock(mutexWrite_);
-                    condVarWrite_.wait(ulock, [this]() { return isWriting_ || shuttingDown_; });
-                    ulock.unlock();
+                    if (!isWriting_ && !shuttingDown_)
+                    {
+                        std::unique_lock<std::mutex> ulock(mutexWrite_);
+                        condVarWrite_.wait(ulock, [this]() { return isWriting_ || shuttingDown_; });
+                        ulock.unlock();
+                    }
 
                     while (!outgoingMessages_.empty())
                     {

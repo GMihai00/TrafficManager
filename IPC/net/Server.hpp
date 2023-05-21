@@ -110,7 +110,8 @@ namespace ipc
             {
                 std::unique_lock<std::mutex> ulock(mutexUpdate_);
                 LOG_DBG << "UPDATING: Waiting for incoming message";
-                condVarUpdate_.wait(ulock, [&] { return !incomingMessagesQueue_.empty() || shuttingDown_; });
+                if (incomingMessagesQueue_.empty() && !shuttingDown_)
+                    condVarUpdate_.wait(ulock, [&] { return !incomingMessagesQueue_.empty() || shuttingDown_; });
 
                 if (shuttingDown_)
                 {

@@ -85,19 +85,8 @@ namespace common
 					return {};
 				}
 			}
-
-			LANE calculateDirection(const GeoCoordinate<T> coordinate)
-			{
-				DecimalCoordinate startlatitude = latitude;
-				DecimalCoordinate startlongitude = longitude;
-				DecimalCoordinate headinglatitude = coordinate.latitude;
-				DecimalCoordinate headinglongitude = coordinate.longitude;
-
-				return LANE::E;
-			}
 		};
 
-		// FOR SOME KIND OF REASON CAN NOT ADD IT INSIDE CLASS
 		template<typename T>
 		std::optional<LANE> calculateDirection(const GeoCoordinate<T>& startcoordinate, const GeoCoordinate<T>& coordinate)
 		{

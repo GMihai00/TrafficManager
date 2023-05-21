@@ -51,9 +51,6 @@
     <ClInclude Include="utile\GeoCoordinate.hpp">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
-    <ClInclude Include="utile\SignatureHelpers.hpp">
-      <Filter>Header Files\utile</Filter>
-    </ClInclude>
     <ClInclude Include="db\BoundingRect.hpp">
       <Filter>Header Files\db</Filter>
     </ClInclude>
@@ -93,9 +90,6 @@
       <Filter>Source Files\utile</Filter>
     </ClCompile>
     <ClCompile Include="utile\GeoCoordinate.cpp">
-      <Filter>Source Files\utile</Filter>
-    </ClCompile>
-    <ClCompile Include="utile\SignatureHelpers.cpp">
       <Filter>Source Files\utile</Filter>
     </ClCompile>
     <ClCompile Include="utile\DataTypes.cpp">

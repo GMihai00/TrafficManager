@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <boost/optional.hpp>
 #include "MovingObject.hpp"
 
@@ -23,7 +24,7 @@ namespace cvision
 		bool objFoundInFrame_ = false;
 		size_t nrFramesWithoutMatch_ = 0;
 		cv::Point futurePosition_;
-		std::mutex mutexGroup_;
+		std::shared_mutex mutexGroup_;
 		size_t nrFramesWithoutBeeingCar_ = 0;
 		uint8_t nrCars_ = 0;
 

@@ -251,7 +251,6 @@ namespace model
 		{
 			typedef  mpl::list <sc::transition<NormalTransition, ETransition>> reactions;
 
-			// TO BETTER DO THIS ALL OF THIS IN BASE STATE, JUST SET STRING IN HERE
 			NSTransition()
 			{
 				std::cout << "State NS started";
@@ -308,7 +307,6 @@ namespace model
 		{
 			typedef  mpl::list <sc::transition<NormalTransition, EWTransition>> reactions;
 
-			// TO BETTER DO THIS ALL OF THIS IN BASE STATE, JUST SET STRING IN HERE
 			NSTransitionCpy()
 			{
 				std::cout << "State NS started";

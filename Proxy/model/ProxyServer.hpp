@@ -42,7 +42,7 @@ namespace model
 		ProxyServer(const ipc::utile::IP_ADRESS& host, 
 			const ipc::utile::PORT port,
 			const common::db::ProxyPtr& dbProxy,
-			const utile::DBConnectionData& connectionData);
+			const ::utile::DBConnectionData& connectionData);
 		ProxyServer(const ProxyServer&) = delete;
 		virtual ~ProxyServer() noexcept = default;
 

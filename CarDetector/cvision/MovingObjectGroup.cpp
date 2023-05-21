@@ -65,16 +65,14 @@ namespace cvision
 
     size_t MovingObjectGroup::getNrOfMovingObjInGroup()
     {
-        std::scoped_lock lock(mutexGroup_);
+        std::shared_lock lock(mutexGroup_);
         
         return this->centerPositions_.size();
     }
 
     bool MovingObjectGroup::stillBeingTracked()
     {
-        
-        
-        std::scoped_lock lock(mutexGroup_);
+        std::shared_lock lock(mutexGroup_);
         // HARDCODED VALUE BUT SHOULD BE FINE, IF NOT FOUND FOR 5 FRAMES
         // EITHER NOT MOVING OR PASSED CAMERA RANGE OF COVERAGE
         
@@ -84,8 +82,7 @@ namespace cvision
     boost::optional<cv::Point> 
         MovingObjectGroup::getCenterPosition(const size_t& index)
     {
-        
-        std::scoped_lock lock(mutexGroup_);
+        std::shared_lock lock(mutexGroup_);
         
         if (index >= centerPositions_.size())
         {
@@ -98,9 +95,8 @@ namespace cvision
 
     boost::optional<cv::Point> MovingObjectGroup::getLastCenterPosition()
     {
-        
-        
-        std::scoped_lock lock(mutexGroup_);
+        std::shared_lock lock(mutexGroup_);
+
         if (centerPositions_.size() == 0)
         {
             
@@ -112,18 +108,14 @@ namespace cvision
 
     cv::Point MovingObjectGroup::getFuturePosition()
     {
-        
-        
-        std::scoped_lock lock(mutexGroup_);
+        std::shared_lock lock(mutexGroup_);
         
         return futurePosition_;
     }
 
     boost::optional<double>  MovingObjectGroup::getDiagonalSize()
     {
-        
-        
-        std::scoped_lock lock(mutexGroup_);
+        std::shared_lock lock(mutexGroup_);
         if (movingObjectStates_.empty())
         {
             
@@ -135,10 +127,8 @@ namespace cvision
 
     std::shared_ptr<MovingObject> MovingObjectGroup::getLastState()
     {
-        
-        
-        std::scoped_lock lock(mutexGroup_);
-        // NEED TO INVESTIGATE WHY I CAN NOT LOCK MUTEX
+        std::shared_lock lock(mutexGroup_);
+
         if (movingObjectStates_.empty())
         {
             
@@ -150,9 +140,8 @@ namespace cvision
 
     std::shared_ptr<MovingObject> MovingObjectGroup::getFirstState()
     {
-        
-        
-        std::scoped_lock lock(mutexGroup_);
+        std::shared_lock lock(mutexGroup_);
+
         if (movingObjectStates_.empty())
         {
             
@@ -164,15 +153,13 @@ namespace cvision
 
     cv::Mat MovingObjectGroup::getCroppedImage(cv::Mat img)
     {
-        
-        
-        std::scoped_lock lock(mutexGroup_);
+        std::shared_lock lock(mutexGroup_);
         if (movingObjectStates_.empty())
         {
             
             return img;
         }
-        // THIS COULD BE THE STUPID CAUSE OF FAILURE...
+
         try
         {
             cv::Rect rect = movingObjectStates_.back()->getBoudingRect();
@@ -192,8 +179,6 @@ namespace cvision
 
     void MovingObjectGroup::updateCarState(uint8_t nrCars)
     {
-        
-        
         std::scoped_lock lock(mutexGroup_);
         if (nrCars == 0)
         {
@@ -209,7 +194,7 @@ namespace cvision
 
     uint8_t MovingObjectGroup::nrCars()
     {
-        std::scoped_lock lock(mutexGroup_);
+        std::shared_lock lock(mutexGroup_);
         
         return nrCars_;
     }

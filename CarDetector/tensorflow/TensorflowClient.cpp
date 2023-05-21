@@ -31,7 +31,6 @@ namespace tensorflow
             return 0;
         }
 
-        //asta poate sa dea in double locking to fix later
         auto answear = getLastUnreadAnswear();
         if (!answear.has_value()) { return 0; }
 

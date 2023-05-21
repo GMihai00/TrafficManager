@@ -10,7 +10,7 @@
 #include <functional>
 #include <chrono>
 #include <optional>
-
+#include <shared_mutex>
 #include "Logger.hpp"
 
 namespace common
@@ -21,7 +21,7 @@ namespace common
         class ThreadSafeQueue
         {
         protected:
-            std::mutex mutexQueue_;
+            std::shared_mutex mutexQueue_;
             std::queue<T> queue_;
             LOGGER("TSQ");
         public:
@@ -50,13 +50,13 @@ namespace common
 
             const bool empty()
             {
-                std::scoped_lock lock(mutexQueue_);
+                std::shared_lock lock(mutexQueue_);
                 return queue_.empty();
             }
 
             const size_t size()
             {
-                std::scoped_lock lock(mutexQueue_);
+                std::shared_lock lock(mutexQueue_);
                 return queue_.size();
             }
 

@@ -31,16 +31,18 @@ namespace cvision
     void ObjectTracker::waitForFirstFrameApperance()
     {
         std::unique_lock<std::mutex> ulock(mutexProcess_);
-        condVarProcess_.wait(ulock, [this] 
-            {
-                return ((!firstImageFrame_) &&
-                    !imageQueue_.empty()) || !camera_.isRunning();
-            });
+        if (imageQueue_.empty() && camera_.isRunning())
+            condVarProcess_.wait(ulock, [this] 
+                {
+                    return ((!firstImageFrame_) &&
+                        !imageQueue_.empty()) || !camera_.isRunning();
+                });
         
         if (!camera_.isRunning())
             return;
 
         firstImageFrame_ = imageQueue_.pop();
+        condVarCamera_.notify_one();
         if (firstImageFrame_.value().empty())
         {
             LOG_ERR << "FIRST IMAGE WAS EMPTY!\n";
@@ -54,12 +56,14 @@ namespace cvision
         while (camera_.isRunning() || !imageQueue_.empty())
         {
             std::unique_lock<std::mutex> ulock(mutexProcess_);
-            condVarProcess_.wait(ulock, [this] { return !imageQueue_.empty() || !camera_.isRunning(); });
+            if (imageQueue_.empty() && camera_.isRunning())
+                condVarProcess_.wait(ulock, [this] { return !imageQueue_.empty() || !camera_.isRunning(); });
 
             if (!camera_.isRunning())
                 continue;
 
             secondImageFrame_ = imageQueue_.pop();
+            condVarCamera_.notify_one();
             if (secondImageFrame_.value().empty())
             {
                 LOG_ERR << "SECOND IMAGE WAS EMPTY!\n";
@@ -103,24 +107,21 @@ namespace cvision
                 {
                     while (camera_.isRunning())
                     {
-                        // THIS IS A BUSY WAIT IT SHOULD BE CHANGED
-                        // TRY TO CHANGE LOGIC HERE, TO HAVE THIS THINK WAITING,
-                        // NOT THE CAMERA THREAD
-                        // NEED TO INVESTIGATE ON HOW TO DO THIS
-                        // TRIED SHARED_PTR ON MUTEX AND COND VARIABLE BUT 
-                        // MUTEX SEEMS TO REMAIN A NULLPTR FOR SOME KIND OF REASON
-                        if (imageQueue_.size() < 2)
+                        std::unique_lock<std::mutex> ulock(mutexCamera_);
+                        if (imageQueue_.size() >= 2 && camera_.isRunning())
+                            condVarCamera_.wait(ulock, [&]() { return imageQueue_.size() < 2 || !camera_.isRunning(); });
+
+                        if (!camera_.isRunning())
+                            continue;
+
+                        boost::optional<cv::Mat> image = camera_.getImage();
+                        if (image != boost::none)
                         {
-                            std::unique_lock<std::mutex> ulock(mutexProcess_);
-                            boost::optional<cv::Mat> image = camera_.getImage();
-                            if (image != boost::none)
-                            {
-                                cv::Mat img = image.get();
-                                imageQueue_.push(img);
-                            }
-                            ulock.unlock();
-                            condVarProcess_.notify_one();
+                            cv::Mat img = image.get();
+                            imageQueue_.push(img);
                         }
+                        ulock.unlock();
+                        condVarProcess_.notify_one();
                     }
                     camera_.stop();
                 });
@@ -139,6 +140,7 @@ namespace cvision
     void ObjectTracker::stopTracking()
     {
         camera_.stop();
+        condVarCamera_.notify_one();
 
         carDetector_->stopDetecting();
         imageRender_->stopRendering();

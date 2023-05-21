@@ -51,7 +51,6 @@ bool isInDisplayMode(const CommandLineParser& commandLine)
 	return false;
 }
 
-//std::condition_variable g_condVarEnd;
 bool g_shouldStop = false;
 
 int main(int argc, char* argv[])
@@ -61,12 +60,10 @@ int main(int argc, char* argv[])
 	sigHandler.setAction(SIGINT, [](int singal)
 		{
 			g_shouldStop = true;
-			//g_condVarEnd.notify_one();
 		});
 	sigHandler.setAction(SIGTERM, [](int singal)
 		{
 			g_shouldStop = true;
-			//g_condVarEnd.notify_one();
 		});
 
 	auto commandLine = CommandLineParser(argc, argv);
@@ -101,14 +98,10 @@ int main(int argc, char* argv[])
 
 		LOG_INF << "Server started";
 
-		// can't be avoided
 		while (!g_shouldStop)
 		{
 			Sleep(500);
 		}
-		/*std::mutex mutexEnd;
-		std::unique_lock<std::mutex> ulock(mutexEnd);
-		g_condVarEnd.wait(ulock);*/
 	}
 	catch (const std::exception& err)
 	{

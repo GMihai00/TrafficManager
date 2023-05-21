@@ -4,19 +4,20 @@
 
 #include <thread>
 #include <mutex>
+#include <queue>
 #include <condition_variable>
 #include "Utils.hpp"
-#include "utile/ThreadSafeQueue.hpp"
 
 namespace cvision
 {
 	class ImageRender
 	{
 	private:
-		common::utile::ThreadSafeQueue<cv::Mat> imageQueue_;
+		std::queue<cv::Mat> imageQueue_;
 		std::thread threadRender_;
 		std::mutex mutexRender_;
 		std::condition_variable condVarRender_;
+		std::condition_variable condVarUpdate_;
 		std::atomic<bool> isRunning_ = false;
 		std::atomic<bool> shuttingDown_ = false;
 	public:

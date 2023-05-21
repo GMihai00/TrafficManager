@@ -47,7 +47,8 @@ namespace cvision
 				while (videoCapture_ != nullptr)
 				{
 					std::unique_lock<std::mutex> ulock(mutexRead_);
-					condVarRead_.wait(ulock, [&] { return currentImage_ == boost::none || videoCapture_ == nullptr; });
+					if (currentImage_ != boost::none && videoCapture_ != nullptr)
+						condVarRead_.wait(ulock, [&] { return currentImage_ == boost::none || videoCapture_ == nullptr; });
 
 					if (videoCapture_ == nullptr)
 						continue;
@@ -83,7 +84,7 @@ namespace cvision
 
 	bool Camera::isRunning()
 	{
-		std::scoped_lock lock(mutexRead_);
+		std::shared_lock<std::shared_mutex> lock(mutexRun_);
 		return videoCapture_ != nullptr;
 	}
 
@@ -94,7 +95,7 @@ namespace cvision
 
 	boost::optional<cv::Mat> Camera::getImage()
 	{
-		std::scoped_lock lock(mutexRead_);
+		std::unique_lock<std::shared_mutex> lock(mutexRun_);
 		if (this->currentImage_ == boost::none)
 		{
 			condVarRead_.notify_one();

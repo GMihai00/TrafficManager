@@ -86,7 +86,6 @@ namespace model
 
 			draw_junction();
 
-			// de vazut daca nu cumva is probleme pe multithread aici dar nu cred
 			std::unique_lock<std::mutex> lock(m_mutex);
 			std::queue<std::function<void()>> m_draw_actions = std::move(m_waing_queue);
 			lock.unlock();

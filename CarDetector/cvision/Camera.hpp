@@ -9,6 +9,7 @@
 #include <mutex>
 #include <chrono>
 #include <condition_variable>
+#include <shared_mutex>
 
 #include <boost/optional.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -28,6 +29,7 @@ namespace cvision
 		std::string pathVideo_;
 		std::thread threadRead_;
 		std::mutex mutexRead_;
+		std::shared_mutex mutexRun_;
 		std::condition_variable condVarRead_;
 		boost::optional<cv::Mat> currentImage_;
 		

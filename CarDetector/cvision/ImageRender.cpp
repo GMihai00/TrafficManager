@@ -9,7 +9,6 @@ namespace cvision
 {
 	void ImageRender::loadImage(const cv::Mat& image)
 	{
-		std::scoped_lock lock(mutexRender_);
 		imageQueue_.push(image);
 		condVarRender_.notify_one();
 	}
@@ -24,17 +23,16 @@ namespace cvision
 				while (!shuttingDown_)
 				{
 					std::unique_lock<std::mutex> ulock(mutexRender_);
-					condVarRender_.wait(ulock, [this] { return !imageQueue_.empty() || shuttingDown_; });
+					if (imageQueue_.empty() && !shuttingDown_)
+						condVarRender_.wait(ulock, [this] { return !imageQueue_.empty() || shuttingDown_; });
 
 					if (shuttingDown_)
 						continue;
 
-					auto img = imageQueue_.pop();
-					if (img)
-					{
-						cv::imshow("FRAME", img.value());
-						cv::waitKey(1);
-					}
+					cv::Mat img = imageQueue_.front();
+					cv::imshow("FRAME", img);
+					cv::waitKey(1);
+					imageQueue_.pop();
 				}
 			});
 		return true;

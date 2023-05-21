@@ -143,8 +143,7 @@ std::optional<std::string> getDBPassword(const CommandLineParser& commandLine)
 	return {};
 }
 
-// NEEDS TO BE MADE GLOBAL DUE TO BEEING UNABLE TO CAPTURE VARIABLES INSIDE LAMBDAS PASSED TO SIGNALHANDLER
-std::condition_variable g_condVarEnd;
+bool g_shouldStop = false;
 
 int main(int argc, char* argv[])
 {
@@ -201,10 +200,13 @@ int main(int argc, char* argv[])
 			return ipc::utile::SERVER_FAILURE;
 		}
 
-		sigHandler.setAction(SIGINT, [](int /*singal*/) { g_condVarEnd.notify_one(); });
-		std::mutex mutexEnd;
-		std::unique_lock<std::mutex> ulock(mutexEnd);
-		g_condVarEnd.wait(ulock);
+		sigHandler.setAction(SIGINT, [](int /*singal*/) { g_shouldStop = true; });
+		sigHandler.setAction(SIGTERM, [](int /*singal*/) { g_shouldStop = true; });
+
+		while (!g_shouldStop)
+		{
+			Sleep(500);
+		}
 		LOG_INF << "Finished waiting";
 	}
 	catch (const std::exception& err)

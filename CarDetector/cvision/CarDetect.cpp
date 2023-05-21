@@ -42,7 +42,8 @@ namespace cvision
 				while (!shuttingDown_)
 				{
 					std::unique_lock<std::mutex> ulock(mutexDetect_);
-					condVarDetect_.wait(ulock, [this] {	return !taskQueue_.empty() || shuttingDown_; });
+					if (taskQueue_.empty() && !shuttingDown_)
+						condVarDetect_.wait(ulock, [this] {	return !taskQueue_.empty() || shuttingDown_; });
 
 					if (shuttingDown_)
 						continue;

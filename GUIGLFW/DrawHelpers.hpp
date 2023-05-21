@@ -2,7 +2,9 @@
 
 #include "GraphicsDataTypes.hpp"
 
+#ifndef PI
 #define PI 3.1415926535898
+#endif
 
 void draw_square(const Point& bl_point, const GLfloat& edge, const RGBColor& color);
 void draw_circle(const Point& center, const GLfloat& radius, const RGBColor& color);

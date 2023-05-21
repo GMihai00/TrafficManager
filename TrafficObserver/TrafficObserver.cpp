@@ -126,13 +126,10 @@ int main(int argc, char* argv[])
 		exit(5);
 	}
 
-	// can't be avoided
 	while (!g_shouldStop)
 	{
 		Sleep(500);
 	}
- //  /* std::mutex mutexEnd;
- //   std::unique_lock<std::mutex> ulock(mutexEnd);
- //   g_condVarEnd.wait(ulock);*/
- //   return 0;
+
+	return 0;
 }

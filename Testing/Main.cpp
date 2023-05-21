@@ -368,21 +368,21 @@ int main(int argc, char* argv[])
         return 5;
     }
 
-    auto proxyConfigFile = getProxyConfigFile(commandLine);
-    if (!proxyConfigFile.has_value() || !loadProxysFromConfigFile(proxyConfigFile.value()))
-    {
-        LOG_ERR << "Failed to run Proxys";
-        closeAllProcesses();
-        return 5;
-    }
+    //auto proxyConfigFile = getProxyConfigFile(commandLine);
+    //if (!proxyConfigFile.has_value() || !loadProxysFromConfigFile(proxyConfigFile.value()))
+    //{
+    //    LOG_ERR << "Failed to run Proxys";
+    //    closeAllProcesses();
+    //    return 5;
+    //}
 
-    auto gpsDataDir = getGPSDataDir(commandLine);
-    if (!gpsDataDir.has_value())
-    {
-        LOG_ERR << "GPS input is missing";
-        closeAllProcesses();
-        return 5;
-    }
+    //auto gpsDataDir = getGPSDataDir(commandLine);
+    //if (!gpsDataDir.has_value())
+    //{
+    //    LOG_ERR << "GPS input is missing";
+    //    closeAllProcesses();
+    //    return 5;
+    //}
     // aici nu ar trebui sa ia un VT pt fiecare vehicle ar trebui sa am 4 configurari pt fiecare lane care stiu ca dau in junction 
     // clienti ar trebui sa se spawneze random!!!
 

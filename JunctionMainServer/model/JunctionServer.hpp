@@ -15,14 +15,12 @@
 
 #include "controller/TrafficLightStateMachine.hpp"
 
-// TO REFACTOR EVERYTHING IN HERE IT IS SO SO SOOOO WRONG
 namespace model
 {
 	class JunctionServer : public ipc::net::Server<ipc::VehicleDetectionMessages>
 	{
 	private:
 		
-		//std::thread threadProcess_;
 		controller::TrafficLightStateMachine trafficLightStateMachine_;
 		std::map<common::utile::LANE, std::string> laneToKeyword_;
 		LOGGER("JUNCTION-SERVER");
