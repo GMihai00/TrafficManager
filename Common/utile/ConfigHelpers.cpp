@@ -52,7 +52,7 @@ namespace common
 					lanes = *it;
 				}
 
-				std::vector <std::string> directions = { "left", "right", "top", "down" };
+				std::vector <std::string> directions = { "right", "left", "top", "down" };
 
 				for (auto poz = 0; poz < directions.size(); poz++)
 				{

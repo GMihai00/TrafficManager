@@ -60,12 +60,7 @@ namespace model
 		{ 
 		case ipc::VehicleDetectionMessages::VCDR:
 		{
-			auto vtLane = trafficLightStateMachine_.getVehicleTrackerLane(client->getIpAdress());
-			if (vtLane != boost::none)
-			{
-				return vtLane;
-			}
-			
+			// should add a some sort of encryption layer here, maybe add public private key in here
 			std::string keyword;
 			keyword.resize(msg.header.size - sizeof(uint8_t));
 			msg >> keyword;

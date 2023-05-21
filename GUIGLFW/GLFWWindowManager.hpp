@@ -27,6 +27,8 @@ namespace model
 
 		std::map<common::utile::LANE, bool> m_lane_alowence_map;
 
+		std::mutex m_mutex;
+
 		GLFWwindow* m_window = nullptr;
 
 		const GLfloat junction_edge_ = 0.5f;

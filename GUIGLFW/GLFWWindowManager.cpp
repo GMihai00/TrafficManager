@@ -87,7 +87,9 @@ namespace model
 			draw_junction();
 
 			// de vazut daca nu cumva is probleme pe multithread aici dar nu cred
+			std::unique_lock<std::mutex> lock(m_mutex);
 			std::queue<std::function<void()>> m_draw_actions = std::move(m_waing_queue);
+			lock.unlock();
 
 			while (!m_draw_actions.empty())
 			{
@@ -109,6 +111,11 @@ namespace model
 
 	GLFWWindowManager::GLFWWindowManager(int window_weight, int window_height)
 	{
+		for (auto i = 0; i < 4; i++)
+		{
+			m_lane_alowence_map[(common::utile::LANE)i] = false;
+		}
+
 		m_rendering_thread = std::thread(std::bind(&GLFWWindowManager::render, this, window_weight, window_height));
 	}
 
@@ -136,24 +143,29 @@ namespace model
 		auto car_border_NW = Point(bl_point.m_oX, bl_point.m_oY + height);
 		auto car_border_SW = Point(bl_point.m_oX, bl_point.m_oY);
 
+		//std::cout << "Car OXSW: " << car_border_SW.m_oX << " OYSW: " << car_border_SW.m_oY 
+		//	<< " OYNW: " << car_border_NW.m_oY <<  " OXNW: " << car_border_NW.m_oX
+		//	<< " OYSE:" << car_border_SE.m_oY << " OXSE: " << car_border_SE.m_oX
+		//	<< " OYNE:" << car_border_NE.m_oY << " OXNE: " << car_border_NE.m_oX
+		//	<< std::endl;
 
 		switch (lane)
 		{
 		case common::utile::LANE::E:
 			// ox are valori pozitive
-			return  (car_border_SW.m_oX < junction_border_SE.m_oX) && (car_border_SE.m_oX > junction_border_SE.m_oX);
+			return  (car_border_SW.m_oX <= junction_border_SE.m_oX) && (car_border_SE.m_oX > junction_border_SE.m_oX);
 			break;
 		case common::utile::LANE::W:
 			// ox are valori negative 
-			return (car_border_SW.m_oX > junction_border_SW.m_oX) && (car_border_SE.m_oX < junction_border_SW.m_oX);
+			return (car_border_SE.m_oX >= junction_border_SW.m_oX) && (car_border_SW.m_oX < junction_border_SW.m_oX);
 			break;
 		case common::utile::LANE::N:
 			// oy are valori pozitive
-			return (car_border_SW.m_oY < junction_border_NE.m_oY) && (car_border_NW.m_oY > junction_border_NE.m_oY);
+			return (car_border_SW.m_oY <= junction_border_NE.m_oY) && (car_border_NW.m_oY > junction_border_NE.m_oY);
 			break;
 		case common::utile::LANE::S:
 			// oy are valori negative
-			return (car_border_NW.m_oY > junction_border_SW.m_oY) && (car_border_SW.m_oY < junction_border_SW.m_oY);
+			return (car_border_NW.m_oY >= junction_border_SW.m_oY) && (car_border_SW.m_oY < junction_border_SW.m_oY);
 			break;
 		default:
 			return false;
@@ -168,18 +180,18 @@ namespace model
 	{
 		const static std::map<common::utile::LANE, Point> starting_lane_points =
 		{
-			{common::utile::LANE::E, Point(GLfloat(1.), GLfloat(0.05))},
-			{common::utile::LANE::N, Point(GLfloat(-0.05), GLfloat(1.))},
-			{common::utile::LANE::S, Point(GLfloat(0.05), GLfloat(-1.))},
-			{common::utile::LANE::W, Point(GLfloat(- 1.), GLfloat(-0.05))}
+			{common::utile::LANE::E, Point(GLfloat(1.), GLfloat(0.1))},
+			{common::utile::LANE::N, Point(GLfloat(-0.1), GLfloat(1.))},
+			{common::utile::LANE::S, Point(GLfloat(0.1), GLfloat(-1.))},
+			{common::utile::LANE::W, Point(GLfloat(- 1.), GLfloat(-0.1))}
 		};
 
 		const static std::map<common::utile::LANE, Point> ending_lane_points = 
 		{
-			{common::utile::LANE::E, Point(GLfloat(-1.), GLfloat(0.05))},
-			{common::utile::LANE::N, Point(GLfloat(-0.05), GLfloat(-1.))},
-			{common::utile::LANE::S, Point(GLfloat(0.05), GLfloat(1.))},
-			{common::utile::LANE::W, Point(GLfloat(1.), GLfloat(-0.05))}
+			{common::utile::LANE::E, Point(GLfloat(-1.), GLfloat(0.1))},
+			{common::utile::LANE::N, Point(GLfloat(-0.1), GLfloat(-1.))},
+			{common::utile::LANE::S, Point(GLfloat(0.1), GLfloat(1.))},
+			{common::utile::LANE::W, Point(GLfloat(1.), GLfloat(-0.1))}
 		};
 
 		if (bl_point == std::nullopt)
@@ -202,7 +214,7 @@ namespace model
 		// do the actual drawing
 		const std::map<common::utile::LANE, std::pair<GLfloat, GLfloat>> rect_shape_based_on_lane =
 		{
-			{common::utile::LANE::E, {height, -width}},
+			{common::utile::LANE::E, {-height, width}},
 			{common::utile::LANE::N, {width, -height}},
 			{common::utile::LANE::S, {width, height}},
 			{common::utile::LANE::W, {height, width}}
@@ -251,7 +263,10 @@ namespace model
 
 	void GLFWWindowManager::changeTrafficLights(const std::set<common::utile::LANE>& green_light_lanes)
 	{
-		m_lane_alowence_map.clear();
+		for (auto i = 0; i < 4; i++)
+		{
+			m_lane_alowence_map[(common::utile::LANE)i] = false;
+		}
 
 		for (const auto& lane : green_light_lanes)
 			m_lane_alowence_map[lane] = true;

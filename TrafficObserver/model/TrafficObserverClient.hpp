@@ -27,7 +27,6 @@ namespace model
 
         size_t carCountLeft_ = 0;
         size_t carCountRight_ = 0;
-        std::atomic_bool already_sent_keyword_ = false;
 
         LOGGER("TRAFFICOBSERVER-CLIENT");
         bool startTrackingCars();

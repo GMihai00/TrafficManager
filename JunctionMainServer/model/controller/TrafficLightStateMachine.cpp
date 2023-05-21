@@ -45,9 +45,11 @@ namespace model
 		{
 			return  usingLeftLane_;
 		}
+
 		bool TrafficLightStateMachine::isVehicleTracker(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip) const
 		{
-			return laneToVehicleTrackerIPAdress_.at(lane) == ip;
+			auto it = laneToVehicleTrackerIPAdress_.find(lane);
+			return it != laneToVehicleTrackerIPAdress_.end() && it->second == ip;
 		}
 
 		bool TrafficLightStateMachine::isLaneMissing(const common::utile::LANE lane) const
@@ -389,12 +391,19 @@ namespace model
 		bool TrafficLightStateMachine::registerVehicleTrackerIpAdress(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ipAdress)
 		{
 			std::scoped_lock lock(mutexClients_);
+
 			if (auto it = laneToVehicleTrackerIPAdress_.find(lane); it != laneToVehicleTrackerIPAdress_.end() && it->second != ipAdress)
 			{
 				LOG_ERR << "Camera already connect to the give lane. Please disable it";
 				return false;
 			}
-			laneToVehicleTrackerIPAdress_[lane] = ipAdress;
+			else if (auto it = laneToVehicleTrackerIPAdress_.find(lane); it != laneToVehicleTrackerIPAdress_.end() && it->second == ipAdress)
+			{
+				return true;
+			}
+
+			LOG_ERR << (int)lane;
+ 			laneToVehicleTrackerIPAdress_[lane] = ipAdress;
 			return true;
 		}
 

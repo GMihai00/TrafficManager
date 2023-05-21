@@ -58,12 +58,8 @@ namespace model
             message.header.id = messageIdProvider_.provideId(ipc::VehicleDetectionMessages::VCDR);
             message.header.hasPriority = false;
             message << leftLane;
+            message << keyword_;
 
-            if (!already_sent_keyword_)
-            {
-                message << keyword_;
-                already_sent_keyword_ = true;
-            }
 
             connection_->send(message);
         }
