@@ -12,7 +12,7 @@ namespace model
 		
 		TrafficLightStateMachine::TrafficLightStateMachine(const common::utile::model::JMSConfig& config, bool shouldDisplay) :
 			greenLightDuration_(config.maxWaitingTime),
-			regLightDuration_(15), // TO CHANGE THIS UPDATED BY ML
+			regLightDuration_(15),
 			usingLeftLane_(config.usingLeftLane)
 		{
 			missingLane_ = boost::none;
@@ -99,7 +99,14 @@ namespace model
 				decreaseTimer(lane, ip);
 				if (windowManager_)
 				{
-					windowManager_->signalIncomingCar(paint::VehicleTypes::NORMAL_VEHICLE, lane);
+					if (isVehicleTracker(lane, ip))
+					{
+						windowManager_->signalIncomingCar(paint::VehicleTypes::NORMAL_VEHICLE, lane);
+					}
+					else
+					{
+						windowManager_->signalIncomingCar(paint::VehicleTypes::VT_VEHICLE, lane);
+					}
 				}
 			}
 
@@ -113,7 +120,6 @@ namespace model
 
 		bool TrafficLightStateMachine::unregisterClient(ipc::utile::IP_ADRESS ip)
 		{
-			// crapa de aici somehow
 			std::scoped_lock lock(mutexClients_);
 			std::optional<common::utile::LANE> corespondingLane = {};
 			for (const auto& [lane, clientsConnected] : clientsConnected_)
@@ -131,12 +137,12 @@ namespace model
 				return false;
 			}
 
-			clientsConnected_[corespondingLane.value()].erase(ip);
-			
 			if (!isVehicleTracker(corespondingLane.value(), ip))
 			{
 				carsThatPassedJunction_[corespondingLane.value()]++;
 			}
+
+			clientsConnected_[corespondingLane.value()].erase(ip);
 
 			return true;
 		}
@@ -148,24 +154,24 @@ namespace model
 
 		bool TrafficLightStateMachine::startEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
 		{
-			//std::scoped_lock lock(mutexClients_);
 			if (!registerClient(lane, ip, usingLeftLane_))
 			{
 				return false;
 			}
 
+			std::scoped_lock lock(mutexClients_);
 			waitingEmergencyVehicles_.push({lane, ip});
 			return true;
 		}
 
 		bool TrafficLightStateMachine::endEmergencyState(ipc::utile::IP_ADRESS ip)
 		{
-			//std::scoped_lock lock(mutexClients_);
 			if (!unregisterClient(ip))
 			{
 				return false;
 			}
 
+			std::scoped_lock lock(mutexClients_);
 			while (!waitingEmergencyVehicles_.empty())
 			{
 				auto maybeLaneIpPair = waitingEmergencyVehicles_.pop();

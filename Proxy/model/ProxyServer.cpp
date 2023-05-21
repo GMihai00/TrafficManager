@@ -26,6 +26,7 @@ namespace model
 			LOG_ERR << "FAILED TO CONNECT TO DB";
 			exit(1);
 		}
+		LOG_INF << "Connected to database succesfully";
 	}
 
 	void ProxyServer::rejectMessage(

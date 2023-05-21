@@ -185,6 +185,10 @@ namespace ipc
                     availableIds_.push(client->getId());
                     client.reset();
                 }
+                else
+                {
+                    LOG_ERR << "Invalid client disconnect";
+                }
             }
     
         protected:

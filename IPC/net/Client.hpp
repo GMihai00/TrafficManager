@@ -10,6 +10,7 @@
 #include <optional>
 #include <condition_variable>
 #include <chrono>
+#include <shared_mutex>
 
 #include <boost/asio.hpp>
 #include <boost/asio/ts/buffer.hpp>
@@ -38,6 +39,7 @@ namespace ipc
             std::thread threadContext_;
             std::mutex mutexUpdate_;
             std::mutex mutexGet_;
+            std::shared_mutex mutexConnection_;
             std::condition_variable condVarUpdate_;
             std::unique_ptr<Connection<T>> connection_;
             std::atomic<bool> shuttingDown_ = false;
@@ -59,6 +61,8 @@ namespace ipc
     
             bool connect(const utile::IP_ADRESS& host, const ipc::utile::PORT port)
             {
+                std::unique_lock lock(mutexConnection_);
+
                 if (!utile::IsIPV4(host))
                 {
                     LOG_ERR << "Invalid IPV4 ip adress: " << host;
@@ -108,11 +112,15 @@ namespace ipc
 
             bool isConnected()
             {
+                std::shared_lock lock(mutexConnection_);
+
                 return connection_ && connection_->isConnected();
             }
     
             bool answearRecieved()
             {
+                std::shared_lock lock(mutexConnection_);
+
                 return !incomingMessages_.empty();
             }
 
@@ -159,6 +167,8 @@ namespace ipc
 	
 	        uint32_t getId()
 	        {
+                std::shared_lock lock(mutexConnection_);
+
                 return connection_->getId();
 	        }
         };

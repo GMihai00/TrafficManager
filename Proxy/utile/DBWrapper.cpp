@@ -1,14 +1,23 @@
 #include "DBWrapper.hpp"
 #include <assert.h>
 
-// TO FINISH THIS
 namespace utile
 {
 	DBWrapper::DBWrapper(DBConnectionData connectionData) :
 		connection_(get_driver_instance()->connect(connectionData.m_server, connectionData.m_username, connectionData.m_password))
 	{
-		LOG_INF << "Connected";
+		auto driver = get_driver_instance();
+		if (!driver)
+			throw std::runtime_error("Unabled to get SQL driver");
+		
+		auto conneciton = driver->connect(connectionData.m_server, connectionData.m_username, connectionData.m_password);
+		if (!conneciton)
+			throw std::runtime_error("Unabled to connect to the server: " + connectionData.m_server);
+		
+		connection_ = std::unique_ptr<sql::Connection>(conneciton);
+
 		connection_->setSchema("traffic_manager");
+		LOG_INF << "Connected to " << connectionData.m_server;
 	}
 
 	db::BoundingRectPtr DBWrapper::buildBoundingRectFromQueryResult(const std::shared_ptr<sql::ResultSet>& queryResult) noexcept

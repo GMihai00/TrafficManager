@@ -24,13 +24,12 @@ namespace model
 			{
 				if (lastVisitedProxys_.empty())
 				{
-					continue; // this written in here for my program not to crash for testing porposes
 					throw std::runtime_error("Failed to find a valid junction, client is out of reach");
 				}
 
 				LOG_DBG << lastVisitedProxys_.top().first << lastVisitedProxys_.top().second;
 				
-				if (!connect(lastVisitedProxys_.top().first, lastVisitedProxys_.top().second))
+				if (!isConnected() && !connect(lastVisitedProxys_.top().first, lastVisitedProxys_.top().second))
 				{
 					lastVisitedProxys_.pop();
 					continue;
@@ -38,8 +37,11 @@ namespace model
 
 				if (!queryProxy())
 				{
-					lastVisitedProxys_.pop();
-					disconnect();
+					if (lastVisitedProxys_.size() != 1)
+					{
+						lastVisitedProxys_.pop();
+						disconnect();
+					}
 					continue;
 				}
 
@@ -61,6 +63,9 @@ namespace model
 
 				disconnect();
 			}
+
+			if (isConnected())
+				disconnect();
 		}
 	}
 
@@ -127,7 +132,7 @@ namespace model
 		send(message);
 
 		// WAIT FOR RESPONSE
-		if (!waitForAnswear(5000))
+		if (!waitForAnswear(1000))
 		{
 			return false;
 		}
@@ -204,6 +209,7 @@ namespace model
 		{
 			return false;
 		}
+
 		auto msgId = messageIdProvider_.provideId(ipc::VehicleDetectionMessages::VDB);
 		ipc::net::Message<ipc::VehicleDetectionMessages> message;
 		message.header.id = msgId;
@@ -211,7 +217,16 @@ namespace model
 		message << followedLane_;
 		send(message);
 
-		return true;
+		if (!waitForAnswear(1000))
+		{
+			LOG_ERR << "Timeout recieving answear from the junction";
+			return false;
+		}
+
+		auto answear = getLastUnreadAnswear();
+		if (!answear.has_value()) { return false; }
+
+		return answear->first.msg.header.type == ipc::VehicleDetectionMessages::ACK;
 	}
 	
 	// AICI PASSED SI IS PASSING SOMEHOW IS FAILING ??? to check if still valid
