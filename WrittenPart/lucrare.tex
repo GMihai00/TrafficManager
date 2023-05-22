@@ -112,7 +112,7 @@ environmental impact, and safety concerns become more pronounced.
 Therefore, the need for innovative and intelligent traffic management
 solutions is imperative.\\
 \indent
-This paper provides an overview of various approaches and
+This thesis provides an overview of various approaches and
 technologies employed to tackle traffic management challenges as 
 well as a new traffic management system that would solve most of 
 the traffic congestion problems in the near future. It highlights
@@ -194,7 +194,34 @@ efficiently. The goal is to improve traffic flow, reduce congestion, enhance saf
 and minimize environmental impacts. Smart city traffic management often includes
 the following key elements: ITS, Data Analystics, Adaptive Traffic Control Systems,
 Integrated Traffic Managemen, Connected Vehicles, Multi-modal Transportation,
-Smart Parking Systems, Sustainable Transportation
+Smart Parking Systems, Sustainable Transportation.\\
+\indent \indent
+In the next chapters we will discuss about the following subjects: 
+the tehnologys that already have been developed, the reason the 
+current systems are not performant enough, a new way of handling 
+traffic, the way we implemented the system and futher directions. \\
+\indent \indent
+We will start analyzing traffic management from the most anique ways all the
+way to the latest systems that have been developed at the time writing with
+focus on DSRC based systems huge potential of improving traffic flow. 
+We will also describe the bennefits/drawbacks of other systems that have 
+been implemented trough the time like object recognition based systems, 
+sensor based systems and many others.\\
+\indent \indent 
+The current flaws of the traffic management system will be highlighted and 
+a new IPC system will be presented to fix the given issues. It will be based on 
+already existant traffic system and has the possibility to be globally scaled
+and deployed. We will further talk of the importance of DSRC systems and the
+need of maintaining stable tarffic flow even if our systems somehow fail. \\
+\indent \indent 
+After describing the system we will present the implementation details, the 
+model that we have trained for decting vehicles, the way we handle IPC, describe 
+the servers and clients responsibilities based on their type, the GPS data 
+handling, and overall how things work within our systems.
+
+% de adaugat la curpins odata ce am gata partea cu motivatia si concluzile
+
+% de adaugat si rezumat in romana 
 \chapter{Overview of the Technology Developed}
 
 \indent \indent
@@ -252,7 +279,6 @@ comparison to highlight some of their characteristics.
 
 % sectiunile devin capitole
 
-\pagebreak
 
 \section{Object recognition based systems}
 \indent \indent
@@ -417,8 +443,6 @@ Also the chance to upgrade is very reliant on traffic conditions. Furthermore,
 even if the algorithm has been running for a long time, it still can choose a
 non optimal solution that may or may not lead to traffic jams. 
 
-\pagebreak
-
 \section{Dedicated Short-Range Communications systems}
 \indent \indent
 To explain why this kind of systems would work, first we have to understand what
@@ -486,6 +510,7 @@ an infrastructure for this kind of technologie, but only time will tell. In the 
 time the best thing we can do is to develop an economically efficient plan for
 transitioning from existing traffic control systems to  VTL systems.
 
+% de pus aici chapter cu motivatie
 \pagebreak
 
 
@@ -677,6 +702,7 @@ start vizualing it(Figure ~\ref{fig:System_sketch}). Clients will query the
 they will send varios type of data to the junction server and the server itselft 
 will change the traffic phases based on the data recieved.
 
+% de facut poza mai mica si bagat text eventual
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{Sketches/SchitaSistem.png}
     \caption{System sketch}
@@ -1012,7 +1038,9 @@ one for writing and one for notifying progress.
         template<typename DataType>
         friend Message<T>& operator >> (Message<T>& msg, DataType& data)
     }
-\end{lstlisting}   
+\end{lstlisting}  
+
+%de descris tot codul
 \pagebreak
 
 \section{CarDetector}
@@ -1044,6 +1072,7 @@ library that facilitates training, evaluating, and deploying object detection
 models. It offers a collection of pre-trained models and tools for building custom
 models to detect and localize objects in images and videos. 
 
+% de scos poza =)
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{TensorFlow.png}
     \caption{TensorFlow (\href{https://www.vectorlogo.zone/logos/tensorflow/index.html}{Image Source} \copyright)}
@@ -1141,6 +1170,7 @@ traffic states and the events being timer expire events. Each state has associat
 a timer that decreases normally or when an incoming vehicle is detected. Whenever we 
 are in a given state, it's corresponding timer is frozen and afterwards reseted.
 
+%de descris pe scurt fisierul de configurare
 \begin{lstlisting}[language = C++][H]
 { 
     "server": { "ip": "127.0.0.1", "port": 5000 },
@@ -1214,6 +1244,7 @@ the executable itself you will need to provide a camera as well as a way to
 connect to the network, for example a zigbee. For testing porposes a
 video was provided instead of linking directly to a camera. ~\ref{fig:Running client samples}
 
+% de adaugat nume si descris eventual
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{TrafficDetectionRunningExample.png}
     \label{fig:Running client sample}
@@ -1264,6 +1295,7 @@ have passed a junction the whole process restarts from the last queried proxy.
     \label{fig:Proxy junction data reply}
 \end{figure}
 
+%de impartit in mai multe subcapitole "Conclusions and Further Directions"
 \chapter{Conclusions and Further Directions}
 \indent \indent
 In this paper, through an analysis of existing research,
