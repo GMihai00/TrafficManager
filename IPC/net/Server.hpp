@@ -21,6 +21,7 @@
 #include "utile/Logger.hpp"
 #include "../utile/IPCDataTypes.hpp"
 #include "../utile/IPAdressHelpers.hpp"
+#include "..\ClientDisconnectObserver.hpp"
 
 namespace ipc
 {
@@ -42,11 +43,30 @@ namespace ipc
             common::utile::ThreadSafeQueue<uint32_t> availableIds_;
             std::map<uint32_t, std::shared_ptr<Connection<T>>> connections_;
             std::atomic<bool> shuttingDown_ = false;
+
+            std::unique_ptr<ipc::utile::IClientDisconnectObserver<T>> observerDisconnect_;
+            std::function<void(std::shared_ptr<ipc::net::IConnection<T>>)> disconnectCallback_;
+
             LOGGER("SERVER");
         public:
+            void disconnectCallback(std::shared_ptr<ipc::net::IConnection<T>> connection)
+            {
+                std::shared_ptr<ipc::net::Connection<T>> connectionPtr =
+                    std::dynamic_pointer_cast<ipc::net::Connection<T>>(connection);
+                if (connectionPtr)
+                {
+                    onClientDisconnect(connectionPtr);
+                }
+            }
+
             Server(const utile::IP_ADRESS& host, ipc::utile::PORT port):
                 connectionAccepter_(context_)
             {
+
+                disconnectCallback_ = std::bind(&Server::disconnectCallback, this, std::placeholders::_1);
+
+                observerDisconnect_ = std::make_unique<ipc::utile::ClientDisconnectObserver<T>>(disconnectCallback_);
+
                 if (!utile::IsIPV4(host))
                 {
                     throw std::runtime_error("Invalid IPV4 ip adress: " + host);
@@ -142,7 +162,8 @@ namespace ipc
                                     context_,
                                     std::move(socket),
                                     incomingMessagesQueue_,
-                                    condVarUpdate_);
+                                    condVarUpdate_,
+                                    observerDisconnect_);
                     
                             if (onClientConnect(newConnection))
                             {

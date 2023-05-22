@@ -22,7 +22,7 @@
 #include "utile/Logger.hpp"
 #include "../utile/IPCDataTypes.hpp"
 #include "../utile/IPAdressHelpers.hpp"
-
+#include "..\ClientDisconnectObserver.hpp"
 
 namespace ipc
 {
@@ -44,6 +44,7 @@ namespace ipc
             std::unique_ptr<Connection<T>> connection_;
             std::atomic<bool> shuttingDown_ = false;
             boost::asio::io_context::work idleWork_; // for context to not immediatly stop
+            std::unique_ptr<ipc::utile::IClientDisconnectObserver<T>> observer_; // needed for just creating connections, always nullptr
             LOGGER("CLIENT");
         public:
             Client() : idleWork_(context_)
@@ -80,7 +81,8 @@ namespace ipc
                         context_,
                         boost::asio::ip::tcp::socket(context_),
                         incomingMessages_,
-                        condVarUpdate_);
+                        condVarUpdate_,
+                        observer_);
             
                     return connection_->connectToServer(endpoints);
 

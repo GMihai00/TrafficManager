@@ -163,6 +163,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ClientDisconnectObserver.hpp" />
+    <ClInclude Include="IClientDisconnectObserver.hpp" />
+    <ClInclude Include="IConnection.hpp" />
     <ClInclude Include="MessageTypes.hpp" />
     <ClInclude Include="net\Client.hpp" />
     <ClInclude Include="net\Connection.hpp" />

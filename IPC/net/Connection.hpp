@@ -14,9 +14,12 @@
 #include <boost/asio/ts/buffer.hpp>
 #include <boost/asio/ts/internet.hpp>
 
+#include "..\IClientDisconnectObserver.hpp"
+
 #include "Message.hpp"
 #include "utile/ThreadSafePriorityQueue.hpp"
 #include "utile/Logger.hpp"
+#include "..\IConnection.hpp"
 
 namespace ipc
 {
@@ -29,7 +32,7 @@ namespace ipc
         };
 
         template <typename T>
-        class Connection : public std::enable_shared_from_this<Connection<T>>
+        class Connection : public IConnection<T>, public std::enable_shared_from_this<Connection<T>>
         {
         protected:
             const Owner owner_;
@@ -50,6 +53,8 @@ namespace ipc
             std::atomic_bool shuttingDown_ = false;
             uint32_t id_;
             std::string ipAdress_;
+
+            std::unique_ptr<ipc::utile::IClientDisconnectObserver<T>>& observer_;
             LOGGER("CONNECTION-UNDEFINED");
 
         private:
@@ -86,12 +91,14 @@ namespace ipc
                 boost::asio::io_context& context,
                 boost::asio::ip::tcp::socket socket,
                 common::utile::ThreadSafePriorityQueue<OwnedMessage<T>>& incomingMessages,
-                std::condition_variable& condVarUpdate) :
+                std::condition_variable& condVarUpdate,
+                std::unique_ptr<ipc::utile::IClientDisconnectObserver<T>>& observer) :
                 owner_{ owner },
                 context_{ context },
                 socket_{ std::move(socket) },
                 incomingMessages_{ incomingMessages },
                 condVarUpdate_{condVarUpdate},
+                observer_{observer},
                 isWriting_{false},
                 isReading_{false},
                 id_{0}
@@ -403,6 +410,9 @@ namespace ipc
             {
                 if (isConnected())
                 {
+                    if (observer_)
+                        observer_->notify(this->shared_from_this());
+
                     boost::asio::post(context_, [this]() { socket_.close(); });
                 }
             }
