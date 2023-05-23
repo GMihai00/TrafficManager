@@ -58,7 +58,7 @@ BACHELOR STUDY PROGRAM: Computer Science}}
 {\large\noindent{\bf SUPERVISOR:
 \hspace{100pt} GRADUATE:}
 
-\noindent Lect. Todor Ivașcu \hfill 
+\noindent Lect. Dr. Todor Ivașcu \hfill 
 \noindent Mihai Andrei Gherghinescu
 }
 
@@ -86,7 +86,7 @@ BACHELOR STUDY PROGRAM:  Computer Science}}
 {\large\noindent{\bf SUPERVISOR:
 \hspace{100pt} GRADUATE:}
 
-\noindent Lect. Todor Ivașcu \hfill 
+\noindent Lect. Dr. Todor Ivașcu \hfill 
 \noindent Mihai Andrei Gherghinescu
 }
 
@@ -146,6 +146,65 @@ like microcontrollers, cameras, GPS, zigbees, radios etc. To achive
 that we defined a new message standard and trained an objecte detection
 neural networks model that could recognize our vehicles.
 
+\pagebreak
+
+% de adaugat si rezumat in romana 
+{\Large\textbf{Rezumat}} \\
+
+\indent \indent
+Lucrarea are ca scop prezentarea a unui nou sistem de semaforizare 
+ce combina mai multe idei deja in uz. Ca si o partea introductiva,
+se va face o prezentare asupra tehnologiilor dezvoltatea de-a lungul 
+timpului. Vom aborda in special teme precum sisteme de semnaforizare 
+pe baza detectiei de obiecte, sisteme ce folosesc senzori, sisteme ce
+se bazeaza pe algoritmi de planificare si in cele din urma sisteme
+pe baza de semnale radio cu raza mica de acoperire(DSRC).
+Vom face o comparatie evidentiand avantajele si dezavantajele acestora.\\
+\indent \indent
+Odata prezentate, vom sublinia de ce este necesar sa cream un nou 
+sistem in momentul de fata, anume unul care este suportat de 
+infrastructura traficului din momentul scrieri lucrari. \\
+\indent \indent
+In urmatoarele capitole vom descrie cum va functiona sistemul nostru mai
+exact, de ce credem ca este o mai buna alternativa de gestionare a
+traficului si ce avantaje/dezavantaje aduce. In sine 
+acest sistem se bazeaza pe 2 mari sisteme deja dezvoltate si aduce 
+la randul sau imbunatatiri. Arhitectura sa presupune crearea mai multor 
+servere ce colecteaza date, redirectioneaza dar si gestioneaza traficul pe 
+baza informatiilor primite. De asemenea, pentru a procura datele am 
+ales sa avem doua tipuri de clienti: unul stationar, conectat direct 
+la un singur semafor si unul mobil. \\
+\indent \indent
+Pentru a putea face corespondenta dintre clientul mobil si serverele 
+ce gestioneaza traficul si pentru a putea identifica care este 
+urmatorul server care urmeaza a fi intersectat, am decis sa folosim 
+un proxy ce actioneaza ca si un fel load balancer si permite
+sistemului a fi scalat la nivel global. Exista un server principal
+de unde pleaca interogarea clientului, dar acestuia ii se poate fie raspunde cu 
+urmatoarul server in ruta sa sau poate fi redirectionat la alt proxy 
+din calea de acoperire a celui curent. De asemnea interactiunea cu server-ul
+principal este minimizata, deoarece dupa fiecare request clientul isi stocheaza 
+si salveaza toate proxiurile vizitate de acesta, interogand mereu utlimul 
+proxy vizitat. Astfel crestem eficienta sistemului, 
+dar si minimizam daunele unui potential atac cibernetic asupra 
+proxi-ului principal. Va fi descris fiecare tip de server si de client si rolul sau 
+in buna functionare a sistemului. Vom vorbi despre serverele ce vor capta 
+date si vor gestiona traficul, ce vor fi amplasate la fiecare intersectie 
+in parte, despre clientul stationar ce este legat la o camera si
+detecteaza masinile ce urmeaza a trece prin intersectia noastra, despre 
+clientul mobil instalat direct pe automobil, ce va parsa datele de la
+GPS si va determina coordonatele cat si directia vehiculului si le va 
+transmite prin intermediul radioului catre server. \\
+\indent \indent 
+Odata descris se va face o scurta prezentare asupra software-ului 
+dezvoltat ce alcatuieste sistemul, dar si asupra modelul-ui antrenat
+pentru a recunoaste autovehiculele. Vom sublinia de ce credem ca
+traficul nu poate fi prezis si in acelasi timp vom argumenta de ce
+credem ca adaptarea dinamica a timpului de astepare si a fazelor de trafic
+este cea mai buna solutie de gestionare a traficului din punctul nostru 
+de vedere.\\
+\indent \indent
+Intr-un final, vom propune potentiale imbunatatiri ale sistemului.
 \pagebreak
 
 \tableofcontents
@@ -221,7 +280,6 @@ handling, and overall how things work within our systems.
 
 % de adaugat la curpins odata ce am gata partea cu motivatia si concluzile
 
-% de adaugat si rezumat in romana 
 \chapter{Overview of the Technology Developed}
 
 \indent \indent
