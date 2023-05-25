@@ -155,6 +155,7 @@
     <ClCompile Include="net\ProxyRedirect.cpp" />
     <ClCompile Include="net\ProxyReply.cpp" />
     <ClCompile Include="net\VehicleTrackerMessage.cpp" />
+    <ClCompile Include="RSA.cpp" />
     <ClCompile Include="utile\IPAdressHelpers.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +175,7 @@
     <ClInclude Include="net\ProxyReply.hpp" />
     <ClInclude Include="net\Server.hpp" />
     <ClInclude Include="net\VehicleTrackerMessage.hpp" />
+    <ClInclude Include="RSA.hpp" />
     <ClInclude Include="utile\ErrorCodes.hpp" />
     <ClInclude Include="utile\IPAdressHelpers.hpp" />
     <ClInclude Include="utile\IPCDataTypes.hpp" />
