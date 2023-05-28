@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 4
+names: ['car', 'pedestrian', 'traffic light', 'traffic sign']
+
+roboflow:
+  workspace: pedro-azevedo-3c9ol
+  project: bdd100k-3zgda
+  version: 5
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/pedro-azevedo-3c9ol/bdd100k-3zgda/dataset/5
