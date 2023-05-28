@@ -890,7 +890,7 @@ back to it's original flow, from where it left off.
 \chapter{Implementation details}
 \indent \indent
 The whole system was developed using C++17, Python, Boost, GLFW, MSVC WinAPI, OpenCV,
-Tensorflow  and MySQL. The system itself is treated as a big project 
+Tensorflow, YoloV8 and MySQL. The system itself is treated as a big project 
 and splitted into multiple submodules: 
 
 \begin{itemize}
@@ -1124,18 +1124,27 @@ inside the module and remove any kind of process interactions.
 
 \section{ObjectDetectionServer} 
 \indent \indent
-To be able to able to detect if cars were present we made use of Tenserflow 
-Object Detection API ~\ref{fig:TensorFlow}. It is a powerful framework provided by Google's TensorFlow
+To be able to able to detect if cars were present we made tried using 2 different 
+architectures: one based on YOLOv8 and one using Tenserflow Object Detection API, 
+while using the same dataset for training.\\
+\indent \indent
+YOLO, short for You Only Look Once, is a popular real-time object detection system.
+It revolutionized the field of computer vision by introducing a unified approach to
+object detection that combines object localization and classification in a single
+neural network. The YOLO algorithm divides an input image into a grid and predicts
+bounding boxes and class probabilities for each grid cell. These predictions are
+based on anchor boxes, which are pre-defined bounding box shapes of different sizes
+and aspect ratios. YOLO predicts the offsets and sizes of anchor boxes relative to
+the grid cells, as well as the probabilities of different classes for each bounding
+box. \\
+After training our model we achivede a precision of 75\% but the detection, proved 
+to be to slow so we further looked for another architecture that could fit our objectives. \\
+The architecture that we settled on was the one that was provided by Tenserflow
+Object Detection API.It is a powerful framework provided by Google's TensorFlow
 library that facilitates training, evaluating, and deploying object detection
 models. It offers a collection of pre-trained models and tools for building custom
 models to detect and localize objects in images and videos. 
 
-% de scos poza =)
-\begin{figure}[h!]
-    \includegraphics[width=\textwidth]{TensorFlow.png}
-    \caption{TensorFlow (\href{https://www.vectorlogo.zone/logos/tensorflow/index.html}{Image Source} \copyright)}
-    \label{fig:TensorFlow}
-\end{figure}
 
 Due to the fact that the model will be loaded by a microcontroller a
 \href{https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md}{SSD MobileNet model}
