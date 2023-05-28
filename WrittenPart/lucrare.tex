@@ -581,11 +581,20 @@ heavily populated areas such as Tokyo, Beijing, Mumbai, Los Angeles,
 New York City, São Paulo, and many other major cities around the world.
 These cities often face significant traffic challenges due to their large populations, limited road capacity, and high levels of economic activity.
 
-The frequency of traffic jams can vary throughout the day and week.
+The frequency of traffic jams(~\ref{fig:TrafficJam}) 
+can vary throughout the day and week.
 Rush hours, typically occurring during morning and evening commute
 times, tend to experience the most congestion as people travel to
 and from work or school. Similarly, certain events or holidays can
 cause increased traffic and congestion in specific areas.
+
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{TrafficJam.jpg}
+    \caption{Traffic Jam Example 
+    (\href{https://unsplash.com/photos/cekJ1XXx1Rk}{Image Source} \textcopyright)}
+    \label{fig:TrafficJam}
+\end{figure}
+
 
 Various factors contribute to traffic congestion, including
 inadequate infrastructure, insufficient public transportation options,
@@ -629,7 +638,6 @@ working and not cause drastic traffic disturbance. One thing that needs
 to be taken in consideration as well is the fact that some components 
 can single-handedly manage traffic if the traffic volume is relatively 
 low so in many scenarios you won't even need to upgrade the system.
-
 
 \pagebreak
 
@@ -1024,38 +1032,55 @@ was develop, while using Boost Asio for socket handling. The loggic
 itself runs on 4 threads: one for keeping the context running, one for reading,
 one for writing and one for notifying progress.
 
-
 \begin{lstlisting}[language = C++][H]
     template<typename T>
     class Client
     {
     private:
-        common::ThreadSafePriorityQueue<OwnedMessage<T>> incomingMessages_;
+        ThreadSafePriorityQueue<OwnedMessage<T>>
+            incomingMessages_;
 
     protected:
-        boost::asio::io_context context_;
-        std::thread threadContext_;
-        std::mutex mutexUpdate_;
-        std::condition_variable condVarUpdate_;
-        std::unique_ptr<Connection<T>> connection_;
-        std::atomic<bool> shuttingDown_ = false;
-        boost::asio::io_context::work idleWork_;
+    boost::asio::io_context context_;
+    std::thread threadContext_;
+    std::mutex mutexUpdate_;
+    std::mutex mutexGet_;
+    std::shared_mutex mutexConnection_;
+    std::condition_variable condVarUpdate_;
+    std::unique_ptr<Connection<T>> connection_;
+    std::atomic<bool> shuttingDown_;
+    boost::asio::io_context::work idleWork_; 
+    std::unique_ptr<IClientDisconnectObserver<T>> 
+        observer_; 
+    LOGGER("CLIENT");
         LOGGER("CLIENT");
     public:
-        bool connect(const utile::IP_ADRESS& host, const ipc::utile::PORT port);
+        bool connect(const utile::IP_ADRESS& host,
+            const ipc::utile::PORT port);
         void disconnect();
         bool isConnected();
         void send(const Message<T>& msg);
         bool waitForAnswear(uint32_t timeout = 0);
-        std::optional<std::pair<OwnedMessage<T>, bool>> getLastUnreadAnswear();
+        std::optional<std::pair<OwnedMessage<T>, bool>>
+            getLastUnreadAnswear();
     }
 \end{lstlisting}
 
+The client has 4 main methods, all of them beeing run syncronosly:
+"connect", "disconnect", "send", "waitForAnswear". Every time a 
+new connection is established with the server a new "Connection"
+object will be created that will be responsible for reading, writing 
+and providing messages. To be able to send request over the network
+we use boost a asio context that is initally provided with idle work 
+so that it doesn't go out of scope before sending/reciving messages. 
+The actual waiting for the messages is done trough the use of unique 
+locks and condition variables so that busy waits are avoided.
 \pagebreak
 
 \begin{lstlisting}[language = C++][H]
     template <typename T>
-    class Connection : public std::enable_shared_from_this<Connection<T>>
+    class Connection
+    : public std::enable_shared_from_this<Connection<T>>
     {
     protected:
         const Owner owner_;
@@ -1068,24 +1093,27 @@ one for writing and one for notifying progress.
         std::condition_variable& condVarUpdate_;
         boost::asio::io_context& context_;
         boost::asio::ip::tcp::socket socket_;
-        common::ThreadSafePriorityQueue<OwnedMessage<T>>& incomingMessages_;
-        common::ThreadSafePriorityQueue<Message<T>> outgoingMessages_;
+        ThreadSafePriorityQueue<OwnedMessage<T>>&
+            incomingMessages_;
+        ThreadSafePriorityQueue<Message<T>>
+            outgoingMessages_;
         Message<T> incomingTemporaryMessage_;
         std::atomic_bool isReading_;
         std::atomic_bool isWriting_;
         std::atomic_bool shuttingDown_ = false;
-        uint32_t id_;
-        std::string ipAdress_;
+        uint32_t id_; std::string ipAdress_;
+        std::unique_ptr<IClientDisconnectObserver<T>>& 
+            observer_;
         LOGGER("CONNECTION-UNDEFINED");
-
     private:
-        bool readData(std::vector<uint8_t>& vBuffer, size_t toRead);
+        bool readData(std::vector<uint8_t>& vBuffer,
+            size_t toRead);
         void readMessages();
         void writeMessages();
     public:
         Owner getOwner() const;
         bool connectToServer(
-            const boost::asio::ip::tcp::resolver::results_type& endpoints);
+            const ip::tcp::resolver::results_type& endpoints);
         bool connectToClient(uint32_t id);
         void disconnect();
         bool isConnected() const;
@@ -1093,6 +1121,11 @@ one for writing and one for notifying progress.
     }
 \end{lstlisting}
 
+The connection is responsible for reading and writing messages.
+It atcs like a middle point between the client and the server. It 
+shared a queue of incoming messages and an condition variable with 
+any of the other to classes so that it can notify the owner that a 
+new message has arrived. 
 \pagebreak
 
 \begin{lstlisting}[language = C++][H]
@@ -1100,7 +1133,8 @@ one for writing and one for notifying progress.
     class Server
     {
     protected:
-        common::ThreadSafePriorityQueue<OwnedMessage<T>> incomingMessagesQueue_;
+        ThreadSafePriorityQueue<OwnedMessage<T>>
+        incomingMessagesQueue_;
         boost::asio::io_context context_;
         std::thread threadContext_;
         std::thread threadUpdate_;
@@ -1109,7 +1143,8 @@ one for writing and one for notifying progress.
         std::mutex mutexMessage_;
         boost::asio::ip::tcp::acceptor connectionAccepter_;
         common::ThreadSafeQueue<uint32_t> availableIds_;
-        std::map<uint32_t, std::shared_ptr<Connection<T>>> connections_;
+        std::map<uint32_t, 
+            std::shared_ptr<Connection<T>>>connections_;
         std::atomic<bool> shuttingDown_ = false;
         LOGGER("SERVER");
     private:
@@ -1118,15 +1153,29 @@ one for writing and one for notifying progress.
         bool start();
         void stop();
         void waitForClientConnection(); //ASYNC
-        void messageClient(std::shared_ptr<Connection<T>> client,
+        void messageClient(
+            std::shared_ptr<Connection<T>> client,
             const Message<T>& msg);
     protected:
-        virtual bool onClientConnect(std::shared_ptr<Connection<T>> client);
-        virtual void onClientDisconnect(std::shared_ptr<Connection<T>> client);
-        virtual void onMessage(std::shared_ptr<Connection<T>> client,
+        virtual bool onClientConnect(
+            std::shared_ptr<Connection<T>> client);
+        virtual void onClientDisconnect(
+            std::shared_ptr<Connection<T>> client);
+        virtual void onMessage(
+            std::shared_ptr<Connection<T>> client,
             Message<T>& msg);
     }
 \end{lstlisting}
+
+The server is running on 2 threads, one for handling the boost asio 
+operations and one for processing the incoming messages. It has 
+a list of already connected clients and the connection itself the only 
+operation that is done asynchronously. It has 3 main methods that 
+can be overwritten that define the actual behaviour of the server: 
+"onClientConnect", "onClientDisconnect", "onMessage" that are actual 
+callbacks to IPC events. If, for example, and integrator would want 
+to use our IPC framework all that he would need to do would be do 
+overwrite those given callbacks.
 
 \pagebreak
 
@@ -1150,16 +1199,32 @@ one for writing and one for notifying progress.
         void clear();
         Message<T> clone();
 
-        friend std::ostream& operator << (std::ostream& os, 
+        friend std::ostream& operator << (
+            std::ostream& os, 
             const Message<T>& msg);
+
         template<typename DataType>
-        friend Message<T>& operator << (Message<T>& msg, const DataType& data)
+        friend Message<T>& operator << (
+            Message<T>& msg,
+            const DataType& data)
+        
         template<typename DataType>
-        friend Message<T>& operator >> (Message<T>& msg, DataType& data)
+        friend Message<T>& operator >> (
+            Message<T>& msg,
+            DataType& data)
     }
 \end{lstlisting}  
 
-%de descris tot codul
+To define our message structure we also created a message class. The 
+header of message contains it's size, if it is has priority(is from 
+an emergency vehicle) and the type of message that is beeing send as
+well as and id. The data saved inside our body is in byte format and 
+we defined costum addition/extraction operations for any type of data.
+To do so we just memcopy the contents of the data as bytes and push 
+them to the end of our vector. Also the extraction can be done only 
+from the back of the vector. So if for example we add and variable 
+a and variable b to the message in this specific order we would need 
+to first read variable b then variable a.
 \pagebreak
 
 \section{CarDetector}
