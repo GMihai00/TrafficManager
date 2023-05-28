@@ -723,10 +723,13 @@ TSWLatexianTemp*
 /MLDataTraining/Python/tenserflow_env_py3.9/*
 
 #training data
-/MLDataTraining/Python/training_data/*
+/MLDataTraining/Python/Tensorflow/training_data/*
 
 #model coco record
-/MLDataTraining/Python/models/ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8/setup_files/*
+/MLDataTraining/Python/Tensorflow/models/ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8/setup_files/*
 
 #subrepo
-/MLDataTraining/Python/tf_repo/*
+/MLDataTraining/Python/Tensorflow/tf_repo/*
+
+#yolo training data
+/MLDataTraining/YOLOv8/datasets/*
