@@ -5,6 +5,7 @@
 
 #include "utile/ConfigHelpers.hpp"
 
+extern std::condition_variable g_condVarEnd;
 namespace model
 {
 	void VehicleTrackerClient::process()
@@ -24,7 +25,9 @@ namespace model
 			{
 				if (lastVisitedProxys_.empty())
 				{
-					throw std::runtime_error("Failed to find a valid junction, client is out of reach");
+					LOG_WARN << "Failed to find a valid junction, client is out of reach";
+					stop();
+					break;
 				}
 
 				LOG_DBG << lastVisitedProxys_.top().first << lastVisitedProxys_.top().second;
@@ -37,12 +40,8 @@ namespace model
 
 				if (!queryProxy())
 				{
-					if (lastVisitedProxys_.size() != 1)
-					{
-						lastVisitedProxys_.pop();
-						disconnect();
-					}
-					continue;
+					lastVisitedProxys_.pop();
+					disconnect();
 				}
 
 				disconnect();
@@ -67,6 +66,8 @@ namespace model
 			if (isConnected())
 				disconnect();
 		}
+
+		g_condVarEnd.notify_one();
 	}
 
 	VehicleTrackerClient::VehicleTrackerClient(const std::string& pathConfigFile, std::istream& inputStream) :
