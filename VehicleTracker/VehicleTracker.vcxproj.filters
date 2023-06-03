@@ -46,6 +46,18 @@
     <None Include="..\resources\VTConfig.json">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\resources\TestData\GPSData\E_INCOMING.nmea">
+      <Filter>Resource Files\gpsdata</Filter>
+    </None>
+    <None Include="..\resources\TestData\GPSData\N_INCOMING.nmea">
+      <Filter>Resource Files\gpsdata</Filter>
+    </None>
+    <None Include="..\resources\TestData\GPSData\S_INCOMING.nmea">
+      <Filter>Resource Files\gpsdata</Filter>
+    </None>
+    <None Include="..\resources\TestData\GPSData\W_INCOMING.nmea">
+      <Filter>Resource Files\gpsdata</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\resources\GPSData\NMEA_all.txt">

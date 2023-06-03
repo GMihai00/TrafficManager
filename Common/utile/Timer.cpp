@@ -82,9 +82,8 @@ namespace common
 			condVarTimer_.notify_one();
 		}
 
-		bool Timer::hasExpired()
+		bool Timer::hasExpired() const
 		{
-			std::scoped_lock lock(mutexTimer_);
 			return expired_;
 		}
 

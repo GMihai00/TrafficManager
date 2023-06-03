@@ -42,7 +42,7 @@ namespace common
 			virtual ~Timer() noexcept;
 			void decreaseTimer(const uint16_t& sec);
 			void resetTimer(const uint16_t& sec = 2);
-			bool hasExpired();
+			bool hasExpired() const;
 			std::time_t getExpirationTime();
 			uint16_t getTimeLeft();
 			void freezeTimer();

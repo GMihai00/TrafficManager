@@ -25,6 +25,7 @@ namespace model
 			{
 				if (lastVisitedProxys_.empty())
 				{
+					continue;
 					LOG_WARN << "Failed to find a valid junction, client is out of reach";
 					stop();
 					break;
@@ -42,6 +43,7 @@ namespace model
 				{
 					lastVisitedProxys_.pop();
 					disconnect();
+					continue;
 				}
 
 				disconnect();
@@ -118,8 +120,13 @@ namespace model
 		auto start = gpsAdapter_.getCurrentCoordinates();
 		auto current = gpsAdapter_.getCurrentCoordinates();
 
-		if (!(start.has_value() && current.has_value()))
+		if (!start.has_value())
 			return false;
+
+		while (current.has_value() && current.value() == start.value())
+		{
+			current = gpsAdapter_.getCurrentCoordinates();
+		}
 
 		auto direction = calculateDirection(start.value(), current.value());
 		if (!direction.has_value()) { return false; }

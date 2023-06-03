@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <clocale>
 #include <cstdlib>
+#include <random>
 
 #include "utile/Logger.hpp"
 #include "utile/GeoCoordinate.hpp"
@@ -25,10 +26,13 @@ LOGGER("TEST-MAIN");
 
 std::vector<PROCESS_INFORMATION> g_runningProcesses;
 std::filesystem::path g_video_path;
-// TO BE ADDED INSIDE COMMON
+std::thread g_vtSpawnerThread;
+std::mutex g_mutexUpdate;
+bool g_shouldStop = false;
+
 std::filesystem::path getWorkingDirectory()
 {
-    wchar_t pBuf[MAX_PATH]; // limited by Windows
+    wchar_t pBuf[MAX_PATH];
     size_t len = sizeof(pBuf);
 
     int bytes = GetModuleFileName(NULL, pBuf, len);
@@ -45,33 +49,40 @@ struct command_line
 {
     std::wstring m_exe;
     std::vector<std::wstring> m_arguments;
+
+    std::wstring to_wstring() const
+    {
+        std::wstringstream wss;
+        wss << L"Executable: " << m_exe << L"\n";
+        wss << L"Arguments: ";
+        for (const auto& arg : m_arguments)
+        {
+            wss << arg << L" ";
+        }
+        return wss.str();
+    }
 };
 
 std::string GetLastErrorAsString()
 {
-    //Get the error message ID, if any.
     DWORD errorMessageID = ::GetLastError();
     if (errorMessageID == 0) {
-        return std::string(); //No error message has been recorded
+        return std::string();
     }
 
     LPSTR messageBuffer = nullptr;
 
-    //Ask Win32 to give us the string version of that message ID.
-    //The parameters we pass in, tell Win32 to create the buffer that holds the message for us (because we don't yet know how long the message string will be).
     size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
 
-    //Copy the error message into a std::string.
     std::string message(messageBuffer, size);
 
-    //Free the Win32's string's buffer.
     LocalFree(messageBuffer);
 
     return message;
 }
 
-// TO BE ADDED INSIDE COMMON
+
 bool createProcessFromSameDirectory(const command_line& cmd)
 {
     STARTUPINFO si;
@@ -91,17 +102,17 @@ bool createProcessFromSameDirectory(const command_line& cmd)
     }
 
     std::wcout << L"[INFO] Attempting to run: " << command << L"\n";
-    // Start the child process. 
-    if (!CreateProcess(NULL,   // No module name (use command line)
-        LPWSTR(command.c_str()),   // Command line
-        NULL,           // Process handle not inheritable
-        NULL,           // Thread handle not inheritable
-        FALSE,          // Set handle inheritance to FALSE
-        CREATE_NEW_CONSOLE,              // No creation flags
-        NULL,           // Use parent's environment block
-        NULL,           // Use parent's starting directory 
-        &si,            // Pointer to STARTUPINFO structure
-        &pi)           // Pointer to PROCESS_INFORMATION structure
+
+    if (!CreateProcess(NULL,
+        LPWSTR(command.c_str()),
+        NULL,
+        NULL,
+        FALSE,
+        CREATE_NEW_CONSOLE,
+        NULL,
+        NULL,
+        &si,
+        &pi)
         )
     {
 
@@ -141,8 +152,7 @@ bool tryToRun4TOsForEachJMS(const model::JMSConfig& config)
 {
     std::vector<command_line> commandsToBeRan;
 
-    // runnning for same enpoint this is why it was failing ffs
-    for (auto lane_keyword_pair : config.laneToKeyword)
+    for (const auto& lane_keyword_pair : config.laneToKeyword)
     {
         command_line cmd;
         cmd.m_exe = L"TrafficObserver.exe";
@@ -229,27 +239,97 @@ bool runJMSForAllConfigs(const std::filesystem::path& jmsConfigDir)
     return rez;
 }
 
-// Data generate with the help of https://www.nmeagen.org/
-bool runVTForEachGPS(const std::filesystem::path& gpsDataDir, const std::filesystem::path& configPath)
+int getRandomNumberWithinRange(int min, int max)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    std::uniform_int_distribution<int> dist(min, max);
+
+    return dist(gen);
+}
+
+bool startSpawningVTsRandomly(const std::filesystem::path& gpsDataDir, const std::filesystem::path& configPath)
 {
     std::vector<command_line> commandsToBeRan;
 
+    std::vector<std::filesystem::path> configFiles;
+
     std::error_code ec;
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(gpsDataDir, ec))
+    auto dir_iter = std::filesystem::recursive_directory_iterator(gpsDataDir, ec);
+
+    if (ec)
+    {
+        LOG_ERR << ec.message();
+        return false;
+    }
+
+    for (const auto& entry : dir_iter)
     {
         if (std::filesystem::is_regular_file(entry, ec))
         {
-            command_line cmd;
-            cmd.m_exe = L"VehicleTracker.exe";
-            cmd.m_arguments.push_back(L"-gps_f");
-            cmd.m_arguments.push_back(entry.path().wstring());
-            cmd.m_arguments.push_back(L"-conf");
-            cmd.m_arguments.push_back(configPath.wstring());
-            commandsToBeRan.push_back(cmd);
+            if (!ec)
+                configFiles.push_back(entry.path());
         }
     }
 
-    return std::all_of(commandsToBeRan.begin(), commandsToBeRan.end(), [](const auto& comand) { return createProcessFromSameDirectory(comand); });
+    if (configFiles.empty())
+        return false;
+
+    g_vtSpawnerThread = std::thread([configFiles, configPath]()
+        {
+            while (!g_shouldStop)
+            {
+                auto poz = getRandomNumberWithinRange(0, configFiles.size() - 1);
+
+
+                std::scoped_lock lock(g_mutexUpdate);
+                if (poz >= configFiles.size())
+                    continue;
+
+                command_line cmd;
+                cmd.m_exe = L"VehicleTracker.exe";
+                cmd.m_arguments.push_back(L"-gps_f");
+                cmd.m_arguments.push_back(configFiles[poz].wstring());
+                cmd.m_arguments.push_back(L"-conf");
+                cmd.m_arguments.push_back(configPath.wstring());
+
+                if (createProcessFromSameDirectory(cmd))
+                {
+                    {
+                        const auto& pi = *g_runningProcesses.rbegin().base();
+
+                        HANDLE processHandle = NULL;
+                        processHandle = OpenProcess(PROCESS_TERMINATE | PROCESS_ALL_ACCESS, FALSE, pi.dwProcessId);
+                        if (processHandle == NULL) {
+                            std::cerr << "Error opening process: " << GetLastErrorAsString() << std::endl;
+                            return;
+                        }
+
+                        auto waitingTime = getRandomNumberWithinRange(1000, 3000);
+
+                        WaitForSingleObject(pi.hProcess, waitingTime);
+
+                        if (!TerminateProcess(pi.hProcess, 0)) {
+                            std::cerr << "Error terminating process: " << GetLastErrorAsString() << std::endl;
+                            return;
+                        }
+
+                        CloseHandle(pi.hProcess);
+                        CloseHandle(pi.hThread);
+                    }
+
+                    g_runningProcesses.pop_back();
+                }
+                else
+                {
+                    LOG_WARN << "Failed to start process, cmd= " << utf16_to_utf8(cmd.to_wstring());
+                }
+            }
+
+        });
+
+    return true;
 }
 
 std::optional<std::filesystem::path> getGPSDataDir(const CommandLineParser& commandLine)
@@ -368,37 +448,45 @@ int main(int argc, char* argv[])
         return 5;
     }
 
-    //auto proxyConfigFile = getProxyConfigFile(commandLine);
-    //if (!proxyConfigFile.has_value() || !loadProxysFromConfigFile(proxyConfigFile.value()))
-    //{
-    //    LOG_ERR << "Failed to run Proxys";
-    //    closeAllProcesses();
-    //    return 5;
-    //}
+    auto proxyConfigFile = getProxyConfigFile(commandLine);
+    if (!proxyConfigFile.has_value() || !loadProxysFromConfigFile(proxyConfigFile.value()))
+    {
+        LOG_ERR << "Failed to run Proxys";
+        closeAllProcesses();
+        return 5;
+    }
 
-    //auto gpsDataDir = getGPSDataDir(commandLine);
-    //if (!gpsDataDir.has_value())
-    //{
-    //    LOG_ERR << "GPS input is missing";
-    //    closeAllProcesses();
-    //    return 5;
-    //}
-    // aici nu ar trebui sa ia un VT pt fiecare vehicle ar trebui sa am 4 configurari pt fiecare lane care stiu ca dau in junction 
-    // clienti ar trebui sa se spawneze random!!!
+    // data generated with https://www.nmeagen.org/, junction resembles "Podul Mihai Viteazu Timisoara, Timis"
+    auto gpsDataDir = getGPSDataDir(commandLine);
+    if (!gpsDataDir.has_value())
+    {
+        LOG_ERR << "GPS input is missing";
+        closeAllProcesses();
+        return 5;
+    }
 
-    //auto vtConfigFile = getVtConfigFile(commandLine);
-    //if (!vtConfigFile.has_value())
-    //{
-    //    LOG_WARN << "VT config file is missing";
-    //    vtConfigFile = "";
-    //}
-
-    //runVTForEachGPS(gpsDataDir.value(), vtConfigFile.value());
+    auto vtConfigFile = getVtConfigFile(commandLine);
+    if (!vtConfigFile.has_value())
+    {
+        LOG_WARN << "VT config file is missing";
+        vtConfigFile = "";
+    }
+  
+    if (!startSpawningVTsRandomly(gpsDataDir.value(), vtConfigFile.value()))
+    {
+        LOG_WARN << "Failed to start VTs";
+    }
 
     std::cout << "Press any key to stop\n";
     char input;
     std::cin >> input;
 
     closeAllProcesses();
+
+    g_shouldStop = true;
+
+    if (g_vtSpawnerThread.joinable())
+        g_vtSpawnerThread.join();
+
 	return 0;
 }

@@ -62,7 +62,7 @@ namespace common
 
 			bool operator==(const GeoCoordinate& obj) const
 			{
-				return ((this->latitude == obj.latitude) && (this->longitude == obj.longitude));
+				return ((std::fabs(this->latitude - obj.latitude) < 0.00001) && (std::fabs(this->longitude - obj.longitude) < 0.00001));
 			}
 
 			// SHOULD SWITCH TO BEARING IN THE END FOR NOW JUST USING S,E,N,W

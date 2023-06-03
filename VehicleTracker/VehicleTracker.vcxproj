@@ -172,6 +172,10 @@
     <ClInclude Include="model\VehicleTrackerClient.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\resources\TestData\GPSData\E_INCOMING.nmea" />
+    <None Include="..\resources\TestData\GPSData\N_INCOMING.nmea" />
+    <None Include="..\resources\TestData\GPSData\S_INCOMING.nmea" />
+    <None Include="..\resources\TestData\GPSData\W_INCOMING.nmea" />
     <None Include="..\resources\VTConfig.json" />
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,7 @@
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 
-#define CHECK_IF_STILL_VALID_POSITION(start) if (start == std::string::npos) { return {}; }
+#define CHECK_IF_STILL_VALID_POSITION(start) if (start == std::string::npos) { return std::nullopt; }
 
 namespace model
 {
@@ -26,7 +26,8 @@ namespace model
 			while (lastCoordinates_.has_value() == false)
 			{
 				NMEAString.clear();
-				std::getline(inputStream_, NMEAString);
+				if (!std::getline(inputStream_, NMEAString))
+					continue;
 
 				auto maybeCoordinate = parseNMEAString(NMEAString);
 				if (maybeCoordinate.has_value())
@@ -73,18 +74,20 @@ namespace model
 
 	std::optional<GeoCoordinate<DecimalCoordinate>> GPSAdapter::getCurrentCoordinates()
 	{
-		condVarProcess_.notify_one();
 		std::unique_lock<std::mutex> ulock(mutexProcess_);
 		if (!lastCoordinates_.has_value() && !shuttingDown_)
+		{
+			condVarProcess_.notify_one();
 			condVarProcess_.wait(ulock, [&] { return lastCoordinates_.has_value() || shuttingDown_; });
+		}
 
 		if (shuttingDown_)
 		{
-			return {};
+			return std::nullopt;
 		}
 
 		common::utile::GeoCoordinate currentCoordinate = lastCoordinates_.value();
-		lastCoordinates_ = {};
+		lastCoordinates_ = std::nullopt;
 		return currentCoordinate;
 	}
 
@@ -119,7 +122,7 @@ namespace model
 
 	std::optional<GeoCoordinate<DecimalCoordinate>> GPSAdapter::parseNMEAString(std::string& NMEAString)
 	{
-		std::optional<GeoCoordinate<DecimalCoordinate>> rez;
+		std::optional<GeoCoordinate<DecimalCoordinate>> rez = std::nullopt;
 		rez = parseGPGLLString(NMEAString);
 		if (rez.has_value())
 		{
@@ -138,7 +141,7 @@ namespace model
 			return rez;
 		}
 
-		return {};
+		return std::nullopt;
 	}
 
 	std::optional<GeoCoordinate<DecimalCoordinate>> GPSAdapter::parseGPGLLString(std::string NMEAString)
@@ -150,19 +153,19 @@ namespace model
 		//$GPGLL
 		std::string value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
-		if (value != "$GPGLL") { return {}; }
+		if (value != "$GPGLL") { return std::nullopt; }
 
 		// <lat>
 		value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
 
 		auto latitude = common::utile::StringToDecimalCoordinates(value);
-		if (!latitude.has_value()) { return {}; }
+		if (!latitude.has_value()) { return std::nullopt; }
 
 		// N/S
 		value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
-		if (!(value == "N" || value == "S")) { return {}; }
+		if (!(value == "N" || value == "S")) { return std::nullopt; }
 		if (value == "S") { latitude = -latitude.value(); }
 
 		// <lon>
@@ -170,12 +173,12 @@ namespace model
 		CHECK_IF_STILL_VALID_POSITION(start);
 
 		auto longitude = common::utile::StringToDecimalCoordinates(value);
-		if (!longitude.has_value()) { return {}; }
+		if (!longitude.has_value()) { return std::nullopt; }
 
 		//take E/W
 		value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
-		if (!(value == "E" || value == "W")) { return {}; }
+		if (!(value == "E" || value == "W")) { return std::nullopt; }
 		if (value == "W") { longitude = -longitude.value(); }
 
 		// <time>(hhmmss.sss) IGNORED
@@ -185,19 +188,19 @@ namespace model
 		// A/V if V return {}
 		value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
-		if (value == "V" ) { return {}; }
+		if (value == "V" ) { return std::nullopt; }
 
 		// "A/D/E/M/N" useless so just skip it
 		start++;
 		CHECK_IF_STILL_VALID_POSITION(start);
 
 		// "*" <checksum> if not matching return {}
-		if (NMEAString[start] != '*') { return {}; }
+		if (NMEAString[start] != '*') { return std::nullopt; }
 		start++;
 		CHECK_IF_STILL_VALID_POSITION(start);
 
 		value = NMEAString.substr(start, NMEAString.size() - start + 1);
-		if (calculateCheckSum(std::string(NMEAString.substr(1, start - 2))) != hexStringToInt(value)) { return {}; }
+		if (calculateCheckSum(std::string(NMEAString.substr(1, start - 2))) != hexStringToInt(value)) { return std::nullopt; }
 
 		rez.latitude = latitude.value();
 		rez.longitude = longitude.value();
@@ -214,7 +217,7 @@ namespace model
 		//$GPGGA
 		std::string value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
-		if (value != "$GPGGA") { return {}; }
+		if (value != "$GPGGA") { return std::nullopt; }
 
 		// <time>(hhmmss.sss) IGNORED
 		value = getNextValue(NMEAString, start);
@@ -225,12 +228,12 @@ namespace model
 		CHECK_IF_STILL_VALID_POSITION(start);
 
 		auto latitude = common::utile::StringToDecimalCoordinates(value);
-		if (!latitude.has_value()) { return {}; }
+		if (!latitude.has_value()) { return std::nullopt; }
 
 		// N/S
 		value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
-		if (!(value == "N" || value == "S")) { return {}; }
+		if (!(value == "N" || value == "S")) { return std::nullopt; }
 		if (value == "S") { latitude = -latitude.value(); }
 
 		// <lon>
@@ -238,12 +241,12 @@ namespace model
 		CHECK_IF_STILL_VALID_POSITION(start);
 
 		auto longitude = common::utile::StringToDecimalCoordinates(value);
-		if (!longitude.has_value()) { return {}; }
+		if (!longitude.has_value()) { return std::nullopt; }
 
 		//take E/W
 		value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
-		if (!(value == "E" || value == "W")) { return {}; }
+		if (!(value == "E" || value == "W")) { return std::nullopt; }
 		if (value == "W") { longitude = -longitude.value(); }
 
 
@@ -284,12 +287,12 @@ namespace model
 		// <Diff. ref. station ID> IGNORED
 		while (start < NMEAString.size() && NMEAString[start] != '*') { start++; }
 
-		if (start >= NMEAString.size() || NMEAString[start] != '*') { return {}; }
+		if (start >= NMEAString.size() || NMEAString[start] != '*') { return std::nullopt; }
 		start++;
 		CHECK_IF_STILL_VALID_POSITION(start);
 
 		value = NMEAString.substr(start, NMEAString.size() - start + 1);
-		if (calculateCheckSum(std::string(NMEAString.substr(1, start - 2))) != hexStringToInt(value)) { return {}; }
+		if (calculateCheckSum(std::string(NMEAString.substr(1, start - 2))) != hexStringToInt(value)) { return std::nullopt; }
 
 		rez.latitude = latitude.value();
 		rez.longitude = longitude.value();
@@ -306,7 +309,7 @@ namespace model
 		//$GPRMC
 		std::string value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
-		if (value != "$GPRMC") { return {}; }
+		if (value != "$GPRMC") { return std::nullopt; }
 
 		// <time>(hhmmss.sss) IGNORED
 		value = getNextValue(NMEAString, start);
@@ -315,19 +318,19 @@ namespace model
 		// A/V if V return {}
 		value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
-		if (value == "V") { return {}; }
+		if (value == "V") { return std::nullopt; }
 
 		// <lat>
 		value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
 
 		auto latitude = common::utile::StringToDecimalCoordinates(value);
-		if (!latitude.has_value()) { return {}; }
+		if (!latitude.has_value()) { return std::nullopt; }
 
 		// N/S
 		value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
-		if (!(value == "N" || value == "S")) { return {}; }
+		if (!(value == "N" || value == "S")) { return std::nullopt; }
 		if (value == "S") { latitude = -latitude.value(); }
 
 		// <lon>
@@ -335,12 +338,12 @@ namespace model
 		CHECK_IF_STILL_VALID_POSITION(start);
 
 		auto longitude = common::utile::StringToDecimalCoordinates(value);
-		if (!longitude.has_value()) { return {}; }
+		if (!longitude.has_value()) { return std::nullopt; }
 
 		//take E/W
 		value = getNextValue(NMEAString, start);
 		CHECK_IF_STILL_VALID_POSITION(start);
-		if (!(value == "E" || value == "W")) { return {}; }
+		if (!(value == "E" || value == "W")) { return std::nullopt; }
 		if (value == "W") { longitude = -longitude.value(); }
 
 		// <Speed over ground> IGNORED
@@ -364,12 +367,12 @@ namespace model
 		CHECK_IF_STILL_VALID_POSITION(start);
 
 		// "*" <checksum> if not matching return {}
-		if (NMEAString[start] != '*') { return {}; }
+		if (NMEAString[start] != '*') { return std::nullopt; }
 		start++;
 		CHECK_IF_STILL_VALID_POSITION(start);
 
 		value = NMEAString.substr(start, NMEAString.size() - start + 1);
-		if (calculateCheckSum(std::string(NMEAString.substr(1, start - 2))) != hexStringToInt(value)) { return {}; }
+		if (calculateCheckSum(std::string(NMEAString.substr(1, start - 2))) != hexStringToInt(value)) { return std::nullopt; }
 
 		rez.latitude = latitude.value();
 		rez.longitude = longitude.value();
