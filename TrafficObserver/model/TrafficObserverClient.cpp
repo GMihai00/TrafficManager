@@ -8,8 +8,9 @@ namespace model
 
         LOG_INF << "Handling new car data carcount_left: " << carCount.first << " carcount_right: " << carCount.second;
 
-        sendData(carCount.first - carCountLeft_, 1);
-        sendData(carCount.second - carCountRight_, 0);
+        // from the camera perspective left cars are incoming vehicles aka cars from the right lane
+        sendData(carCount.first - carCountLeft_, 0);
+        sendData(carCount.second - carCountRight_, 1);
 
         carCountLeft_ = carCount.first;
         carCountRight_ = carCount.second;

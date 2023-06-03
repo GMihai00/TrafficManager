@@ -20,6 +20,7 @@ namespace ipc
             T type{};
             uint16_t id{};
             bool hasPriority = false;
+            bool disconnecting = false;
             size_t size = 0;
         };
     
@@ -27,7 +28,7 @@ namespace ipc
         struct Message
         {
             MessageHeader<T> header{};
-            std::vector<uint8_t> body;
+            std::vector<uint8_t> body = {};
 
             size_t size() const
             {

@@ -98,7 +98,16 @@ namespace ipc
             {
                 if (isConnected())
                 {
+                    Message<T> disconnectMessage;
+                    disconnectMessage.header.disconnecting = true;
+
+                    send(disconnectMessage);
+
+                    waitForAnswear(1000);
+
                     connection_->disconnect();
+
+                    incomingMessages_.clear();
                 }
                 connection_.reset();
             }

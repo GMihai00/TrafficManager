@@ -144,7 +144,20 @@ namespace ipc
                 if (maybeMsg.has_value())
                 {
                     auto msg = maybeMsg.value().first;
-                    onMessage(msg.remote, msg.msg);
+
+                    if (msg.remote)
+                    {
+                        if (msg.msg.header.disconnecting == false)
+                        {
+                            onMessage(msg.remote, msg.msg);
+                        }
+                        else
+                        {
+                            messageClient(msg.remote, msg.msg);
+
+                            msg.remote->disconnect();
+                        }
+                    }
                 }
             }
             // ASYNC OK

@@ -132,7 +132,7 @@ namespace model
 		send(message);
 
 		// WAIT FOR RESPONSE
-		if (!waitForAnswear(1000))
+		if (!waitForAnswear(3000))
 		{
 			return false;
 		}
