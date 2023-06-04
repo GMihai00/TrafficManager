@@ -2,9 +2,12 @@
 #ifndef COMMON_UTILE_GEOCOORDINATE_HPP
 #define COMMON_UTILE_GEOCOORDINATE_HPP
 
+#include <iomanip>
 #include <string>
 #include <optional>
 #include <type_traits>
+#include <sstream>
+
 #include "boost/algorithm/string.hpp"
 
 #include "DataTypes.hpp"
@@ -44,6 +47,8 @@ namespace common
 			T latitude;
 			T longitude;
 
+			GeoCoordinate(const T& lat, const T& lon) : latitude(lat), longitude(lon) {}
+
 			GeoCoordinate(const std::string& input)
 			{
 				std::vector<std::string> val;
@@ -63,6 +68,15 @@ namespace common
 			bool operator==(const GeoCoordinate& obj) const
 			{
 				return ((std::fabs(this->latitude - obj.latitude) < 0.00001) && (std::fabs(this->longitude - obj.longitude) < 0.00001));
+			}
+
+
+			std::string toString() const
+			{
+				std::stringstream ss;
+				ss << "lat= " << latitude << " lon= " << longitude;
+
+				return ss.str();
 			}
 
 			// SHOULD SWITCH TO BEARING IN THE END FOR NOW JUST USING S,E,N,W
@@ -101,9 +115,9 @@ namespace common
 			DecimalCoordinate headinglongitude = coordinate.longitude;
 			
 			DecimalCoordinate horizontalTraveledDistance = abs(headinglongitude - startlongitude);
-			LANE headingHorizontal = (startlongitude < headinglongitude) ? LANE::E : LANE::W;
+			LANE headingHorizontal = (startlongitude < headinglongitude) ? LANE::W : LANE::E;
 			DecimalCoordinate verticalTraveledDistance = abs(headinglatitude - startlatitude);
-			LANE headingVertical = (startlatitude < headinglatitude) ? LANE::N : LANE::S;
+			LANE headingVertical = (startlatitude < headinglatitude) ? LANE::S : LANE::N;
 
 			return ((horizontalTraveledDistance > verticalTraveledDistance) ? headingHorizontal : headingVertical);
 		}

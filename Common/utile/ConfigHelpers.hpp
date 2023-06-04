@@ -8,6 +8,8 @@
 #include <vector>
 #include <map>
 #include <stack>
+#include <sstream>
+
 #include <nlohmann/json.hpp>
 
 #include "DataTypes.hpp"
@@ -35,13 +37,22 @@ namespace common
 
 			struct proxy_config_data
 			{
-				IP_ADRESS ip;
-				PORT port;
-				GeoCoordinate<DecimalCoordinate> boundSW;
-				GeoCoordinate<DecimalCoordinate> boundNE;
-				std::string dbServer;
-				std::string dbUsername;
-				std::string dbPassword;
+				IP_ADRESS ip = "";
+				PORT port = 0;
+				GeoCoordinate<DecimalCoordinate> boundSW{0., 0.};
+				GeoCoordinate<DecimalCoordinate> boundNE{0., 0.};
+				std::string dbServer = "";
+				std::string dbUsername = "";
+				std::string dbPassword = "";
+
+				std::string toString() const
+				{
+					std::stringstream ss;
+					ss << "ip= " << ip << " port= " << port << " server: " << dbServer << 
+						" boundSW: " << boundSW.toString() << " boundNE: " << boundNE.toString();
+
+					return ss.str();
+				}
 			};
 
 		}
@@ -73,6 +84,9 @@ namespace common
 		std::stack<std::pair<utile::IP_ADRESS, utile::PORT>> getLastVisitedProxys(const std::string& pathToConfigFile) noexcept;
 
 		bool saveVTConfig(std::stack<std::pair<utile::IP_ADRESS, utile::PORT>> lastVisitedProxys) noexcept;
+
+		std::optional<model::proxy_config_data> loadProxyConfig(const nlohmann::json& data) noexcept;
+		std::optional<model::proxy_config_data> loadProxyConfig(const std::string& pathToConfigFile) noexcept;
 
 		std::vector<model::proxy_config_data> loadProxyConfigs(const std::string& pathToConfigFile) noexcept;
 	} // namespace utile

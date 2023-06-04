@@ -19,4 +19,35 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\resources\TestData\CarTestVideo1.mp4">
+      <Filter>Source Files\Resource Files</Filter>
+    </Media>
+    <Media Include="..\resources\TestData\CarTestVideo2.mp4">
+      <Filter>Source Files\Resource Files</Filter>
+    </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\resources\TestData\VTConfig.json">
+      <Filter>Source Files\Resource Files</Filter>
+    </None>
+    <None Include="..\resources\TestData\ProxyConfigs\ProxyConfig.json">
+      <Filter>Source Files\Resource Files</Filter>
+    </None>
+    <None Include="..\resources\TestData\JMSConfigs\JunctionConfig.json">
+      <Filter>Source Files\Resource Files</Filter>
+    </None>
+    <None Include="..\resources\TestData\GPSData\E_INCOMING.nmea">
+      <Filter>Source Files\Resource Files</Filter>
+    </None>
+    <None Include="..\resources\TestData\GPSData\N_INCOMING.nmea">
+      <Filter>Source Files\Resource Files</Filter>
+    </None>
+    <None Include="..\resources\TestData\GPSData\S_INCOMING.nmea">
+      <Filter>Source Files\Resource Files</Filter>
+    </None>
+    <None Include="..\resources\TestData\GPSData\W_INCOMING.nmea">
+      <Filter>Source Files\Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

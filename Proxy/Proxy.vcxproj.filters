@@ -45,4 +45,12 @@
       <Filter>Header Files\utile</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\resources\TestData\ProxyConfigs\ProxyConfig.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\resources\ProxyConfig.json">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

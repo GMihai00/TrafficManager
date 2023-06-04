@@ -20,6 +20,9 @@
 #include "utile/TypeConverters.hpp"
 
 #include "utile/SignalHandler.hpp"
+
+#include "utile/GeoCoordinate.hpp"
+
 using namespace common::utile;
 
 LOGGER("TEST-MAIN");
@@ -29,6 +32,16 @@ std::filesystem::path g_video_path;
 std::thread g_vtSpawnerThread;
 std::mutex g_mutexUpdate;
 bool g_shouldStop = false;
+
+int getRandomNumberWithinRange(int min, int max)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    std::uniform_int_distribution<int> dist(min, max);
+
+    return dist(gen);
+}
 
 std::filesystem::path getWorkingDirectory()
 {
@@ -147,6 +160,31 @@ void closeAllProcesses()
     }
 }
 
+
+void closeLastProcess()
+{
+    const auto& pi = *g_runningProcesses.rbegin().base();
+
+    HANDLE processHandle = NULL;
+    processHandle = OpenProcess(PROCESS_TERMINATE | PROCESS_ALL_ACCESS, FALSE, pi.dwProcessId);
+    if (processHandle == NULL) {
+        std::cerr << "Error opening process: " << GetLastErrorAsString() << std::endl;
+        return;
+    }
+
+    auto waitingTime = getRandomNumberWithinRange(1000, 3000);
+
+    WaitForSingleObject(pi.hProcess, waitingTime);
+
+    if (!TerminateProcess(pi.hProcess, 0)) {
+        std::cerr << "Error terminating process: " << GetLastErrorAsString() << std::endl;
+        return;
+    }
+
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+}
+
 // taken from jms file
 bool tryToRun4TOsForEachJMS(const model::JMSConfig& config)
 {
@@ -171,36 +209,15 @@ bool tryToRun4TOsForEachJMS(const model::JMSConfig& config)
     return std::all_of(commandsToBeRan.begin(), commandsToBeRan.end(), [](const auto& comand) { return createProcessFromSameDirectory(comand); });
 }
 
-bool runProxy(const model::proxy_config_data& config)
+bool runProxy(const std::filesystem::path& configPath)
 {
     command_line cmd;
 
     cmd.m_exe = L"Proxy.exe";
-    cmd.m_arguments.push_back(L"-h");
-    cmd.m_arguments.push_back(utf8_to_utf16(config.ip));
-    cmd.m_arguments.push_back(L"-p");
-    cmd.m_arguments.push_back(std::to_wstring(config.port));
-    cmd.m_arguments.push_back(L"-bsw");
-    std::wstring boundSW = std::to_wstring(config.boundSW.latitude) + L"," + std::to_wstring(config.boundSW.longitude);
-    cmd.m_arguments.push_back(boundSW);
-    cmd.m_arguments.push_back(L"-bne");
-    std::wstring boundNE = std::to_wstring(config.boundNE.latitude) + L"," + std::to_wstring(config.boundNE.longitude);;
-    cmd.m_arguments.push_back(boundNE);
-    cmd.m_arguments.push_back(L"-s");
-    cmd.m_arguments.push_back(utf8_to_utf16(config.dbServer));
-    cmd.m_arguments.push_back(L"-u");
-    cmd.m_arguments.push_back(utf8_to_utf16(config.dbUsername));
-    cmd.m_arguments.push_back(L"-ps");
-    cmd.m_arguments.push_back(utf8_to_utf16(config.dbPassword));
+    cmd.m_arguments.push_back(L"-p_conf");
+    cmd.m_arguments.push_back(configPath.wstring());
 
     return createProcessFromSameDirectory(cmd);
-}
-
-bool loadProxysFromConfigFile(const std::filesystem::path& configPath)
-{
-    auto configs = loadProxyConfigs(configPath.string());
-    
-    return std::all_of(configs.begin(), configs.end(), [](const auto& config) { return runProxy(config); });
 }
 
 bool runJMSForAllConfigs(const std::filesystem::path& jmsConfigDir)
@@ -237,16 +254,6 @@ bool runJMSForAllConfigs(const std::filesystem::path& jmsConfigDir)
     }
 
     return rez;
-}
-
-int getRandomNumberWithinRange(int min, int max)
-{
-    std::random_device rd;
-    std::mt19937 gen(rd());
-
-    std::uniform_int_distribution<int> dist(min, max);
-
-    return dist(gen);
 }
 
 bool startSpawningVTsRandomly(const std::filesystem::path& gpsDataDir, const std::filesystem::path& configPath)
@@ -296,29 +303,7 @@ bool startSpawningVTsRandomly(const std::filesystem::path& gpsDataDir, const std
 
                 if (createProcessFromSameDirectory(cmd))
                 {
-                    {
-                        const auto& pi = *g_runningProcesses.rbegin().base();
-
-                        HANDLE processHandle = NULL;
-                        processHandle = OpenProcess(PROCESS_TERMINATE | PROCESS_ALL_ACCESS, FALSE, pi.dwProcessId);
-                        if (processHandle == NULL) {
-                            std::cerr << "Error opening process: " << GetLastErrorAsString() << std::endl;
-                            return;
-                        }
-
-                        auto waitingTime = getRandomNumberWithinRange(1000, 3000);
-
-                        WaitForSingleObject(pi.hProcess, waitingTime);
-
-                        if (!TerminateProcess(pi.hProcess, 0)) {
-                            std::cerr << "Error terminating process: " << GetLastErrorAsString() << std::endl;
-                            return;
-                        }
-
-                        CloseHandle(pi.hProcess);
-                        CloseHandle(pi.hThread);
-                    }
-
+                    closeLastProcess();
                     g_runningProcesses.pop_back();
                 }
                 else
@@ -423,7 +408,6 @@ std::optional<std::filesystem::path> getProxyConfigFile(const CommandLineParser&
 
 int main(int argc, char* argv[])
 {
-
     auto commandLine = CommandLineParser(argc, argv);
 
     SignalHandler sigHandler{};
@@ -449,9 +433,9 @@ int main(int argc, char* argv[])
     }
 
     auto proxyConfigFile = getProxyConfigFile(commandLine);
-    if (!proxyConfigFile.has_value() || !loadProxysFromConfigFile(proxyConfigFile.value()))
+    if (!proxyConfigFile.has_value() || !runProxy(proxyConfigFile.value()))
     {
-        LOG_ERR << "Failed to run Proxys";
+        LOG_ERR << "Failed to run Proxy";
         closeAllProcesses();
         return 5;
     }

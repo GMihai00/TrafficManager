@@ -1,0 +1,17 @@
+{
+    "ip": "127.0.0.1",
+    "port": 6000,
+    "bound_sw": {
+        "latitude": -9999,
+        "longitude": -9999
+    },
+    "bound_ne": {
+        "latitude": 9999,
+        "longitude": 9999
+    },
+    "db": {
+        "server": "tcp://localhost:3306/traffic_manager",
+        "username": "root",
+        "password": "Calebbb1234567890*"
+    }
+}

@@ -26,6 +26,19 @@
       <Project>{49c8f1b8-b740-417a-8e55-a729a6dfb496}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\resources\TestData\CarTestVideo1.mp4" />
+    <Media Include="..\resources\TestData\CarTestVideo2.mp4" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\resources\TestData\GPSData\E_INCOMING.nmea" />
+    <None Include="..\resources\TestData\GPSData\N_INCOMING.nmea" />
+    <None Include="..\resources\TestData\GPSData\S_INCOMING.nmea" />
+    <None Include="..\resources\TestData\GPSData\W_INCOMING.nmea" />
+    <None Include="..\resources\TestData\JMSConfigs\JunctionConfig.json" />
+    <None Include="..\resources\TestData\ProxyConfigs\ProxyConfig.json" />
+    <None Include="..\resources\TestData\VTConfig.json" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

@@ -21,11 +21,10 @@ namespace model
 				continue;
 			}
 
-			while (!shouldPause_)
+			while (!shouldPause_ && !shuttingDown_)
 			{
 				if (lastVisitedProxys_.empty())
 				{
-					continue;
 					LOG_WARN << "Failed to find a valid junction, client is out of reach";
 					stop();
 					break;
@@ -41,13 +40,19 @@ namespace model
 
 				if (!queryProxy())
 				{
-					lastVisitedProxys_.pop();
-					disconnect();
+					if (lastVisitedProxys_.size() != 1)
+					{
+						lastVisitedProxys_.pop();
+						disconnect();
+					}
+					LOG_WARN << "Failed to query proxy";
 					continue;
 				}
 
 				disconnect();
 				
+				LOG_INF << "Connecting to junction";
+
 				if (!connect(nextJunction_->getIpAdress(), nextJunction_->getPort()))
 				{
 					LOG_ERR << "FAILED TO COMMUNICATE WITH JUNCTION";
@@ -60,6 +65,7 @@ namespace model
 					continue;
 				}
 
+				LOG_INF << "Waiting to pass junction";
 				waitToPassJunction();
 
 				disconnect();
@@ -120,13 +126,16 @@ namespace model
 		auto start = gpsAdapter_.getCurrentCoordinates();
 		auto current = gpsAdapter_.getCurrentCoordinates();
 
-		if (!start.has_value())
+		while (!start.has_value())
 			return false;
 
-		while (current.has_value() && current.value() == start.value())
+		while (!current.has_value() || (current.value() == start.value()))
 		{
 			current = gpsAdapter_.getCurrentCoordinates();
 		}
+
+		LOG_INF << "Start: " << start.value().toString();
+		LOG_INF << "Current: " << current.value().toString();
 
 		auto direction = calculateDirection(start.value(), current.value());
 		if (!direction.has_value()) { return false; }
@@ -140,6 +149,7 @@ namespace model
 		send(message);
 
 		// WAIT FOR RESPONSE
+		LOG_INF << "Waiting for proxy answear";
 		if (!waitForAnswear(3000))
 		{
 			return false;
@@ -147,7 +157,7 @@ namespace model
 
 		// GET MESSAGE AND CHECK TYPE
 		auto answear = getLastUnreadAnswear();
-		if (!answear.has_value()) { return false; }
+		if (!answear.has_value()) { LOG_ERR << "No answear recieved"; return false; }
 
 		// IF THIS FAILS IT MEANS THAT YOU ARE UNABLE TO BE REDIRECTED TO A JUNCTION FOR SOME KIND OF REASON
 		// JUST HALT THE EXECUTION OF THE PROGRAM AND RETURN ERR EXIT CODE, NO REASON TO MOVE FORWARD
@@ -174,19 +184,24 @@ namespace model
 		}
 		catch (const std::runtime_error&)
 		{
+			LOG_WARN << "Not a valid proxyReply, attempting to read it as a redirect";
 		}
 
 		try
 		{
 			ipc::net::ProxyRedirect redirect{ msg };
-			LOG_DBG << "Redirected";
+			LOG_DBG << "Client beeing redirected, switching to new proxy";
 			return switchConnectionToRedirectedProxy(redirect);
 		}
 		catch (const std::runtime_error&)
 		{
 			// IF WE REACHED THIS POINT WE JUST GOT A NACK MESSAGE
 			// FOR NOW NO NEED TO REPARSE IT TO SEE IF IT IS NACK OR NOT
-			LOG_DBG << "Message rejected";
+			if (msg.header.type == ipc::VehicleDetectionMessages::NACK)
+				LOG_ERR << "Message rejected";
+			else
+				LOG_ERR << "Invalid message recieved";
+
 			return false;
 		}
 	}

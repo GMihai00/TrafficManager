@@ -5,13 +5,15 @@
 
 namespace model
 {
-	ProxyServer::ProxyServer(const ipc::utile::IP_ADRESS& host,
-		const ipc::utile::PORT port,
-		const common::db::ProxyPtr& dbProxy,
-		const utile::DBConnectionData& connectionData) :
-		ipc::net::Server<ipc::VehicleDetectionMessages>(host, port),
-		dbProxy_(dbProxy)
+	ProxyServer::ProxyServer(const common::utile::model::proxy_config_data& config):
+		ipc::net::Server<ipc::VehicleDetectionMessages>(config.ip, config.port)
 	{
+		auto coveredArea = std::make_shared<common::db::BoundingRect>(config.boundSW, config.boundNE);
+
+		dbProxy_ = std::make_shared<common::db::Proxy>(config.ip, config.port, 0, coveredArea);
+
+		auto connectionData = ::utile::DBConnectionData(config.dbServer, config.dbUsername, config.dbPassword);
+
 		try
 		{
 			dbWrapper_ = std::make_unique<utile::DBWrapper>(connectionData);
@@ -32,7 +34,6 @@ namespace model
 	void ProxyServer::rejectMessage(
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
-		LOG_WARN << "Rejecting message, valid proxy could not be found";
 		ipc::net::Message<ipc::VehicleDetectionMessages> message;
 		message.header.id = msg.header.id;
 		message.header.type = ipc::VehicleDetectionMessages::NACK;
@@ -115,6 +116,7 @@ namespace model
 				proxy = dbWrapper_->findClosestProxyToPoint(pointB);
 				if (!proxy)
 				{
+					LOG_ERR << "Couldn't find a proxy to redirect to, rejecting message";
 					rejectMessage(client, msg);
 					return;
 				}
@@ -159,6 +161,7 @@ namespace model
 			case ipc::net::Owner::Server:
 				if (!isCoveredByProxy(client, msg))
 				{
+					LOG_WARN << "Rejecting message, proxy not covering the moving client area";
 					rejectMessage(client, msg);
 					return;
 				}
@@ -169,6 +172,7 @@ namespace model
 				}
 				else
 				{
+					LOG_INF << "Failed to find suitable junction, attempting to redirect";
 					redirect(client, backupMsg);
 				}
 			default:

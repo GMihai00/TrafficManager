@@ -152,12 +152,12 @@ namespace common
 				return setProxyIp(json, config) && setProxyPort(json, config);
 			}
 
-			bool setCoordinateLatitude(const nlohmann::json& json, GeoCoordinate<DecimalCoordinate> coordinate)
+			bool setCoordinateLatitude(const nlohmann::json& json, GeoCoordinate<DecimalCoordinate>& coordinate)
 			{
 				return getData(json, "latitude", coordinate.latitude);
 			}
 
-			bool setCoordinateLongitude(const nlohmann::json& json, GeoCoordinate<DecimalCoordinate> coordinate)
+			bool setCoordinateLongitude(const nlohmann::json& json, GeoCoordinate<DecimalCoordinate>& coordinate)
 			{
 				return getData(json, "longitude", coordinate.longitude);
 			}
@@ -171,7 +171,7 @@ namespace common
 					return {};
 				}
 
-				GeoCoordinate<DecimalCoordinate> coordinate;
+				GeoCoordinate<DecimalCoordinate> coordinate{ 0., 0. };
 				if (!(setCoordinateLatitude(*val, coordinate) && setCoordinateLongitude(*val, coordinate)))
 					return {};
 
@@ -343,6 +343,61 @@ namespace common
 			}
 		}
 
+		std::optional<model::proxy_config_data> loadProxyConfig(const nlohmann::json& data) noexcept
+		{
+			model::proxy_config_data config;
+			if (!details::setProxyEnpoint(data, config))
+			{
+				LOG_WARN << "Invalid config data. Missing proxy endpoint";
+				return std::nullopt;
+			}
+
+			if (!details::setProxyCoordinates(data, config))
+			{
+				LOG_WARN << "Invalid config data. Missing proxy coordinates";
+				return std::nullopt;
+			}
+
+			if (!details::setDbConnectionData(data, config))
+			{
+				LOG_WARN << "Invalid config data. Missing DB Connection Data";
+				return std::nullopt;
+			}
+
+			return config;
+		}
+
+		std::optional<model::proxy_config_data> loadProxyConfig(const std::string& pathToConfigFile) noexcept
+		{
+			nlohmann::json data;
+
+			if (!details::readJson(pathToConfigFile, data))
+			{
+				return std::nullopt;
+			}
+
+			model::proxy_config_data config;
+			if (!details::setProxyEnpoint(data, config))
+			{
+				LOG_WARN << "Invalid config data. Missing proxy endpoint";
+				return std::nullopt;
+			}
+
+			if (!details::setProxyCoordinates(data, config))
+			{
+				LOG_WARN << "Invalid config data. Missing proxy coordinates";
+				return std::nullopt;
+			}
+
+			if (!details::setDbConnectionData(data, config))
+			{
+				LOG_WARN << "Invalid config data. Missing DB Connection Data";
+				return std::nullopt;
+			}
+
+			return config;
+		}
+
 		std::vector<model::proxy_config_data> loadProxyConfigs(const std::string& pathToConfigFile) noexcept
 		{
 			std::vector<model::proxy_config_data> rez;
@@ -362,26 +417,10 @@ namespace common
 
 			for (const auto& item : *proxys)
 			{
-				model::proxy_config_data config;
-				if (!details::setProxyEnpoint(item, config))
-				{
-					LOG_WARN << "Invalid config data. Missing proxy endpoint";
-					continue;
-				}
+				auto config = loadProxyConfig(item);
 
-				if (!details::setProxyCoordinates(item, config))
-				{
-					LOG_WARN << "Invalid config data. Missing proxy coordinates";
-					continue;
-				}
-
-				if (!details::setDbConnectionData(item, config))
-				{
-					LOG_WARN << "Invalid config data. Missing DB Connection Data";
-					continue;
-				}
-
-				rez.push_back(std::move(config));
+				if (config.has_value())
+					rez.push_back(config.value());
 			}
 
 			return rez;
