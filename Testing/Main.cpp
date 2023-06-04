@@ -1,3 +1,4 @@
+#include <iostream>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -27,7 +28,7 @@ using namespace common::utile;
 
 LOGGER("TEST-MAIN");
 
-std::vector<PROCESS_INFORMATION> g_runningProcesses;
+std::vector<DWORD> g_runningProcesses;
 std::filesystem::path g_video_path;
 std::thread g_vtSpawnerThread;
 std::mutex g_mutexUpdate;
@@ -133,40 +134,51 @@ bool createProcessFromSameDirectory(const command_line& cmd)
         return false;
     }
 
-    g_runningProcesses.push_back(pi);
+    LOG_INF << "Created new process with pid: " << static_cast<int>(pi.dwProcessId);
+
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    g_runningProcesses.push_back(pi.dwProcessId);
     return true;
 }
 
 void closeAllProcesses()
 {
-    for (const auto& pi : g_runningProcesses)
+    for (const auto& pid : g_runningProcesses)
     {
+        LOG_INF << "Attempting to close process with pid: " << static_cast<int>(pid);
         HANDLE processHandle = NULL;
-        processHandle = OpenProcess(PROCESS_TERMINATE | PROCESS_ALL_ACCESS, FALSE, pi.dwProcessId);
+        processHandle = OpenProcess(PROCESS_TERMINATE | PROCESS_ALL_ACCESS, FALSE, pid);
         if (processHandle == NULL) {
             std::cerr << "Error opening process: " << GetLastErrorAsString() << std::endl;
             continue;
         }
 
-        WaitForSingleObject(pi.hProcess, 1000);
+        WaitForSingleObject(processHandle, 1000);
 
-        if (!TerminateProcess(pi.hProcess, 0)) {
+        if (!TerminateProcess(processHandle, 0)) {
             std::cerr << "Error terminating process: " << GetLastErrorAsString() << std::endl;
         }
 
 
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
+        CloseHandle(processHandle);
     }
 }
 
 
 void closeLastProcess()
 {
-    const auto& pi = *g_runningProcesses.rbegin().base();
+    for (const auto& pid : g_runningProcesses)
+    {
+        std::cout << static_cast<int>(pid);
+    }
 
+    const auto& pid = *(g_runningProcesses.rbegin());
+
+    LOG_INF << "Attempting to close process with pid: " << static_cast<int>(pid);
     HANDLE processHandle = NULL;
-    processHandle = OpenProcess(PROCESS_TERMINATE | PROCESS_ALL_ACCESS, FALSE, pi.dwProcessId);
+    processHandle = OpenProcess(PROCESS_TERMINATE | PROCESS_ALL_ACCESS, FALSE, pid);
     if (processHandle == NULL) {
         std::cerr << "Error opening process: " << GetLastErrorAsString() << std::endl;
         return;
@@ -174,15 +186,14 @@ void closeLastProcess()
 
     auto waitingTime = getRandomNumberWithinRange(1000, 3000);
 
-    WaitForSingleObject(pi.hProcess, waitingTime);
+    WaitForSingleObject(processHandle, waitingTime);
 
-    if (!TerminateProcess(pi.hProcess, 0)) {
+    if (!TerminateProcess(processHandle, 0)) {
         std::cerr << "Error terminating process: " << GetLastErrorAsString() << std::endl;
         return;
     }
 
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
+    CloseHandle(processHandle);
 }
 
 // taken from jms file
