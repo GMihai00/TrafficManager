@@ -61,6 +61,42 @@ namespace model
 			
 	}
 
+	void GLFWWindowManager::display_time_left_for_lane(const common::utile::LANE lane, const uint16_t time_left)
+	{
+		if (!m_textRendere)
+			return;
+
+		// TO DO
+		switch (lane)
+		{
+		case common::utile::LANE::E:
+			m_textRendere->writeText("TIMER E: " + std::to_string(time_left), 530., 780.);
+			break;
+		case common::utile::LANE::W:
+			m_textRendere->writeText("TIMER W: 120" + std::to_string(time_left), 20., 100.);
+			break;
+		case common::utile::LANE::N:
+			m_textRendere->writeText("TIMER N: 120" + std::to_string(time_left), 20., 780.);
+			break;
+		case common::utile::LANE::S:
+			m_textRendere->writeText("TIMER S: 120" + std::to_string(time_left), 530., 100.);
+			break;
+		default:
+			break;
+		}
+	}
+
+	void GLFWWindowManager::display_time_left_timers()
+	{
+		if (!m_textRendere)
+			return;
+
+		for (const auto& [lane, timer] : laneToTimerMap_)
+		{
+			display_time_left_for_lane(lane, timer->getTimeLeft());
+		}
+	}
+
 	void GLFWWindowManager::render(int window_weight, int window_height)
 	{
 		if (!glfwInit()) { return; }
@@ -85,6 +121,7 @@ namespace model
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			draw_junction();
+			display_time_left_timers();
 
 			std::unique_lock<std::mutex> lock(m_mutex);
 			std::queue<std::function<void()>> m_draw_actions = std::move(m_waing_queue);
@@ -108,11 +145,21 @@ namespace model
 		glfwTerminate();
 	}
 
-	GLFWWindowManager::GLFWWindowManager(int window_weight, int window_height)
+	GLFWWindowManager::GLFWWindowManager(const std::map<common::utile::LANE, common::utile::TimerPtr>& laneToTimerMap, 
+		int window_weight, int window_height, const std::filesystem::path& texturePath) :laneToTimerMap_(laneToTimerMap)
 	{
 		for (auto i = 0; i < 4; i++)
 		{
 			m_lane_alowence_map[(common::utile::LANE)i] = false;
+		}
+
+		try
+		{
+			m_textRendere = std::make_unique<TextRenderer>(texturePath);
+		}
+		catch (const std::exception& err)
+		{
+			std::cerr << err.what() << std::endl;
 		}
 
 		m_rendering_thread = std::thread(std::bind(&GLFWWindowManager::render, this, window_weight, window_height));

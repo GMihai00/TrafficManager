@@ -58,7 +58,7 @@ namespace model
 		{ 
 		case ipc::VehicleDetectionMessages::VCDR:
 		{
-			// should add a some sort of encryption layer here, maybe add public private key in here
+			// TO DO: decrypt with private key
 			std::string keyword;
 			keyword.resize(msg.header.size - sizeof(uint8_t));
 			msg >> keyword;

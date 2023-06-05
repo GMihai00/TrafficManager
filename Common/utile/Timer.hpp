@@ -44,7 +44,7 @@ namespace common
 			void resetTimer(const uint16_t& sec = 2);
 			bool hasExpired() const;
 			std::time_t getExpirationTime();
-			uint16_t getTimeLeft();
+			uint16_t getTimeLeft() const;
 			void freezeTimer();
 			void unfreezeTimer(); // NOT USED FOR ANITHING RIGHT NOW
 			void subscribe(const IObserverPtr obs);

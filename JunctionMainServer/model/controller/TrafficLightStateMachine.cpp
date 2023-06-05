@@ -37,7 +37,7 @@ namespace model
 
 			if (shouldDisplay)
 			{
-				windowManager_ = std::make_shared<GLFWWindowManager>();
+				windowManager_ = std::make_shared<GLFWWindowManager>(laneToTimerMap_);
 			}
 		}
 

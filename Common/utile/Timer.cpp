@@ -69,7 +69,7 @@ namespace common
 				timeLeft_ -= sec;
 		}
 
-		uint16_t Timer::getTimeLeft()
+		uint16_t Timer::getTimeLeft() const
 		{
 			return timeLeft_;
 		}

@@ -13,9 +13,11 @@
 #include <GLFW/glfw3.h>
 
 #include "utile/DataTypes.hpp"
+#include "utile/Timer.hpp"
 
 #include "VehicleTypes.hpp"
 #include "GraphicsDataTypes.hpp"
+#include "TextRenderer.hpp"
 
 namespace model
 {
@@ -31,9 +33,14 @@ namespace model
 
 		GLFWwindow* m_window = nullptr;
 
+		TextRendererPtr m_textRendere;
 		const GLfloat junction_edge_ = 0.5f;
 
+		const std::map<common::utile::LANE, common::utile::TimerPtr>& laneToTimerMap_;
+
 		void draw_junction();
+		void display_time_left_for_lane(const common::utile::LANE lane, const uint16_t time_left);
+		void display_time_left_timers();
 
 		void render(int window_weight, int window_height);
 
@@ -46,7 +53,9 @@ namespace model
 		bool isAboutToCrossTheJunction(const Point& bl_point, const GLfloat& height, const GLfloat& width, const common::utile::LANE lane);
 
 	public:
-		GLFWWindowManager(int window_weight = 1080, int window_height = 1080);
+		GLFWWindowManager(const std::map<common::utile::LANE, common::utile::TimerPtr>& laneToTimerMap,
+			int window_weight = 1080, int window_height = 1080, 
+			const std::filesystem::path& texturePath = std::filesystem::path("..\\resources\\Textures\\Arialn.ttf"));
 		virtual ~GLFWWindowManager() noexcept;
 
 		void signalIncomingCar(const paint::VehicleTypes type,

@@ -151,6 +151,7 @@ namespace model
 		struct BaseState : sc::simple_state <BaseState, TrafficLightStateMachine, Stopped>
 		{
 			typedef  mpl::list <sc::custom_reaction <JumpTransition> > reactions;
+
 			virtual sc::result react(const JumpTransition& jumpTransition)
 			{
 				if (jumpTransition.nextTransitionName_ == "EW") { return transit<EWTransition>(); }
@@ -177,12 +178,12 @@ namespace model
 
 			EWTransition()
 			{
-				std::cout << "State EW started";
+				std::cout << "State EW started\n";
 			}
 
-			virtual ~EWTransition()
+			virtual ~EWTransition() noexcept
 			{
-				std::cout << "State ended";
+				std::cout << "State ended\n";
 				outermost_context().updateCarCount({ common::utile::LANE::E, common::utile::LANE::W });
 				outermost_context().resetTimers("EW");
 				outermost_context().nextNormalState_ = "N";
@@ -196,12 +197,12 @@ namespace model
 
 			NTransition()
 			{
-				std::cout << "State N started";
+				std::cout << "State N started\n";
 			}
 
-			virtual ~NTransition()
+			virtual ~NTransition() noexcept
 			{
-				std::cout << "State ended";
+				std::cout << "State ended\n";
 				outermost_context().updateCarCount({ common::utile::LANE::N });
 				outermost_context().resetTimers("N");
 				outermost_context().nextNormalState_ = "S";
@@ -215,12 +216,12 @@ namespace model
 
 			STransition()
 			{
-				std::cout << "State S started";
+				std::cout << "State S started\n";
 			}
 
-			~STransition()
+			virtual ~STransition() noexcept
 			{
-				std::cout << "State ended";
+				std::cout << "State ended\n";
 				outermost_context().updateCarCount({ common::utile::LANE::S });
 				outermost_context().resetTimers("S");
 				outermost_context().nextNormalState_ = "EW";
@@ -234,12 +235,12 @@ namespace model
 
 			EWTransitionCpy()
 			{
-				std::cout << "State EW started";
+				std::cout << "State EW started\n";
 			}
 
-			virtual ~EWTransitionCpy()
+			virtual ~EWTransitionCpy() noexcept
 			{
-				std::cout << "State ended";
+				std::cout << "State ended\n";
 				outermost_context().updateCarCount({ common::utile::LANE::E, common::utile::LANE::W });
 				outermost_context().resetTimers("EW");
 				outermost_context().nextNormalState_ = "NS";
@@ -253,12 +254,12 @@ namespace model
 
 			NSTransition()
 			{
-				std::cout << "State NS started";
+				std::cout << "State NS started\n";
 			}
 
-			virtual ~NSTransition()
+			virtual ~NSTransition() noexcept
 			{
-				std::cout << "State ended";
+				std::cout << "State ended\n";
 				outermost_context().updateCarCount({ common::utile::LANE::N, common::utile::LANE::S });
 				outermost_context().resetTimers("NS");
 				outermost_context().nextNormalState_ = "E";
@@ -272,12 +273,12 @@ namespace model
 
 			ETransition()
 			{
-				std::cout << "State E started";
+				std::cout << "State E started\n";
 			}
 
-			virtual ~ETransition()
+			virtual ~ETransition() noexcept
 			{
-				std::cout << "State ended";
+				std::cout << "State ended\n";
 				outermost_context().updateCarCount({ common::utile::LANE::E });
 				outermost_context().resetTimers("E");
 				outermost_context().nextNormalState_ = "W";
@@ -291,12 +292,12 @@ namespace model
 
 			WTransition()
 			{
-				std::cout << "State W started";
+				std::cout << "State W started\n";
 			}
 
-			virtual ~WTransition()
+			virtual ~WTransition() noexcept
 			{
-				std::cout << "State ended";
+				std::cout << "State ended\n";
 				outermost_context().updateCarCount({ common::utile::LANE::W });
 				outermost_context().resetTimers("EW");
 			}
@@ -309,12 +310,12 @@ namespace model
 
 			NSTransitionCpy()
 			{
-				std::cout << "State NS started";
+				std::cout << "State NS started\n";
 			}
 
-			virtual ~NSTransitionCpy()
+			virtual ~NSTransitionCpy() noexcept
 			{
-				std::cout << "State ended";
+				std::cout << "State ended\n";
 				outermost_context().updateCarCount({ common::utile::LANE::N, common::utile::LANE::S });
 				outermost_context().resetTimers("NS");
 				outermost_context().nextNormalState_ = "EW";
