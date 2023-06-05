@@ -109,8 +109,8 @@ namespace model
 		if (msg.header.type == ipc::VehicleDetectionMessages::VCDR)
 		{
 			size_t carsDetected = 0;
-			msg >> isFromLeftLane;
 			msg >> carsDetected;
+			msg >> isFromLeftLane;
 			if (carsDetected == 0)
 			{
 				LOG_ERR << "Invalid number of vehicles";

@@ -11,6 +11,7 @@ namespace model
         LOG_INF << "Handling new car data carcount_left: " << carCount.first << " carcount_right: " << carCount.second;
 
         // from the camera perspective left cars are incoming vehicles aka cars from the right lane
+        std::scoped_lock lock(mutexSendCarData_);
         sendCarData(carCount.first - carCountLeft_, 0);
         sendCarData(carCount.second - carCountRight_, 1);
 
@@ -18,7 +19,7 @@ namespace model
         carCountRight_ = carCount.second;
     }
 
-    TrafficObserverClient::TrafficObserverClient(std::string keyword) :
+    TrafficObserverClient::TrafficObserverClient(const std::string& keyword) :
         ipc::net::Client<ipc::VehicleDetectionMessages>(),
         keyword_(keyword),
         carTracker_(0)
@@ -28,7 +29,7 @@ namespace model
         carTracker_.subscribe(observer_);
     }
 
-    TrafficObserverClient::TrafficObserverClient(std::string keyword, std::filesystem::path videoPath) :
+    TrafficObserverClient::TrafficObserverClient(const std::string& keyword, const std::filesystem::path& videoPath) :
         ipc::net::Client<ipc::VehicleDetectionMessages>(),
         keyword_(keyword),
         carTracker_(videoPath.string())
@@ -139,9 +140,8 @@ namespace model
         return true;
     }
 
-    bool TrafficObserverClient::sendCarData(size_t numberOfCars, uint8_t leftLane)
+    bool TrafficObserverClient::sendCarData(const size_t numberOfCars, const uint8_t leftLane)
     {
-        std::scoped_lock lock(mutexSendCarData_);
         if (!secureConnectionEstablished_ || !connection_)
         {
             LOG_ERR << "Secure connection not established, failed to send message";

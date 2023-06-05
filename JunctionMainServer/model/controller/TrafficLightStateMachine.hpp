@@ -98,7 +98,7 @@ namespace model
 
 			LOGGER("TRAFFICLIGHT-STATEMACHINE");
 
-			uint16_t calculateTimeDecrease(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			uint16_t calculateTimeDecrease(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip, const size_t numberOfRegistrations);
 
 			bool isInConflictScenario();
 
@@ -128,7 +128,7 @@ namespace model
 			bool endEmergencyState(ipc::utile::IP_ADRESS ip);
 			void freezeTimers(const std::string lanes);
 			void resetTimers(const std::string lanes);
-			void decreaseTimer(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip);
+			void decreaseTimer(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip, const size_t numberOfRegistrations);
 			void greenLightExpireCallback();
 			void queueNextStatesWaiting();
 

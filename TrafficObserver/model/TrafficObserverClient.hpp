@@ -37,13 +37,13 @@ namespace model
         LOGGER("TRAFFICOBSERVER-CLIENT");
         bool startTrackingCars();
         void stopTrackingCars();
-        bool sendCarData(size_t numberOfCars, uint8_t leftLane = 0);
+        bool sendCarData(const size_t numberOfCars, const  uint8_t leftLane = 0);
         bool requestPublicKey();
         bool sendSecureConnectRequest();
 
     public:
-        TrafficObserverClient(std::string keyword, std::filesystem::path videoPath);
-        TrafficObserverClient(std::string keyword);
+        TrafficObserverClient(const std::string& keyword, const std::filesystem::path& videoPath);
+        TrafficObserverClient(const std::string& keyword);
         ~TrafficObserverClient();
 
         void handleNewCarData();

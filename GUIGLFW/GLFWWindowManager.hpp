@@ -25,7 +25,7 @@ namespace model
 	{
 	private:
 		std::thread m_rendering_thread;
-		std::queue<std::function<void()>> m_waing_queue;
+		std::queue<std::function<void()>> m_waiting_queue;
 
 		std::map<common::utile::LANE, bool> m_lane_alowence_map;
 
@@ -48,12 +48,13 @@ namespace model
 
 		void render(int window_weight, int window_height);
 
-		void drawCar(const paint::VehicleTypes type,
+		void drawCars(const paint::VehicleTypes type,
 			const common::utile::LANE lane,
 			std::optional<Point> bl_point,
-			const GLfloat& height,
-			const GLfloat& width,
-			GLfloat moving_rate);
+			const GLfloat height,
+			const GLfloat width,
+			GLfloat moving_rate,
+			const size_t nr_cars);
 		bool isAboutToCrossTheJunction(const Point& bl_point, const GLfloat& height, const GLfloat& width, const common::utile::LANE lane);
 
 	public:
@@ -64,6 +65,7 @@ namespace model
 
 		void signalIncomingCar(const paint::VehicleTypes type,
 			const common::utile::LANE lane,
+			const size_t nr_cars = 1,
 			std::optional<Point> bl_point = std::nullopt,
 			const GLfloat& height = 0.1,
 			const GLfloat& width = 0.2,

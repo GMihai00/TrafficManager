@@ -96,19 +96,16 @@ namespace model
 			}
 			if (leftLane == usingLeftLane_)
 			{
-				for (size_t i = 0; i < numberOfRegistrations; i++)
+				decreaseTimer(lane, ip, numberOfRegistrations);
+				if (windowManager_)
 				{
-					decreaseTimer(lane, ip);
-					if (windowManager_)
+					if (isVehicleTracker(lane, ip))
 					{
-						if (isVehicleTracker(lane, ip))
-						{
-							windowManager_->signalIncomingCar(paint::VehicleTypes::NORMAL_VEHICLE, lane);
-						}
-						else
-						{
-							windowManager_->signalIncomingCar(paint::VehicleTypes::VT_VEHICLE, lane);
-						}
+						windowManager_->signalIncomingCar(paint::VehicleTypes::NORMAL_VEHICLE, lane, numberOfRegistrations);
+					}
+					else
+					{
+						windowManager_->signalIncomingCar(paint::VehicleTypes::VT_VEHICLE, lane, numberOfRegistrations);
 					}
 				}
 			}
@@ -214,23 +211,26 @@ namespace model
 
 		}
 
-		uint16_t TrafficLightStateMachine::calculateTimeDecrease(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip)
+		uint16_t TrafficLightStateMachine::calculateTimeDecrease(const common::utile::LANE lane, 
+			const ipc::utile::IP_ADRESS ip, const size_t numberOfRegistrations)
 		{
 			auto timeLeft = laneToTimerMap_[lane]->getTimeLeft();
 
 			if (isVehicleTracker(lane, ip))
 			{
-				return static_cast<uint16_t>(std::ceil( (1.0 * timeLeft) / 100));
+				return static_cast<uint16_t>(std::ceil( (1.0 * timeLeft * numberOfRegistrations) / 100));
 			}
 			else
 			{
 				if (carsWaiting_[lane] - carsThatPassedJunction_[lane] <= averageWaitingCars_)
 				{
-					return static_cast<uint16_t>(std::ceil((1.0 * timeLeft) / 100) * (carsWaiting_[lane] - carsThatPassedJunction_[lane]));
+					return static_cast<uint16_t>(std::ceil((1.0 * timeLeft * numberOfRegistrations) / 100) 
+						* (carsWaiting_[lane] - carsThatPassedJunction_[lane]));
 				}
 				else
 				{
-					return static_cast<uint16_t>(std::ceil((1.0 * timeLeft) / 100) * details::lgput(carsWaiting_[lane] - carsThatPassedJunction_[lane], 2));
+					return static_cast<uint16_t>(std::ceil((1.0 * timeLeft * numberOfRegistrations) / 100) 
+						* details::lgput(carsWaiting_[lane] - carsThatPassedJunction_[lane], 2));
 				}
 			}
 		}
@@ -280,10 +280,10 @@ namespace model
 			}
 		}
 
-		void TrafficLightStateMachine::decreaseTimer(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		void TrafficLightStateMachine::decreaseTimer(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip, const size_t numberOfRegistrations)
 		{
 			if (auto timer = laneToTimerMap_.find(lane); timer != laneToTimerMap_.end() && (timer->second))
-				(timer->second)->decreaseTimer(calculateTimeDecrease(lane, ip));
+				(timer->second)->decreaseTimer(calculateTimeDecrease(lane, ip, numberOfRegistrations));
 		}
 
 		bool TrafficLightStateMachine::isInConflictScenario()
