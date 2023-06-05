@@ -67,6 +67,8 @@ namespace utile
 			{
 				return buildBoundingRectFromQueryResult(queryResult);
 			}
+
+			return nullptr;
 		}
 		catch (const sql::SQLException& err)
 		{

@@ -87,7 +87,7 @@ namespace model
 		}
 
 		bool TrafficLightStateMachine::registerClient(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip,
-			const uint8_t leftLane, const uint16_t numberOfRegistrations)
+			const uint8_t leftLane, const size_t numberOfRegistrations)
 		{
 			std::scoped_lock lock(mutexClients_);
 			if (!isClientValid(lane, ip))
@@ -96,7 +96,7 @@ namespace model
 			}
 			if (leftLane == usingLeftLane_)
 			{
-				for (uint16_t i = 0; i < numberOfRegistrations; i++)
+				for (size_t i = 0; i < numberOfRegistrations; i++)
 				{
 					decreaseTimer(lane, ip);
 					if (windowManager_)

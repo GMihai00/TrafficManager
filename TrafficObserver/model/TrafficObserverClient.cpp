@@ -26,7 +26,6 @@ namespace model
         observer_callback_ = std::bind(&TrafficObserverClient::handleNewCarData, this);
         observer_ = std::make_shared<common::utile::Observer>(observer_callback_);
         carTracker_.subscribe(observer_);
-        this->startTrackingCars();
     }
 
     TrafficObserverClient::TrafficObserverClient(std::string keyword, std::filesystem::path videoPath) :
@@ -37,7 +36,6 @@ namespace model
         observer_callback_ = std::bind(&TrafficObserverClient::handleNewCarData, this);
         observer_ = std::make_shared<common::utile::Observer>(observer_callback_);
         carTracker_.subscribe(observer_);
-        this->startTrackingCars();
     }
 
     TrafficObserverClient::~TrafficObserverClient()
@@ -53,7 +51,7 @@ namespace model
             return false;
         }
 
-        auto cleanupAction = common::utile::finally([this]() { disconnect(); });
+        auto cleanupAction = common::utile::finally([this]() { if(!secureConnectionEstablished_) disconnect(); });
 
         if (!requestPublicKey()) { LOG_ERR << "Failed to acquire public key"; return false; }
 
@@ -69,6 +67,9 @@ namespace model
             return false;
 
         secureConnectionEstablished_ = true;
+        
+        startTrackingCars();
+
         return true;
     }
 
@@ -140,6 +141,7 @@ namespace model
 
     bool TrafficObserverClient::sendCarData(size_t numberOfCars, uint8_t leftLane)
     {
+        std::scoped_lock lock(mutexSendCarData_);
         if (!secureConnectionEstablished_ || !connection_)
         {
             LOG_ERR << "Secure connection not established, failed to send message";

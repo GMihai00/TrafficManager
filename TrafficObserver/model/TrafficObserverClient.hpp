@@ -29,6 +29,7 @@ namespace model
         std::string keyword_;
         std::shared_ptr<security::RSA::PublicKey> publicKey_ = nullptr;
         std::atomic_bool secureConnectionEstablished_ = false;
+        std::mutex mutexSendCarData_;
 
         size_t carCountLeft_ = 0;
         size_t carCountRight_ = 0;

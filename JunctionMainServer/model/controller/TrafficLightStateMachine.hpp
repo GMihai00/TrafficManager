@@ -120,7 +120,7 @@ namespace model
 
 			bool isClientValid(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip);
 			bool registerClient(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip, 
-				const uint8_t leftLane, const uint16_t numberOfRegistrations = 1);
+				const uint8_t leftLane, const size_t numberOfRegistrations = 1);
 			bool unregisterClient(ipc::utile::IP_ADRESS ip);
 
 			bool startEmergencyState(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip);

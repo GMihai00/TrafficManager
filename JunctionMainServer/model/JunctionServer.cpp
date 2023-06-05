@@ -104,11 +104,11 @@ namespace model
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, common::utile::LANE lane)
 	{
 		uint8_t isFromLeftLane = trafficLightStateMachine_.isUsingLeftLane();
-		std::optional<uint16_t> cars = std::nullopt;
+		std::optional<size_t> cars = std::nullopt;
 
 		if (msg.header.type == ipc::VehicleDetectionMessages::VCDR)
 		{
-			auto carsDetected = 0;
+			size_t carsDetected = 0;
 			msg >> isFromLeftLane;
 			msg >> carsDetected;
 			if (carsDetected == 0)
