@@ -234,14 +234,33 @@ namespace model
 
 		void TrafficLightStateMachine::freezeTimers(const std::string lanes)
 		{
+			std::set<common::utile::LANE> lanesLeftForUnfreeze = {
+				common::utile::LANE::E,
+				common::utile::LANE::N,
+				common::utile::LANE::S,
+				common::utile::LANE::W
+			};
+
 			for (const auto& chrlane : lanes)
 			{
 				auto lane = common::utile::CharToLane(chrlane);
 				if (!lane.has_value())
 					continue;
 
+				lanesLeftForUnfreeze.erase(lane.value());
 				if (auto timer = laneToTimerMap_.find(lane.value()); timer != laneToTimerMap_.end() && (timer->second))
 					(timer->second)->freezeTimer();
+			}
+
+			for (const auto& lane : lanesLeftForUnfreeze)
+			{
+				if (!isLaneMissing(lane))
+				{
+					if (auto timer = laneToTimerMap_.find(lane); timer != laneToTimerMap_.end() && (timer->second))
+					{
+						(timer->second)->unfreezeTimer();
+					}
+				}
 			}
 		}
 

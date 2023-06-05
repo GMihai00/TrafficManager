@@ -76,7 +76,6 @@ namespace common
 
 		void Timer::resetTimer(const uint16_t& sec)
 		{
-			//std::scoped_lock lock(mutexTimer_);
 			timeLeft_ = sec;
 			expired_ = false;
 			condVarTimer_.notify_one();
@@ -94,13 +93,11 @@ namespace common
 
 		void Timer::freezeTimer()
 		{
-			std::scoped_lock lock(mutexTimer_);
 			frozen_ = true;
 		}
 
 		void Timer::unfreezeTimer()
 		{
-			std::scoped_lock lock(mutexTimer_);
 			frozen_ = false;
 			condVarTimer_.notify_one();
 		}
@@ -115,6 +112,7 @@ namespace common
 
 		void Timer::unsubscribe()
 		{
+			std::scoped_lock lock(mutexTimer_);
 			if (observer_)
 				observer_.reset();
 		}
