@@ -115,6 +115,8 @@ namespace model
         glLoadIdentity();
         glOrtho(-1, 1, -1, 1, -1, 1);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+        return true;
     }
 
     void TextRenderer::setFontSize(const int fontSize)

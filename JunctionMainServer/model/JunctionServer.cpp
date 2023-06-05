@@ -1,4 +1,5 @@
 #include "JunctionServer.hpp"
+#include <exception>
 
 namespace model
 {
@@ -7,6 +8,15 @@ namespace model
 		trafficLightStateMachine_(config, shouldDisplay),
 		laneToKeyword_(config.laneToKeyword)
 	{
+		try
+		{
+			keyPair_ = security::RSA::generateKeyPair();
+		}
+		catch (const std::exception& err)
+		{
+			LOG_ERR << err.what();
+		}
+
 		trafficLightStateMachine_.initiate();
 	}
 
@@ -58,19 +68,12 @@ namespace model
 		{ 
 		case ipc::VehicleDetectionMessages::VCDR:
 		{
-			// TO DO: decrypt with private key
-			std::string keyword;
-			keyword.resize(msg.header.size - sizeof(uint8_t));
-			msg >> keyword;
-
-			auto lane = getLaneBasedOnKeyword(keyword);
-			return lane;
+			return trafficLightStateMachine_.getVehicleTrackerLane(client->getIpAdress());
 		}
 		case ipc::VehicleDetectionMessages::VDB:
 		{
 			try
 			{
-				// GOT BY CLIENT FROM PROXY
 				common::utile::LANE lane;
 				msg >> lane;
 				return lane;
@@ -101,15 +104,20 @@ namespace model
 		ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg, common::utile::LANE lane)
 	{
 		uint8_t isFromLeftLane = trafficLightStateMachine_.isUsingLeftLane();
+		std::optional<uint16_t> cars = std::nullopt;
+
 		if (msg.header.type == ipc::VehicleDetectionMessages::VCDR)
 		{
-			if (!trafficLightStateMachine_.registerVehicleTrackerIpAdress(lane, client->getIpAdress()))
+			auto carsDetected = 0;
+			msg >> isFromLeftLane;
+			msg >> carsDetected;
+			if (carsDetected == 0)
 			{
+				LOG_ERR << "Invalid number of vehicles";
 				rejectMessage(client, msg);
 				return;
 			}
-
-			msg >> isFromLeftLane;
+			cars = carsDetected;
 		}
 
 
@@ -121,18 +129,95 @@ namespace model
 				return;
 			}
 		}
-		trafficLightStateMachine_.registerClient(lane, client->getIpAdress(), isFromLeftLane);
+
+		if (cars.has_value())
+			trafficLightStateMachine_.registerClient(lane, client->getIpAdress(), isFromLeftLane, cars.value());
+		else
+			trafficLightStateMachine_.registerClient(lane, client->getIpAdress(), isFromLeftLane);
+
 		aproveMessage(client, msg);
+	}
+
+	void JunctionServer::providePublicKeyToClient(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
+	{
+		auto publicKey = std::dynamic_pointer_cast<security::RSA::PublicKey>(keyPair_.first);
+
+		if (!publicKey)
+		{
+			LOG_ERR << "No key pair generate";
+			rejectMessage(client, msg);
+			return;
+		}
+
+		auto value = publicKey->getKeyNumericValues();
+
+		ipc::net::Message<ipc::VehicleDetectionMessages> message;
+		message.header.id = msg.header.id;
+		message.header.type = ipc::VehicleDetectionMessages::ACK;
+
+		message << value.first;
+		message << value.second;
+
+		messageClient(client, message);
+	}
+
+	bool JunctionServer::verifyIfSecureConnectionCanBeEstablished(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
+	{
+		std::string keyword;
+		keyword.resize(msg.header.size);
+
+		msg >> keyword;
+
+		if (!keyPair_.second)
+		{
+			LOG_ERR << "No key pair generate";
+			rejectMessage(client, msg);
+			return false;
+		}
+
+		auto decryptedKeyword = keyPair_.second->encrypt(keyword);
+
+		auto lane = getLaneBasedOnKeyword(decryptedKeyword);
+
+		if (!lane.has_value())
+		{
+			rejectMessage(client, msg);
+			return false;
+		}
+
+		if (!trafficLightStateMachine_.registerVehicleTrackerIpAdress(lane.value(), client->getIpAdress()))
+		{
+			rejectMessage(client, msg);
+			return false;
+		}
+
+		aproveMessage(client, msg);
+		return true;
 	}
 
 	void JunctionServer::onMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
-		const auto lane = getMessageSourceLane(client, msg);
-		if (!isMessageValid(client, msg, lane))
+		switch (msg.header.type)
 		{
+		case ipc::VehicleDetectionMessages::ACK:
+		case ipc::VehicleDetectionMessages::NACK:
+		case ipc::VehicleDetectionMessages::REDIRECT:
+			rejectMessage(client, msg);
 			return;
+		case ipc::VehicleDetectionMessages::PUBLIC_KEY_REQ:
+			providePublicKeyToClient(client, msg);
+			break;
+		case ipc::VehicleDetectionMessages::SECURE_CONNECT:
+			verifyIfSecureConnectionCanBeEstablished(client, msg);
+			break;
+		default:
+			const auto lane = getMessageSourceLane(client, msg);
+			if (!isMessageValid(client, msg, lane))
+			{
+				return;
+			}
+			handleMessage(client, msg, lane.get());
 		}
-		handleMessage(client, msg, lane.get());
 	}
 
 } // namespace model

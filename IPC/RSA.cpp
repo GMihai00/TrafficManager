@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <random>
+#include <sstream>
 
 namespace security
 {
@@ -67,14 +68,40 @@ namespace security
  
         }
 
-        Key::Key(uint32_t power, uint32_t modulo) : m_power(power), m_modulo(modulo) {}
+        Key::Key(const uint32_t power, const uint32_t modulo) : m_power(power), m_modulo(modulo) {}
 
-        uint32_t Key::encrypt(const uint32_t nr, const Key& key)
+        uint32_t Key::encrypt(const uint32_t nr)
         {
-            return details::lgput(nr, key.m_modulo, key.m_power);
+            return details::lgput(nr, m_modulo, m_power);
         }
 
-        std::pair<Key, Key> generateKeyPair()
+        std::string Key::encrypt(const std::string& text)
+        {
+            std::stringstream ss;
+
+            for (const auto& chr : text)
+            {
+                ss << encrypt(static_cast<uint32_t>(chr));
+            }
+
+            return ss.str();
+        }
+
+        PublicKey::PublicKey(const uint32_t power = 1, const uint32_t modulo = 1) : Key(power, modulo) {}
+
+        std::pair<uint32_t, uint32_t> PublicKey::getKeyNumericValues()
+        {
+            return { m_power, m_modulo };
+        }
+
+        void PublicKey::setKeyNumericValues(const std::pair<uint32_t, uint32_t>& values)
+        {
+            m_power = values.first;
+            m_modulo = values.second;
+        }
+
+
+        std::pair<KeyPtr, KeyPtr> generateKeyPair()
         {
             uint32_t primenr1 = details::prime_numbers[details::getRandomNumber(0, (details::prime_numbers.size() - 1) / 2)];
             uint32_t primenr2 = details::prime_numbers[details::getRandomNumber(0, (details::prime_numbers.size() - 1) / 2)];
@@ -83,13 +110,13 @@ namespace security
 
             auto low = std::lower_bound(details::prime_numbers.begin(), details::prime_numbers.end(), euler_product - 2);
             if (low == details::prime_numbers.end())
-                throw std::runtime_error("Invalid value generate, euler_product it to big: " + euler_product);
+                low = details::prime_numbers.end() - 1;
 
             auto e = details::prime_numbers[details::getRandomNumber(2, low - details::prime_numbers.begin())];
             auto d = details::inversModularPrimeNumber(e, mod);
 
-            Key publicKey{ e, mod };
-            Key privateKey{ d, mod };
+            auto publicKey = std::make_shared<PublicKey>( e, mod );
+            auto privateKey = std::make_shared<Key>( d, mod );
 
             return { publicKey, privateKey };
         }

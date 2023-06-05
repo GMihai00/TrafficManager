@@ -158,6 +158,7 @@
     <ClInclude Include="db\BoundingRect.hpp" />
     <ClInclude Include="db\Junction.hpp" />
     <ClInclude Include="db\Proxy.hpp" />
+    <ClInclude Include="finally.h" />
     <ClInclude Include="utile\CommandLineParser.hpp" />
     <ClInclude Include="utile\ConfigHelpers.hpp" />
     <ClInclude Include="utile\DataTypes.hpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="db\BoundingRect.cpp" />
     <ClCompile Include="db\Junction.cpp" />
     <ClCompile Include="db\Proxy.cpp" />
+    <ClCompile Include="finally.cpp" />
     <ClCompile Include="utile\CommandLineParser.cpp" />
     <ClCompile Include="utile\ConfigHelpers.cpp" />
     <ClCompile Include="utile\DataTypes.cpp" />

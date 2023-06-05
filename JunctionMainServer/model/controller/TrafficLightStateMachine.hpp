@@ -75,7 +75,7 @@ namespace model
 			boost::optional<common::utile::LANE> missingLane_ = boost::none;
 
 			std::mutex mutexClients_;
-			std::map<common::utile::LANE, ipc::utile::IP_ADRESS> laneToVehicleTrackerIPAdress_;
+			std::map<common::utile::LANE, ipc::utile::IP_ADRESS> laneToTrafficObserverIPAdress_;
 			std::map<common::utile::LANE, ipc::utile::IP_ADRESSES> clientsConnected_;
 			std::map<common::utile::LANE, common::utile::TimerPtr> laneToTimerMap_;
 			common::utile::ThreadSafeQueue<JumpTransition> jumpTransitionQueue_;
@@ -118,16 +118,17 @@ namespace model
 			boost::optional<common::utile::LANE> getVehicleTrackerLane(const ipc::utile::IP_ADRESS& ip);
 			bool isLaneMissing(const common::utile::LANE lane) const;
 
-			bool isClientValid(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
-			bool registerClient(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip, uint8_t leftLane);
+			bool isClientValid(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip);
+			bool registerClient(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip, 
+				const uint8_t leftLane, const uint16_t numberOfRegistrations = 1);
 			bool unregisterClient(ipc::utile::IP_ADRESS ip);
 
-			bool startEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			bool startEmergencyState(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip);
 			bool isInEmergencyState();
 			bool endEmergencyState(ipc::utile::IP_ADRESS ip);
 			void freezeTimers(const std::string lanes);
 			void resetTimers(const std::string lanes);
-			void decreaseTimer(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip);
+			void decreaseTimer(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip);
 			void greenLightExpireCallback();
 			void queueNextStatesWaiting();
 

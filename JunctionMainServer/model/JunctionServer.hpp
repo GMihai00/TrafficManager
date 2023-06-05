@@ -14,6 +14,7 @@
 #include "utile/ConfigHelpers.hpp"
 
 #include "controller/TrafficLightStateMachine.hpp"
+#include "RSA.hpp"
 
 namespace model
 {
@@ -23,6 +24,10 @@ namespace model
 		
 		controller::TrafficLightStateMachine trafficLightStateMachine_;
 		std::map<common::utile::LANE, std::string> laneToKeyword_;
+
+		// public, private
+		std::pair<security::RSA::KeyPtr, security::RSA::KeyPtr> keyPair_;
+
 		LOGGER("JUNCTION-SERVER");
 
 		boost::optional<common::utile::LANE> getMessageSourceLane(
@@ -32,6 +37,8 @@ namespace model
 		void aproveMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 		void rejectMessage(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 		boost::optional<common::utile::LANE> getLaneBasedOnKeyword(const std::string& keyword);
+		bool verifyIfSecureConnectionCanBeEstablished(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
+		void providePublicKeyToClient(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg);
 	public:
 		JunctionServer(const common::utile::model::JMSConfig& config, bool shouldDisplay = false);
 		JunctionServer(const JunctionServer&) = delete;

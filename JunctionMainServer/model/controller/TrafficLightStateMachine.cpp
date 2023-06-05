@@ -48,8 +48,8 @@ namespace model
 
 		bool TrafficLightStateMachine::isVehicleTracker(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip) const
 		{
-			auto it = laneToVehicleTrackerIPAdress_.find(lane);
-			return it != laneToVehicleTrackerIPAdress_.end() && it->second == ip;
+			auto it = laneToTrafficObserverIPAdress_.find(lane);
+			return it != laneToTrafficObserverIPAdress_.end() && it->second == ip;
 		}
 
 		bool TrafficLightStateMachine::isLaneMissing(const common::utile::LANE lane) const
@@ -59,7 +59,7 @@ namespace model
 
 		boost::optional<common::utile::LANE> TrafficLightStateMachine::getVehicleTrackerLane(const ipc::utile::IP_ADRESS& ip)
 		{
-			for (const auto& entry : laneToVehicleTrackerIPAdress_)
+			for (const auto& entry : laneToTrafficObserverIPAdress_)
 			{
 				if (entry.second == ip)
 				{
@@ -69,7 +69,7 @@ namespace model
 			return boost::none;
 		}
 
-		bool TrafficLightStateMachine::isClientValid(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		bool TrafficLightStateMachine::isClientValid(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip)
 		{
 			if (!isVehicleTracker(lane, ip))
 			{
@@ -86,8 +86,8 @@ namespace model
 			return true;
 		}
 
-		bool TrafficLightStateMachine::registerClient(
-			const common::utile::LANE lane, ipc::utile::IP_ADRESS ip, uint8_t leftLane)
+		bool TrafficLightStateMachine::registerClient(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip,
+			const uint8_t leftLane, const uint16_t numberOfRegistrations)
 		{
 			std::scoped_lock lock(mutexClients_);
 			if (!isClientValid(lane, ip))
@@ -96,16 +96,19 @@ namespace model
 			}
 			if (leftLane == usingLeftLane_)
 			{
-				decreaseTimer(lane, ip);
-				if (windowManager_)
+				for (uint16_t i = 0; i < numberOfRegistrations; i++)
 				{
-					if (isVehicleTracker(lane, ip))
+					decreaseTimer(lane, ip);
+					if (windowManager_)
 					{
-						windowManager_->signalIncomingCar(paint::VehicleTypes::NORMAL_VEHICLE, lane);
-					}
-					else
-					{
-						windowManager_->signalIncomingCar(paint::VehicleTypes::VT_VEHICLE, lane);
+						if (isVehicleTracker(lane, ip))
+						{
+							windowManager_->signalIncomingCar(paint::VehicleTypes::NORMAL_VEHICLE, lane);
+						}
+						else
+						{
+							windowManager_->signalIncomingCar(paint::VehicleTypes::VT_VEHICLE, lane);
+						}
 					}
 				}
 			}
@@ -118,7 +121,7 @@ namespace model
 			return true;
 		}
 
-		bool TrafficLightStateMachine::unregisterClient(ipc::utile::IP_ADRESS ip)
+		bool TrafficLightStateMachine::unregisterClient(const ipc::utile::IP_ADRESS ip)
 		{
 			std::scoped_lock lock(mutexClients_);
 			std::optional<common::utile::LANE> corespondingLane = {};
@@ -152,7 +155,7 @@ namespace model
 			return !waitingEmergencyVehicles_.empty();
 		}
 
-		bool TrafficLightStateMachine::startEmergencyState(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		bool TrafficLightStateMachine::startEmergencyState(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip)
 		{
 			if (!registerClient(lane, ip, usingLeftLane_))
 			{
@@ -164,7 +167,7 @@ namespace model
 			return true;
 		}
 
-		bool TrafficLightStateMachine::endEmergencyState(ipc::utile::IP_ADRESS ip)
+		bool TrafficLightStateMachine::endEmergencyState(const ipc::utile::IP_ADRESS ip)
 		{
 			if (!unregisterClient(ip))
 			{
@@ -211,7 +214,7 @@ namespace model
 
 		}
 
-		uint16_t TrafficLightStateMachine::calculateTimeDecrease(const common::utile::LANE lane, ipc::utile::IP_ADRESS ip)
+		uint16_t TrafficLightStateMachine::calculateTimeDecrease(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip)
 		{
 			auto timeLeft = laneToTimerMap_[lane]->getTimeLeft();
 
@@ -417,18 +420,18 @@ namespace model
 		{
 			std::scoped_lock lock(mutexClients_);
 
-			if (auto it = laneToVehicleTrackerIPAdress_.find(lane); it != laneToVehicleTrackerIPAdress_.end() && it->second != ipAdress)
+			if (auto it = laneToTrafficObserverIPAdress_.find(lane); it != laneToTrafficObserverIPAdress_.end() && it->second != ipAdress)
 			{
 				LOG_ERR << "Camera already connect to the give lane. Please disable it";
 				return false;
 			}
-			else if (auto it = laneToVehicleTrackerIPAdress_.find(lane); it != laneToVehicleTrackerIPAdress_.end() && it->second == ipAdress)
+			else if (auto it = laneToTrafficObserverIPAdress_.find(lane); it != laneToTrafficObserverIPAdress_.end() && it->second == ipAdress)
 			{
 				return true;
 			}
 
 			LOG_ERR << (int)lane;
- 			laneToVehicleTrackerIPAdress_[lane] = ipAdress;
+ 			laneToTrafficObserverIPAdress_[lane] = ipAdress;
 			return true;
 		}
 

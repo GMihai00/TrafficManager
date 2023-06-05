@@ -109,18 +109,18 @@ int main(int argc, char* argv[])
 		exit(5);
 	}
 
-	std::shared_ptr<model::TrafficObserverClient> client;
+	std::shared_ptr<::model::TrafficObserverClient> client;
 	auto videoPath = getVideoPath(commandLine);
 	if (videoPath.has_value())
 	{
-		client = std::make_shared<model::TrafficObserverClient>(keyword.value(), videoPath.value());
+		client = std::make_shared<::model::TrafficObserverClient>(keyword.value(), videoPath.value());
 	}
 	else
 	{
-		client = std::make_shared<model::TrafficObserverClient>(keyword.value());
+		client = std::make_shared<::model::TrafficObserverClient>(keyword.value());
 	}
 
-	if (!client->connect(serverIp.value(), serverPort.value()))
+	if (!client->secureConnect(serverIp.value(), serverPort.value()))
 	{
 		LOG_ERR << "Failed to connect to " << serverIp.value() << ":" << serverPort.value();
 		exit(5);
