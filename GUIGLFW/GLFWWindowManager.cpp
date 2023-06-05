@@ -148,7 +148,7 @@ namespace model
 		if (!m_textRendere)
 			return;
 
-		for (const auto& [type, map] : m_vehicleToCarsWaiting)
+		for (const auto& [type, map] : m_vehicleTypeToCarsWaiting)
 		{
 			for (const auto& [lane, nr_cars] : map)
 			{
@@ -253,7 +253,7 @@ namespace model
 				laneToCarCount[lane] = 0;
 			}
 
-			m_vehicleToCarsWaiting.emplace(vehicleType, std::move(laneToCarCount));
+			m_vehicleTypeToCarsWaiting.emplace(vehicleType, std::move(laneToCarCount));
 		}
 
 		m_rendering_thread = std::thread(std::bind(&GLFWWindowManager::render, this, window_weight, window_height));
@@ -312,12 +312,29 @@ namespace model
 		}
 	}
 
-	void GLFWWindowManager::drawCar(const RGBColor& color,
+	void GLFWWindowManager::drawCar(const paint::VehicleTypes type,
 		const common::utile::LANE lane,
 		std::optional<Point> bl_point,
 		const GLfloat& height, const GLfloat& width,
 		GLfloat moving_rate)
 	{
+		RGBColor color = COLOR_WHITE;
+
+		switch (type)
+		{
+		case paint::VehicleTypes::EMERGENCY_VEHICLE:
+			color = COLOR_RED;
+			break;
+		case paint::VehicleTypes::NORMAL_VEHICLE:
+			color = COLOR_WHITE;
+			break;
+		case paint::VehicleTypes::VT_VEHICLE:
+			color = COLOR_LIGHT_BLUE;
+			break;
+		default:
+			return;
+		}
+
 		const static std::map<common::utile::LANE, Point> starting_lane_points =
 		{
 			{common::utile::LANE::E, Point(GLfloat(1.), GLfloat(0.1))},
@@ -337,7 +354,10 @@ namespace model
 		if (bl_point == std::nullopt)
 		{
 			if (auto it = starting_lane_points.find(lane); it != starting_lane_points.end())
+			{
+				m_vehicleTypeToCarsWaiting[type][lane]++;
 				bl_point = it->second;
+			}
 			else
 				return;
 		}
@@ -347,6 +367,7 @@ namespace model
 				((std::abs(it->second.m_oX) < std::abs(bl_point.value().m_oX)) ||
 					(std::abs(it->second.m_oY) < std::abs(bl_point.value().m_oY))))
 			{
+				m_vehicleTypeToCarsWaiting[type][lane]--;
 				return;
 			}
 		}
@@ -380,7 +401,7 @@ namespace model
 
 					draw_rect(oldPoint, it->second.first, it->second.second, color);
 				}
-				m_waing_queue.push(std::bind(&GLFWWindowManager::drawCar, this, color, lane, bl_point, height, width, moving_rate));
+				m_waing_queue.push(std::bind(&GLFWWindowManager::drawCar, this, type, lane, bl_point, height, width, moving_rate));
 				return;
 			}
 
@@ -398,7 +419,7 @@ namespace model
 		else
 			return;
 
-		m_waing_queue.push(std::bind(&GLFWWindowManager::drawCar, this, color, lane, new_point, height, width, moving_rate));
+		m_waing_queue.push(std::bind(&GLFWWindowManager::drawCar, this, type, lane, new_point, height, width, moving_rate));
 	}
 
 	void GLFWWindowManager::changeTrafficLights(const std::set<common::utile::LANE>& green_light_lanes)
@@ -419,25 +440,7 @@ namespace model
 		const GLfloat& width,
 		GLfloat moving_rate)
 	{
-		
-		RGBColor color = COLOR_WHITE;
-
-		switch (type)
-		{
-		case paint::VehicleTypes::EMERGENCY_VEHICLE:
-			color = COLOR_RED;
-			break;
-		case paint::VehicleTypes::NORMAL_VEHICLE:
-			color = COLOR_WHITE;
-			break;
-		case paint::VehicleTypes::VT_VEHICLE:
-			color = COLOR_LIGHT_BLUE;
-			break;
-		default:
-			return;
-		}
-
-		m_waing_queue.push(std::bind(&GLFWWindowManager::drawCar, this, color, lane, bl_point, height, width, moving_rate));
+		m_waing_queue.push(std::bind(&GLFWWindowManager::drawCar, this, type, lane, bl_point, height, width, moving_rate));
 	}
 
 } // namespace model
