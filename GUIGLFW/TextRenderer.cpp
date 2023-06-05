@@ -33,7 +33,7 @@ namespace model
         FT_Done_FreeType(m_ft);
     }
 
-    bool TextRenderer::writeText(const std::string& text, GLfloat x, GLfloat y)
+    bool TextRenderer::writeText(const std::string& text, GLfloat x, GLfloat y, const RGBColor& color)
     {
         if (FT_Set_Char_Size(m_face, 0, m_fontSize * 64, m_dpi, m_dpi))
         {
@@ -60,7 +60,7 @@ namespace model
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        glColor3f(1.0, 1.0, 1.0);
+        glColor3f(color.m_red, color.m_green, color.m_blue);
 
         FT_GlyphSlot gliphSlot = m_face->glyph;
 

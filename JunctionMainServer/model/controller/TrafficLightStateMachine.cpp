@@ -29,7 +29,7 @@ namespace model
 				common::utile::LANE lane = (common::utile::LANE)laneNr;
 				if (!isLaneMissing(lane))
 				{
-					auto timer = std::make_shared<Timer>();
+					auto timer = std::make_shared<Timer>(regLightDuration_);
 					timer->unfreezeTimer();
 					laneToTimerMap_[lane] = timer;
 				}

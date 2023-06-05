@@ -7,7 +7,7 @@
 #include FT_FREETYPE_H
 
 #include <GLFW/glfw3.h>
-
+#include "GraphicsDataTypes.hpp"
 
 namespace model
 {
@@ -25,7 +25,7 @@ namespace model
 		TextRenderer(const std::filesystem::path& fontPath, int fontSize = 10, int dpi = 300);
 		~TextRenderer() noexcept;
 
-		bool writeText(const std::string& text, GLfloat x, GLfloat y);
+		bool writeText(const std::string& text, GLfloat x, GLfloat y, const RGBColor& color = COLOR_WHITE);
 		void setFontSize(const int fontSize);
 	};
 	typedef std::unique_ptr<TextRenderer> TextRendererPtr;

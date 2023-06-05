@@ -66,23 +66,94 @@ namespace model
 		if (!m_textRendere)
 			return;
 
-		// TO DO
+		RGBColor color = COLOR_GREEN;
+		if (time_left == 0)
+			color = COLOR_RED;
+
 		switch (lane)
 		{
 		case common::utile::LANE::E:
-			m_textRendere->writeText("TIMER E: " + std::to_string(time_left), 530., 780.);
+			m_textRendere->writeText("TIMER E: " + std::to_string(time_left), 530., 780., color);
 			break;
 		case common::utile::LANE::W:
-			m_textRendere->writeText("TIMER W: 120" + std::to_string(time_left), 20., 100.);
+			m_textRendere->writeText("TIMER W: " + std::to_string(time_left), 20., 100., color);
 			break;
 		case common::utile::LANE::N:
-			m_textRendere->writeText("TIMER N: 120" + std::to_string(time_left), 20., 780.);
+			m_textRendere->writeText("TIMER N: " + std::to_string(time_left), 20., 780., color);
 			break;
 		case common::utile::LANE::S:
-			m_textRendere->writeText("TIMER S: 120" + std::to_string(time_left), 530., 100.);
+			m_textRendere->writeText("TIMER S: " + std::to_string(time_left), 530., 100., color);
 			break;
 		default:
 			break;
+		}
+	}
+
+	void GLFWWindowManager::display_cars_waiting_for_lane(const uint16_t nr_cars, const common::utile::LANE lane, const paint::VehicleTypes type)
+	{
+		if (!m_textRendere)
+			return;
+
+		uint16_t translateY = 0;
+		std::string text;
+		RGBColor color = COLOR_WHITE;
+		switch (type)
+		{
+		case paint::VehicleTypes::NORMAL_VEHICLE:
+			translateY = 0;
+			color = COLOR_WHITE;
+			text = "CARS" ": " + std::to_string(nr_cars);
+			break;
+		case paint::VehicleTypes::VT_VEHICLE:
+			translateY = 40;
+			color = COLOR_LIGHT_BLUE;
+			text = "DSRC" ": " + std::to_string(nr_cars);
+			break;
+		case paint::VehicleTypes::EMERGENCY_VEHICLE:
+
+			if (nr_cars == 0)
+				return;
+
+			color = COLOR_RED;
+			translateY = 80;
+			text = "EMERGENCY";
+			break;
+		default:
+			break;
+		}
+
+
+
+		switch (lane)
+		{
+		case common::utile::LANE::E:
+			m_textRendere->writeText(text, 532., 740. - translateY, color);
+			break;
+		case common::utile::LANE::W:
+			m_textRendere->writeText(text, 22., 140. + translateY, color);
+			break;
+		case common::utile::LANE::N:
+			m_textRendere->writeText(text, 22., 740. - translateY, color);
+			break;
+		case common::utile::LANE::S:
+			m_textRendere->writeText(text, 532., 140. + translateY, color);
+			break;
+		default:
+			break;
+		}
+	}
+
+	void GLFWWindowManager::display_cars_waiting()
+	{
+		if (!m_textRendere)
+			return;
+
+		for (const auto& [type, map] : m_vehicleToCarsWaiting)
+		{
+			for (const auto& [lane, nr_cars] : map)
+			{
+				display_cars_waiting_for_lane(nr_cars, lane, type);
+			}
 		}
 	}
 
@@ -137,6 +208,8 @@ namespace model
 				m_draw_actions.pop();
 			}
 
+			display_cars_waiting();
+
 			glfwSwapBuffers(m_window);
 			glfwPollEvents();
 		}
@@ -160,6 +233,27 @@ namespace model
 		catch (const std::exception& err)
 		{
 			std::cerr << err.what() << std::endl;
+		}
+
+		std::vector<paint::VehicleTypes> allVehicleTypes = {
+			paint::VehicleTypes::EMERGENCY_VEHICLE, paint::VehicleTypes::NORMAL_VEHICLE, paint::VehicleTypes::VT_VEHICLE };
+
+		std::vector<common::utile::LANE> allLanes = {
+			common::utile::LANE::E,
+			common::utile::LANE::W,
+			common::utile::LANE::N,
+			common::utile::LANE::S
+		};
+
+		for (const auto& vehicleType : allVehicleTypes)
+		{
+			std::map<common::utile::LANE, uint16_t> laneToCarCount;
+			for (const auto& lane : allLanes)
+			{
+				laneToCarCount[lane] = 0;
+			}
+
+			m_vehicleToCarsWaiting.emplace(vehicleType, std::move(laneToCarCount));
 		}
 
 		m_rendering_thread = std::thread(std::bind(&GLFWWindowManager::render, this, window_weight, window_height));

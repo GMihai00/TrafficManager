@@ -38,9 +38,13 @@ namespace model
 
 		const std::map<common::utile::LANE, common::utile::TimerPtr>& laneToTimerMap_;
 
+		std::map<paint::VehicleTypes, std::map<common::utile::LANE, uint16_t>> m_vehicleToCarsWaiting;
+
 		void draw_junction();
 		void display_time_left_for_lane(const common::utile::LANE lane, const uint16_t time_left);
 		void display_time_left_timers();
+		void display_cars_waiting_for_lane(const uint16_t nr_cars, const common::utile::LANE lane, const paint::VehicleTypes type);
+		void display_cars_waiting();
 
 		void render(int window_weight, int window_height);
 
