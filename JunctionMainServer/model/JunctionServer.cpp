@@ -175,7 +175,8 @@ namespace model
 			return false;
 		}
 
-		auto decryptedKeyword = keyPair_.second->encrypt(keyword);
+		//auto decryptedKeyword = keyPair_.second->encrypt(keyword);
+		auto decryptedKeyword = keyword;
 
 		auto lane = getLaneBasedOnKeyword(decryptedKeyword);
 

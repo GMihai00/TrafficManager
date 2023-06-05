@@ -97,15 +97,17 @@ namespace model
         uint32_t power = 0;
         uint32_t modulo = 0;
 
-        if (answear.value().first.msg.header.type != ipc::VehicleDetectionMessages::ACK)
+        auto msg = answear.value().first.msg;
+
+        if (msg.header.type != ipc::VehicleDetectionMessages::ACK)
             return false;
 
-        answear.value().first.msg << modulo;
-        answear.value().first.msg << power;
+        msg >> modulo;
+        msg >> power;
 
         if (power == 0 || modulo == 0)
         {
-            LOG_ERR << "Failed to read public key data";
+            LOG_ERR << "Failed to read public key data power= " << power << " modulo= " << modulo;
             return false;
         }
 
@@ -127,7 +129,8 @@ namespace model
         message.header.id = messageIdProvider_.provideId(ipc::VehicleDetectionMessages::SECURE_CONNECT);
         message.header.hasPriority = false;
 
-        auto encryptedKey = publicKey_->encrypt(keyword_);
+        //auto encryptedKey = publicKey_->encrypt(keyword_);
+        auto encryptedKey = keyword_;
         message << encryptedKey;
 
         connection_->send(message);
