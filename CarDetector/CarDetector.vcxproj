@@ -163,9 +163,6 @@
     <ClCompile Include="tensorflow\TensorflowClient.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\resources\carsTrainedData.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="cvision\Camera.hpp" />
     <ClInclude Include="cvision\CarDetect.hpp" />
     <ClInclude Include="cvision\ImageProcessor.hpp" />

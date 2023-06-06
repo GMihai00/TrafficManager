@@ -8,16 +8,9 @@ namespace model
 		trafficLightStateMachine_(config, shouldDisplay),
 		laneToKeyword_(config.laneToKeyword)
 	{
-		try
-		{
-			keyPair_ = security::RSA::generateKeyPair();
-		}
-		catch (const std::exception& err)
-		{
-			LOG_ERR << err.what();
-		}
+		rsaParams_.GenerateRandomWithKeySize(rng_, 2048);
 
-		trafficLightStateMachine_.initiate();
+		publicKey_.Initialize(rsaParams_.GetModulus(), rsaParams_.GetPublicExponent());
 	}
 
 	bool JunctionServer::onClientConnect(ipc::utile::ConnectionPtr client)
@@ -140,23 +133,17 @@ namespace model
 
 	void JunctionServer::providePublicKeyToClient(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
-		auto publicKey = std::dynamic_pointer_cast<security::RSA::PublicKey>(keyPair_.first);
-
-		if (!publicKey)
+		publicKeyBytes.clear();
 		{
-			LOG_ERR << "No key pair generate";
-			rejectMessage(client, msg);
-			return;
+			CryptoPP::VectorSink stringSink(publicKeyBytes);
+			publicKey_.DEREncode(stringSink);
 		}
-
-		auto value = publicKey->getKeyNumericValues();
 
 		ipc::net::Message<ipc::VehicleDetectionMessages> message;
 		message.header.id = msg.header.id;
 		message.header.type = ipc::VehicleDetectionMessages::ACK;
 
-		message << value.first;
-		message << value.second;
+		message << publicKeyBytes;
 
 		messageClient(client, message);
 	}
@@ -168,15 +155,14 @@ namespace model
 
 		msg >> keyword;
 
-		if (!keyPair_.second)
-		{
-			LOG_ERR << "No key pair generate";
-			rejectMessage(client, msg);
-			return false;
-		}
+		std::string decryptedKeyword = "";
 
-		//auto decryptedKeyword = keyPair_.second->encrypt(keyword);
-		auto decryptedKeyword = keyword;
+		CryptoPP::RSAES_OAEP_SHA_Decryptor rsaDecryptor(rsaParams_);
+		CryptoPP::StringSource(keyword, true,
+			new CryptoPP::PK_DecryptorFilter(rng_, rsaDecryptor,
+				new CryptoPP::StringSink(decryptedKeyword)
+			)
+		);
 
 		auto lane = getLaneBasedOnKeyword(decryptedKeyword);
 

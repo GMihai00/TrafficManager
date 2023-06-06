@@ -9,24 +9,29 @@
 
 #include <boost/optional/optional.hpp>
 
+#include <cryptopp870/dll.h>
+#include <cryptopp870/rsa.h>
+#include <cryptopp870/osrng.h>
+#include <cryptopp870/base64.h>
+
 #include "net/Server.hpp"
 #include "MessageTypes.hpp"
 #include "utile/ConfigHelpers.hpp"
 
 #include "controller/TrafficLightStateMachine.hpp"
-#include "RSA.hpp"
 
 namespace model
 {
 	class JunctionServer : public ipc::net::Server<ipc::VehicleDetectionMessages>
 	{
 	private:
-		
+		std::vector<uint8_t> publicKeyBytes; // crash when this is dealocated
 		controller::TrafficLightStateMachine trafficLightStateMachine_;
 		std::map<common::utile::LANE, std::string> laneToKeyword_;
 
-		// public, private
-		std::pair<security::RSA::KeyPtr, security::RSA::KeyPtr> keyPair_;
+		CryptoPP::AutoSeededRandomPool rng_;
+		CryptoPP::InvertibleRSAFunction rsaParams_;
+		CryptoPP::RSA::PublicKey publicKey_;
 
 		LOGGER("JUNCTION-SERVER");
 

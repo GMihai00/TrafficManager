@@ -59,11 +59,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\resources\carsTrainedData.xml">
-      <Filter>Resource Files</Filter>
-    </Xml>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="cvision\Utils.hpp">
       <Filter>Header Files\cvision</Filter>
     </ClInclude>

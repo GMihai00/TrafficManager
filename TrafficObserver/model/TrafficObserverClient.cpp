@@ -104,16 +104,28 @@ namespace model
         if (msg.header.type != ipc::VehicleDetectionMessages::ACK)
             return false;
 
-        msg >> modulo;
-        msg >> power;
+        std::vector<uint8_t> publicKeyBytes;
+        publicKeyBytes.resize(msg.header.size);
 
-        if (power == 0 || modulo == 0)
+        msg >> publicKeyBytes;
+
+        if (publicKeyBytes.empty())
         {
             LOG_ERR << "Failed to read public key data power= " << power << " modulo= " << modulo;
             return false;
         }
 
-        publicKey_ = std::make_shared<security::RSA::PublicKey>(power, modulo);
+        CryptoPP::ArraySource publicKeySource(
+            publicKeyBytes.data(),
+            publicKeyBytes.size(),
+            true
+        );
+
+        CryptoPP::RSA::PublicKey publicKey;
+
+        publicKey.BERDecode(publicKeySource);
+
+        publicKey_ = publicKey;
 
         return true;
     }
@@ -131,8 +143,14 @@ namespace model
         message.header.id = messageIdProvider_.provideId(ipc::VehicleDetectionMessages::SECURE_CONNECT);
         message.header.hasPriority = false;
 
-        //auto encryptedKey = publicKey_->encrypt(keyword_);
-        auto encryptedKey = keyword_;
+        CryptoPP::RSAES_OAEP_SHA_Encryptor rsaEncryptor(publicKey_.value());
+
+        encryptedKey.clear();
+
+        CryptoPP::StringSource(keyword_, true,
+            new CryptoPP::PK_EncryptorFilter(rng_, rsaEncryptor,
+                new CryptoPP::StringSink(encryptedKey)));
+
         message << encryptedKey;
 
         connection_->send(message);
