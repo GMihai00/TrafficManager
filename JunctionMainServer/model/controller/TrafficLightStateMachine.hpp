@@ -173,7 +173,7 @@ namespace model
 
 		struct Stopped : sc::simple_state <Stopped, BaseState>
 		{
-			typedef sc::transition<Start, EWTransition> reactions;
+			typedef sc::transition<NormalTransition, EWTransition> reactions;
 
 			virtual ~Stopped() noexcept = default;
 

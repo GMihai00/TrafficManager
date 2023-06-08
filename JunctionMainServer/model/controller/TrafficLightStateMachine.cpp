@@ -293,7 +293,7 @@ namespace model
 
 		void TrafficLightStateMachine::updateTimersDuration()
 		{
-			return; // uncomment only for removing improvements for testing comparison
+			// return; // uncomment only for removing improvements for testing comparison
 			std::scoped_lock lock(mutexClients_);
 			
 			uint8_t numberOfCarsThatPassed = 0;
@@ -387,27 +387,27 @@ namespace model
 		void TrafficLightStateMachine::updateTrafficState()
 		{
 			// comment this part for removing improvements for testing comparison
-			//queueNextStatesWaiting();
-			//if (!jumpTransitionQueue_.empty())
-			//{
-			//	const auto nextTransition = jumpTransitionQueue_.pop();
-			//	if (!nextTransition.has_value())
-			//	{
-			//		LOG_WARN << "Failed to get next jump transition, resuming to normal flow";
+			queueNextStatesWaiting();
+			if (!jumpTransitionQueue_.empty())
+			{
+				const auto nextTransition = jumpTransitionQueue_.pop();
+				if (!nextTransition.has_value())
+				{
+					LOG_WARN << "Failed to get next jump transition, resuming to normal flow";
 
-			//		this->process_event(NormalTransition());
-			//		this->freezeTimers(nextNormalState_);
-			//		this->updateWindowWithNewTrafficState(nextNormalState_);
+					this->process_event(NormalTransition());
+					this->freezeTimers(nextNormalState_);
+					this->updateWindowWithNewTrafficState(nextNormalState_);
 
-			//		return;
-			//	}
-			//	LOG_DBG << "Jumped to transition: " << nextTransition.value().nextTransitionName_;
+					return;
+				}
+				LOG_DBG << "Jumped to transition: " << nextTransition.value().nextTransitionName_;
 
-			//	this->freezeTimers(nextTransition.value().nextTransitionName_);
-			//	this->process_event(nextTransition.value());
-			//	this->updateWindowWithNewTrafficState(nextTransition.value().nextTransitionName_);
-			//	return;
-			//}
+				this->freezeTimers(nextTransition.value().nextTransitionName_);
+				this->process_event(nextTransition.value());
+				this->updateWindowWithNewTrafficState(nextTransition.value().nextTransitionName_);
+				return;
+			}
 			// comment this part for removing improvements for testing pomparison
 
 

@@ -6,11 +6,6 @@
 #include <utility>
 #include <condition_variable>
 
-#include <cryptopp870/dll.h>
-#include <cryptopp870/rsa.h>
-#include <cryptopp870/osrng.h>
-#include <cryptopp870/base64.h>
-
 #include "net/Client.hpp"
 #include "net/Message.hpp"
 #include "MessageTypes.hpp"
@@ -19,6 +14,8 @@
 #include "utile/Logger.hpp"
 #include "utile/Observer.hpp"
 #include "utile/ConfigHelpers.hpp"
+#include "RSA.hpp"
+
 
 namespace model
 {
@@ -29,11 +26,8 @@ namespace model
         cvision::ObjectTracker carTracker_;
         common::utile::IObserverPtr observer_;
         std::function<void()> observer_callback_;
-
         std::string keyword_;
-        CryptoPP::AutoSeededRandomPool rng_;
-        std::optional<CryptoPP::RSA::PublicKey> publicKey_ = std::nullopt;
-        std::string encryptedKey; // crash when this is dealocated
+        std::shared_ptr<security::RSA::PublicKey> publicKey_ = nullptr;
         std::atomic_bool secureConnectionEstablished_ = false;
         std::mutex mutexSendCarData_;
 
