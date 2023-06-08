@@ -16,14 +16,20 @@
     <Filter Include="Header Files\utile">
       <UniqueIdentifier>{9573ac7e-3a3e-4cff-9ce0-d1f35ad5bd52}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\utile">
-      <UniqueIdentifier>{38731901-bd61-46e2-ba3a-e26fdd7b48f3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\db">
       <UniqueIdentifier>{08f0eb19-8286-46e8-9316-41ac76c7664d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\db">
       <UniqueIdentifier>{a0835558-17f8-4f75-9630-10b0cb0eb5e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\data">
+      <UniqueIdentifier>{adfed8b8-e558-4a23-99ee-9da07dbcc229}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\data">
+      <UniqueIdentifier>{87cfd43d-eab3-49c9-ba8d-05722174fae2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\utile">
+      <UniqueIdentifier>{38731901-bd61-46e2-ba3a-e26fdd7b48f3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +87,9 @@
     <ClInclude Include="finally.h">
       <Filter>Header Files\utile</Filter>
     </ClInclude>
+    <ClInclude Include="DataCollector.hpp">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp">
@@ -124,6 +133,9 @@
     </ClCompile>
     <ClCompile Include="finally.cpp">
       <Filter>Source Files\utile</Filter>
+    </ClCompile>
+    <ClCompile Include="DataCollector.cpp">
+      <Filter>Source Files\data</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

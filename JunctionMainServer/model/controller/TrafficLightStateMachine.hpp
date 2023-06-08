@@ -68,7 +68,7 @@ namespace model
 			std::enable_shared_from_this<TrafficLightStateMachine>
 		{
 		public:
-			std::string nextNormalState_ = "N";
+			std::string nextNormalState_ = "EW";
 		private:
 			// CONFIG DATA
 			uint8_t usingLeftLane_ = 0;
@@ -98,7 +98,7 @@ namespace model
 
 			LOGGER("TRAFFICLIGHT-STATEMACHINE");
 
-			uint16_t calculateTimeDecrease(const common::utile::LANE lane, const ipc::utile::IP_ADRESS ip, const size_t numberOfRegistrations);
+			uint16_t calculateTimeDecrease(const common::utile::LANE lane, const  ipc::utile::IP_ADRESS ip, const size_t numberOfRegistrations);
 
 			bool isInConflictScenario();
 
@@ -107,7 +107,7 @@ namespace model
 			
 			void updateWindowWithNewTrafficState(const std::string& transitioName);
 		public:
-			TrafficLightStateMachine(const common::utile::model::JMSConfig& config, bool shouldDisplay);
+			TrafficLightStateMachine(const common::utile::model::JMSConfig& config, const bool shouldDisplay);
 			TrafficLightStateMachine(const TrafficLightStateMachine&) = delete;
 			virtual ~TrafficLightStateMachine() noexcept = default;
 
@@ -153,6 +153,11 @@ namespace model
 		{
 			typedef  mpl::list <sc::custom_reaction <JumpTransition> > reactions;
 
+			BaseState()
+			{
+				std::cout << "BaseState\n";
+			}
+
 			virtual sc::result react(const JumpTransition& jumpTransition)
 			{
 				if (jumpTransition.nextTransitionName_ == "EW") { return transit<EWTransition>(); }
@@ -168,7 +173,10 @@ namespace model
 
 		struct Stopped : sc::simple_state <Stopped, BaseState>
 		{
-			typedef sc::transition<Start ,EWTransition> reactions;
+			typedef sc::transition<Start, EWTransition> reactions;
+
+			virtual ~Stopped() noexcept = default;
+
 		};
 
 	

@@ -10,7 +10,7 @@ namespace model
 	namespace controller
 	{
 		
-		TrafficLightStateMachine::TrafficLightStateMachine(const common::utile::model::JMSConfig& config, bool shouldDisplay) :
+		TrafficLightStateMachine::TrafficLightStateMachine(const common::utile::model::JMSConfig& config, const bool shouldDisplay) :
 			greenLightDuration_(config.maxWaitingTime),
 			regLightDuration_(15),
 			usingLeftLane_(config.usingLeftLane)
@@ -293,6 +293,7 @@ namespace model
 
 		void TrafficLightStateMachine::updateTimersDuration()
 		{
+			return; // uncomment only for removing improvements for testing comparison
 			std::scoped_lock lock(mutexClients_);
 			
 			uint8_t numberOfCarsThatPassed = 0;
@@ -385,28 +386,37 @@ namespace model
 
 		void TrafficLightStateMachine::updateTrafficState()
 		{
-			queueNextStatesWaiting();
-			if (!jumpTransitionQueue_.empty())
-			{
-				const auto nextTransition = jumpTransitionQueue_.pop();
-				if (!nextTransition.has_value())
-				{
-					LOG_ERR << "WE HAVE A BUG";
-					return;
-				}
-				LOG_DBG << "Jumped to transition: " << nextTransition.value().nextTransitionName_;
+			// comment this part for removing improvements for testing comparison
+			//queueNextStatesWaiting();
+			//if (!jumpTransitionQueue_.empty())
+			//{
+			//	const auto nextTransition = jumpTransitionQueue_.pop();
+			//	if (!nextTransition.has_value())
+			//	{
+			//		LOG_WARN << "Failed to get next jump transition, resuming to normal flow";
 
-				this->freezeTimers(nextTransition.value().nextTransitionName_);
-				this->process_event(nextTransition.value());
-				this->updateWindowWithNewTrafficState(nextTransition.value().nextTransitionName_);
-				return;
-			}
+			//		this->process_event(NormalTransition());
+			//		this->freezeTimers(nextNormalState_);
+			//		this->updateWindowWithNewTrafficState(nextNormalState_);
+
+			//		return;
+			//	}
+			//	LOG_DBG << "Jumped to transition: " << nextTransition.value().nextTransitionName_;
+
+			//	this->freezeTimers(nextTransition.value().nextTransitionName_);
+			//	this->process_event(nextTransition.value());
+			//	this->updateWindowWithNewTrafficState(nextTransition.value().nextTransitionName_);
+			//	return;
+			//}
+			// comment this part for removing improvements for testing pomparison
+
 
 			LOG_INF << "Normal transition";
 
 			this->process_event(NormalTransition());
 			this->freezeTimers(nextNormalState_);
 			this->updateWindowWithNewTrafficState(nextNormalState_);
+
 		}
 
 		void TrafficLightStateMachine::greenLightExpireCallback()

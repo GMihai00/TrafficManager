@@ -18,6 +18,7 @@
 #include "VehicleTypes.hpp"
 #include "GraphicsDataTypes.hpp"
 #include "TextRenderer.hpp"
+#include "DataCollector.hpp"
 
 namespace model
 {
@@ -40,6 +41,9 @@ namespace model
 
 		std::map<paint::VehicleTypes, std::map<common::utile::LANE, uint16_t>> m_vehicleTypeToCarsWaiting;
 
+		uint32_t m_id = 0;
+		std::shared_ptr<common::data::DataCollector> m_dataCollector{ nullptr };
+
 		void draw_junction();
 		void display_time_left_for_lane(const common::utile::LANE lane, const uint16_t time_left);
 		void display_time_left_timers();
@@ -54,7 +58,8 @@ namespace model
 			const GLfloat height,
 			const GLfloat width,
 			GLfloat moving_rate,
-			const size_t nr_cars);
+			const size_t nr_cars,
+			const uint32_t id);
 		bool isAboutToCrossTheJunction(const Point& bl_point, const GLfloat& height, const GLfloat& width, const common::utile::LANE lane);
 
 	public:

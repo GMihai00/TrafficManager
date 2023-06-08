@@ -198,17 +198,20 @@ namespace model
 
 			numberOfElementToPop = m_waiting_queue.size();
 
-			while (!m_waiting_queue.empty() && --numberOfElementToPop)
+			if (numberOfElementToPop != 0)
 			{
-				std::function<void()> draw_function;
+				while (!m_waiting_queue.empty() && --numberOfElementToPop)
 				{
-					std::scoped_lock lock(m_mutex);
-					draw_function = m_waiting_queue.front();
-					m_waiting_queue.pop();
-				}
+					std::function<void()> draw_function;
+					{
+						std::scoped_lock lock(m_mutex);
+						draw_function = m_waiting_queue.front();
+						m_waiting_queue.pop();
+					}
 
-				if (draw_function)
-					draw_function();
+					if (draw_function)
+						draw_function();
+				}
 			}
 
 			display_cars_waiting();
@@ -257,6 +260,16 @@ namespace model
 			}
 
 			m_vehicleTypeToCarsWaiting.emplace(vehicleType, std::move(laneToCarCount));
+		}
+
+		try
+		{
+			m_dataCollector = std::make_shared<common::data::DataCollector>();
+		}
+		catch (const std::exception& err)
+		{
+			m_dataCollector = nullptr;
+			std::cerr << err.what() << std::endl;
 		}
 
 		m_rendering_thread = std::thread(std::bind(&GLFWWindowManager::render, this, window_weight, window_height));
@@ -320,7 +333,8 @@ namespace model
 		std::optional<Point> bl_point,
 		const GLfloat height, const GLfloat width,
 		GLfloat moving_rate,
-		const size_t nr_cars)
+		const size_t nr_cars,
+		const uint32_t id)
 	{
 		RGBColor color = COLOR_WHITE;
 
@@ -361,6 +375,9 @@ namespace model
 			{
 				m_vehicleTypeToCarsWaiting[type][lane]+=nr_cars;
 				bl_point = it->second;
+
+				if (m_dataCollector)
+					m_dataCollector->registerCars(id, nr_cars);
 			}
 			else
 				return;
@@ -372,6 +389,10 @@ namespace model
 					(std::abs(it->second.m_oY) < std::abs(bl_point.value().m_oY))))
 			{
 				m_vehicleTypeToCarsWaiting[type][lane]-=nr_cars;
+
+				if (m_dataCollector)
+					m_dataCollector->unregisterCars(id);
+
 				return;
 			}
 		}
@@ -405,7 +426,7 @@ namespace model
 
 					draw_rect(oldPoint, it->second.first, it->second.second, color);
 				}
-				m_waiting_queue.push(std::bind(&GLFWWindowManager::drawCars, this, type, lane, bl_point, height, width, moving_rate, nr_cars));
+				m_waiting_queue.push(std::bind(&GLFWWindowManager::drawCars, this, type, lane, bl_point, height, width, moving_rate, nr_cars, id));
 				return;
 			}
 
@@ -423,7 +444,7 @@ namespace model
 		else
 			return;
 
-		m_waiting_queue.push(std::bind(&GLFWWindowManager::drawCars, this, type, lane, new_point, height, width, moving_rate, nr_cars));
+		m_waiting_queue.push(std::bind(&GLFWWindowManager::drawCars, this, type, lane, new_point, height, width, moving_rate, nr_cars, id));
 	}
 
 	void GLFWWindowManager::changeTrafficLights(const std::set<common::utile::LANE>& green_light_lanes)
@@ -445,7 +466,8 @@ namespace model
 		const GLfloat& width,
 		GLfloat moving_rate)
 	{
-		m_waiting_queue.push(std::bind(&GLFWWindowManager::drawCars, this, type, lane, bl_point, height, width, moving_rate, nr_cars));
+		uint32_t id = ++m_id;
+		m_waiting_queue.push(std::bind(&GLFWWindowManager::drawCars, this, type, lane, bl_point, height, width, moving_rate, nr_cars, id));
 	}
 
 } // namespace model
