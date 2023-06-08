@@ -22,6 +22,7 @@
 
 namespace model
 {
+	// REMOVE RSA CAUSING MEMORY CORRUPTION FCKING UP BOOST STATECHART !!!!
 	class JunctionServer : public ipc::net::Server<ipc::VehicleDetectionMessages>
 	{
 	private:
