@@ -299,7 +299,7 @@ namespace model
 
 		void TrafficLightStateMachine::updateTimersDuration()
 		{
-			//return; // uncomment only for removing improvements for testing comparison
+			return; // uncomment only for removing improvements for testing comparison
 			std::scoped_lock lock(mutexClients_);
 			
 			uint8_t numberOfCarsThatPassed = 0;
@@ -309,8 +309,6 @@ namespace model
 				numberOfCarsThatPassed += pair.second;
 			}
 
-			// aici probleme cred
-			// formulas to be changed, it's just an example
 			if (numberOfCarsThatPassed >= averageWaitingCars_)
 			{
 				if (isInConflictScenario())

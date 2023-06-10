@@ -3,7 +3,7 @@
     "ip": "127.0.0.1",
     "port": 5001
   },
-  "maxWaitingTime": 5,
+  "maxWaitingTime": 25,
   "usingLeftLane": 0,
   "lanes": {
     "top": "keyword1",

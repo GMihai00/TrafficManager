@@ -1497,7 +1497,7 @@ have passed a junction the whole process restarts from the last queried proxy.
 \end{figure}
 
 %de impartit in mai multe subcapitole "Conclusions and Further Directions"
-\chapter{Conclusions and Further Directions}
+\chapter{Conclusions}
 \indent \indent
 In this paper, through an analysis of existing research,
 implementation examples, and emerging trends, we have gained valuable
@@ -1505,6 +1505,22 @@ insights into the effectiveness and potential of traffic management
 systems. With the data collected, we have provided a new alternative 
 way of managing traffic by defining and implementing a new traffic 
 system that we believe will significantly improve traffic flow. \\
+
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={$average-waiting-time$},
+            ylabel={$cars-passed$},
+        ]
+            \addplot[color=red]table {testData/carTesting/noOptimizers/20230610_132908.txt};
+            \addplot[color=blue]table {testData/carTesting/Optimizers/20230610_132406.txt};
+        \end{axis}
+    \end{tikzpicture}
+    \label{fig:Optimizer vs no optimizers}
+    \caption{Performance comparison to regular traffic systems}
+\end{figure}
+
 \indent
 The new system itself attempts to bennefit on already existing V2V and V2I
 communication and provides an IPC based system with multiple clients, servers
@@ -1515,9 +1531,54 @@ DSRC signal based traffic control system that we believe will be the
 future of traffic handling systems. \\
 \indent 
 We mainly focused on the performance part to be able to provide
-the smoothest traffic conditions that we could offer at minimal costs,
-so many other branches, especially the vulnerability defense area,
-were mostly neglected. \\
+the smoothest traffic conditions that we could offer at minimal costs.
+To be able to display it we compared with the normal 
+flow of traffic by keeping the tracking capabilities of our system 
+and removing timers dynamic adaptations based on traffic inflow. 
+The red line (Fig ~\ref{fig:Optimizer vs no optimizers}) represents the 
+average amount of time cars had to wait when traffic was 
+calculated statically with a set waiting time and fixed traffic state 
+transitions. The blue line (Fig ~\ref{fig:Optimizer vs no optimizers}) 
+represents the average amount of time cars had to wait when the 
+waiting time was calculated dinamically and we could jump trough 
+the traffic states based on traffic inflow. As you can see,
+it's clear that cars had to wait less time when the optimiziers
+were enabled. \\
+\indent 
+One of the main disadvantages of our method is the fact the
+green/red light time duration updates only when a DSRC vechile
+passes the junction, so if there isn't any support from the infrastructure,
+then we will be left with no green light/red light time increase/decrese.
+We would just have the same waiting time, but it can be still decreased 
+based on the number of vehicles that arrive at the junction. So actually
+we would just not have any kind of timer increase. As a result we would 
+have much higher odds of encountering traffic state conflicts described in 
+chapter 4. The differce in performance can be seen in Fig 
+~\ref{fig:All Optimizer vs no timer duration update}, the green line 
+representing the average car waiting time when no DSRC vehicle was 
+detected.
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={$average-waiting-time$},
+            ylabel={$cars-passed$},
+        ]
+            \addplot[color=green]table {testData/carTesting/Optimizers/NoDSRC/20230610_175819.txt};
+            \addplot[color=blue]table {testData/carTesting/Optimizers/20230610_132406.txt};
+        \end{axis}
+    \end{tikzpicture}
+    \label{fig:All Optimizer vs no timer duration update}
+    \caption{Performance comparison to regular traffic systems}
+\end{figure}
+
+\indent 
+One other disadvantage is that in bad weather condition, the camera 
+detection won't work as with any other object recognition based 
+traffic systems, but at least in our case it is still backed up by
+the DSRC signals.
+
+\chapter{Further Directions}
 \indent
 One thing that should be done in the near future, if the system will be chosen to be 
 applied in real time scenarios would be to implement a securtiy 
