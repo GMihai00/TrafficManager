@@ -1,124 +1,196 @@
 #include "RSA.hpp"
 
-#include <vector>
-#include <random>
-#include <sstream>
+#pragma warning(disable : 4996)
 
 namespace security
 {
-    namespace RSA
+    namespace details
     {
-        namespace details
+        // Function to generate RSA key pair and return the public key
+        RSA* generateKeyPair(std::string& publicKey, std::string& privateKey)
         {
-            constexpr uint32_t MAXSIZE = (uint32_t)1e6;
+            RSA* rsaKeyPair = nullptr;
+            BIGNUM* bne = nullptr;
+            BIO* privateKeyBio = nullptr;
+            BIO* publicKeyBio = nullptr;
 
-            std::vector<uint32_t> generate_prime_numbers()
+            // Generate RSA key pair
+            bne = BN_new();
+            if (BN_set_word(bne, RSA_F4) != 1)
             {
-                std::vector<bool> ciur(MAXSIZE + 1);
-                std::fill(ciur.begin(), ciur.end(), false);
-
-                std::vector<uint32_t> rez;
-
-                for (uint32_t i = 1; ((i * i) << 1) + (i << 1) <= MAXSIZE; i += 1) {
-                    if (ciur[i] == false) {
-                        for (uint32_t j = ((i * i) << 1) + (i << 1); (j << 1) + 1 <= MAXSIZE; j += (i << 1) + 1) {
-                            ciur[j] = true;
-                        }
-                    }
-                }
-                for (uint32_t i = 1; 2 * i + 1 <= MAXSIZE; ++i)
-                    if (ciur[i] == false) rez.push_back(2 * i + 1);
-
-                return rez;
+                std::cerr << "Failed to set RSA exponent." << std::endl;
+                return nullptr;
             }
 
-            static std::vector<uint32_t> prime_numbers = generate_prime_numbers();
-
-            uint32_t lgput(uint32_t nr, uint32_t power, uint32_t mod)
+            rsaKeyPair = RSA_new();
+            if (RSA_generate_key_ex(rsaKeyPair, 2048, bne, nullptr) != 1)
             {
-                uint32_t rez = 1;
-                while (power > 0)
-                {
-                    if (power & 1)
-                    {
-                        rez *= nr;
-                        rez %= mod;
-                        power--;
-                    }
-                    nr *= nr;
-                    nr %= mod;
-                    power >>= 1;
-                }
-                return rez;
+                std::cerr << "Failed to generate RSA key pair." << std::endl;
+                RSA_free(rsaKeyPair);
+                return nullptr;
             }
 
-            uint32_t inversModularPrimeNumber(uint32_t nr, uint32_t mod)
+            // Get public key in PEM format
+            publicKeyBio = BIO_new(BIO_s_mem());
+            if (PEM_write_bio_RSAPublicKey(publicKeyBio, rsaKeyPair) != 1)
             {
-                return lgput(nr, nr - 2, mod);
+                std::cerr << "Failed to write RSA public key." << std::endl;
+                RSA_free(rsaKeyPair);
+                BIO_free_all(publicKeyBio);
+                return nullptr;
             }
 
-            size_t getRandomNumber(size_t min, size_t max) {
-                std::random_device rd;  
-                std::mt19937 gen(rd()); 
+            // Read public key from BIO into a string
+            char* publicKeyBuffer = nullptr;
+            long publicKeySize = BIO_get_mem_data(publicKeyBio, &publicKeyBuffer);
+            publicKey.assign(publicKeyBuffer, publicKeySize);
 
-                std::uniform_int_distribution<size_t> distribution(min, max);
-
-                return distribution(gen);
-            }
- 
-        }
-
-        Key::Key(const uint32_t power, const uint32_t modulo) : m_power(power), m_modulo(modulo) {}
-
-        uint32_t Key::encrypt(const uint32_t nr)
-        {
-            return details::lgput(nr, m_modulo, m_power);
-        }
-
-        std::string Key::encrypt(const std::string& text)
-        {
-            std::stringstream ss;
-
-            for (const auto& chr : text)
+            // Get private key in PEM format
+            privateKeyBio = BIO_new(BIO_s_mem());
+            if (PEM_write_bio_RSAPrivateKey(privateKeyBio, rsaKeyPair, nullptr, nullptr, 0, nullptr, nullptr) != 1)
             {
-                ss << encrypt(static_cast<uint32_t>(chr));
+                std::cerr << "Failed to write RSA private key." << std::endl;
+                RSA_free(rsaKeyPair);
+                BIO_free_all(publicKeyBio);
+                BIO_free_all(privateKeyBio);
+                return nullptr;
             }
 
-            return ss.str();
+            // Read private key from BIO into a string
+            char* privateKeyBuffer = nullptr;
+            long privateKeySize = BIO_get_mem_data(privateKeyBio, &privateKeyBuffer);
+            privateKey.assign(privateKeyBuffer, privateKeySize);
+
+            // Clean up
+            BN_free(bne);
+            BIO_free_all(publicKeyBio);
+            BIO_free_all(privateKeyBio);
+
+            return rsaKeyPair;
         }
 
-        PublicKey::PublicKey(const uint32_t power = 1, const uint32_t modulo = 1) : Key(power, modulo) {}
-
-        std::pair<uint32_t, uint32_t> PublicKey::getKeyNumericValues()
+        // Function to read a public key from a string
+        RSA* readPublicKeyFromString(const std::string& publicKeyStr)
         {
-            return { m_power, m_modulo };
+            RSA* rsaPublicKey = nullptr;
+            BIO* publicKeyBio = BIO_new_mem_buf(publicKeyStr.c_str(), -1);
+
+            if (!publicKeyBio)
+            {
+                std::cerr << "Failed to create BIO for public key." << std::endl;
+                return nullptr;
+            }
+
+            rsaPublicKey = PEM_read_bio_RSAPublicKey(publicKeyBio, nullptr, nullptr, nullptr);
+
+            if (!rsaPublicKey)
+            {
+                std::cerr << "Failed to read public key from string." << std::endl;
+                BIO_free_all(publicKeyBio);
+                return nullptr;
+            }
+
+            BIO_free_all(publicKeyBio);
+
+            return rsaPublicKey;
         }
 
-        void PublicKey::setKeyNumericValues(const std::pair<uint32_t, uint32_t>& values)
+        // Function to encrypt a message using the public key
+        std::string encryptMessage(const std::string& message, RSA* publicKey)
         {
-            m_power = values.first;
-            m_modulo = values.second;
+            int encryptedSize = RSA_size(publicKey);
+            std::vector<unsigned char> encrypted(encryptedSize);
+
+            int result = RSA_public_encrypt(
+                static_cast<int>(message.size()),
+                reinterpret_cast<const unsigned char*>(message.c_str()),
+                encrypted.data(),
+                publicKey,
+                RSA_PKCS1_PADDING
+            );
+
+            if (result == -1)
+            {
+                std::cerr << "Failed to encrypt the message." << std::endl;
+                return "";
+            }
+
+            return std::string(encrypted.begin(), encrypted.begin() + result);
         }
 
-
-        std::pair<KeyPtr, KeyPtr> generateKeyPair()
+        // Function to decrypt a message using the private key
+        std::string decryptMessage(const std::string& encryptedMessage, RSA* privateKey)
         {
-            uint32_t primenr1 = details::prime_numbers[details::getRandomNumber(0, (details::prime_numbers.size() - 1) / 2)];
-            uint32_t primenr2 = details::prime_numbers[details::getRandomNumber(0, (details::prime_numbers.size() - 1) / 2)];
-            uint32_t mod = primenr1 * primenr2;
-            uint32_t euler_product = (primenr1 - 1) * (primenr2 - 1);
+            int decryptedSize = RSA_size(privateKey);
+            std::vector<unsigned char> decrypted(decryptedSize);
 
-            auto low = std::lower_bound(details::prime_numbers.begin(), details::prime_numbers.end(), euler_product - 2);
-            if (low == details::prime_numbers.end())
-                low = details::prime_numbers.end() - 1;
+            int result = RSA_private_decrypt(
+                static_cast<int>(encryptedMessage.size()),
+                reinterpret_cast<const unsigned char*>(encryptedMessage.c_str()),
+                decrypted.data(),
+                privateKey,
+                RSA_PKCS1_PADDING
+            );
 
-            auto e = details::prime_numbers[details::getRandomNumber(2, low - details::prime_numbers.begin())];
-            auto d = details::inversModularPrimeNumber(e, mod);
+            if (result == -1)
+            {
+                std::cerr << "Failed to decrypt the message." << std::endl;
+                return "";
+            }
 
-            auto publicKey = std::make_shared<PublicKey>( e, mod );
-            auto privateKey = std::make_shared<Key>( d, mod );
-
-            return { publicKey, privateKey };
+            return std::string(decrypted.begin(), decrypted.begin() + result);
         }
+    } // namespace details
+
+    // std::string publicKeyStr;
+    // std::string privateKeyStr;
+    // RSA* publicKey
+    // RSA* privateKey 
+    // de salvat in doua clase
+    void a(){
+        std::string publicKeyStr;
+        std::string privateKeyStr;
+        RSA* publicKey = details::generateKeyPair(publicKeyStr, privateKeyStr);
+        if (!publicKey)
+        {
+            std::cerr << "Failed to generate RSA key pair." << std::endl;
+            return 1;
+        }
+
+        // Encrypt a message using the public key
+        std::string message = "Hello, RSA!";
+        std::string encryptedMessage = details::encryptMessage(message, publicKey);
+
+        // Display the public key and encrypted message
+        std::cout << "Public Key:\n" << publicKeyStr << std::endl;
+        std::cout << "Encrypted Message: " << encryptedMessage << std::endl;
+
+        // Load the private key from memory
+        BIO* privateKeyBio = BIO_new_mem_buf(privateKeyStr.c_str(), -1);
+        RSA* privateKey = PEM_read_bio_RSAPrivateKey(privateKeyBio, nullptr, nullptr, nullptr);
+        BIO_free(privateKeyBio);
+
+        if (!privateKey)
+        {
+            std::cerr << "Failed to load private key." << std::endl;
+            RSA_free(publicKey);
+            return 1;
+        }
+
+        // Decrypt the message using the private key
+        std::string decryptedMessage = details::decryptMessage(encryptedMessage, privateKey);
+
+        // Display the decrypted message
+        std::cout << "Decrypted Message: " << decryptedMessage << std::endl;
+
+        // Clean up
+        RSA_free(publicKey);
+        RSA_free(privateKey);
     }
-}
+} // namespace security
+
+
+#pragma warning(default : 4496)
+
+
+
