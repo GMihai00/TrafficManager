@@ -1531,8 +1531,8 @@ DSRC signal based traffic control system that we believe will be the
 future of traffic handling systems. \\
 \indent 
 We mainly focused on the performance part to be able to provide
-the smoothest traffic conditions that we could offer at minimal costs.
-To be able to display it we compared with the normal 
+the best traffic conditions that we could offer at minimal costs.
+To be able to display it, we compared it with the normal 
 flow of traffic by keeping the tracking capabilities of our system 
 and removing timers dynamic adaptations based on traffic inflow. 
 The red line (Fig ~\ref{fig:Optimizer vs no optimizers}) represents the 
@@ -1555,7 +1555,7 @@ we would just not have any kind of timer increase. As a result we would
 have much higher odds of encountering traffic state conflicts described in 
 chapter 4. The differce in performance can be seen in Fig 
 ~\ref{fig:All Optimizer vs no timer duration update}, the green line 
-representing the average car waiting time when no DSRC vehicle was 
+representing the average car waiting time when no DSRC vehicles were 
 detected.
 \begin{figure}[h!]
     \centering
@@ -1575,27 +1575,49 @@ detected.
 \indent 
 One other disadvantage is that in bad weather condition, the camera 
 detection won't work as with any other object recognition based 
-traffic systems, but at least in our case it is still backed up by
-the DSRC signals.
+traffic systems, but at least in our case the system is still
+backed up by the DSRC signals provision.
 
 \chapter{Further Directions}
-\indent
-One thing that should be done in the near future, if the system will be chosen to be 
-applied in real time scenarios would be to implement a securtiy 
-layer or protocol that would prevent attackers from distur
-bing the 
-normal traffic flow. Also, right now messages are not encrypted and 
-can be captured by anyone, so another step into protecting our system 
-would be to add a public-private key mechanism or try adding some 
-security protocols like Cerberus. \\
+\indent \indent
+The first improvenet that needs to be done before using our systems is 
+improving the security layer. As for now, we did not focused on it
+that much, all that was implemented as a security measure was a 
+public private key exchange with the help of RSA between the JMSs 
+and the TOs so that the connection key can not be intercepted
+and used malliciously. Regarding the other messages, we did not 
+encode them as they do not contain any kind of sensitive data and 
+it would of just lead to a overall slower performance. The problem  
+the needs to be adressed is the conectivity to the JMS of the VTs, so 
+that there can't be a mallicious entity that can fake the arrival of
+multiple VTs. One way to do it is to aproximate the average size of
+a vehicle and map out the area of already connected VTs,
+but this would lead to a high computational complexity as we
+would have to verify if any kind of bounding rects of our vechiles
+would overlap with one another. We would need to consider if we
+really want to add this kind of security measure when there is a
+such high cost regarding performance, or, of course, a better way
+to do it needs to be found. 
+
 \indent 
-Another thing that should be done before deploying our system on a 
+Another improvement that should be done before deploying our system on a 
 global level is to create a real time test environment, as for now,
 no real-time testing was done, so the system may or may not fail. 
 We tried to provide as close to reality data to our system, but there 
 are almost always room for error when dealing with such vast subjects
-like traffic management
+like traffic management. Right now the system is emulated for just
+one junction located in Timisoara, near West University of Timisoara.
+The GPS data is generated with the help of 
+\href{https://www.nmeagen.org/}{NMEAGEN} and the actual camera input 
+are videos as relevant as possible so we can handle as many traffic 
+scenarios as we can.
 
+\indent
+One last improvement that could be done before utilizing our systems 
+would be to improve our model capabilities of detecting vehicles by 
+gathering more data or even changing the whoule arhitecture of the 
+CNN(Convolutional Neural Network) model as for now we used already 
+pretrained models provided by the Tenserflow Object Detection library.
 \pagebreak
 \printbibliography
 
