@@ -83,8 +83,13 @@ namespace model
 			// IS TREATED AS A CLIENT SO CAN CHECK INSIDE CLIENTSCONNECTED
 			common::utile::ThreadSafeQueue<std::pair<common::utile::LANE, ipc::utile::IP_ADRESS>> waitingEmergencyVehicles_;
 			
-			uint16_t regLightDuration_;
+			uint16_t redLightDuration_;
+			uint16_t minRedLightDuration_;
+
 			uint16_t greenLightDuration_; // TO CHANGE INSIDE CONFIG MAXWAITTIME TO GREENLIGHT DURATION
+			uint16_t maxGreenLightDuration_;
+			uint16_t minGreenLightDuration_;
+
 			IObserverPtr greenLightObserver_;
 			std::function<void()> greeLightObserverCallback_;
 			common::utile::Timer greenLightTimer_;

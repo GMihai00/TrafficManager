@@ -78,7 +78,7 @@ namespace common
 		{
 			if (auto it = m_carGroupArrivalTimeMap.find(id); it != m_carGroupArrivalTimeMap.end())
 			{
-				m_totalTimeCarsWaited += m_timeRunning + std::chrono::seconds(m_updateFrequency - m_updateTimer->getTimeLeft()) - it->second.second;
+				m_totalTimeCarsWaited += m_timeRunning + (std::chrono::seconds(m_updateFrequency - m_updateTimer->getTimeLeft()) - it->second.second) * it->second.first;
 				m_carCount += it->second.first;
 				m_carGroupArrivalTimeMap.erase(it);
 			}

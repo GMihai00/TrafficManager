@@ -11,10 +11,16 @@ namespace model
 	{
 		
 		TrafficLightStateMachine::TrafficLightStateMachine(const common::utile::model::JMSConfig& config, const bool shouldDisplay) :
-			greenLightDuration_(config.maxWaitingTime),
-			regLightDuration_(15),
+			maxGreenLightDuration_(config.maxWaitingTime),
 			usingLeftLane_(config.usingLeftLane)
 		{
+			minGreenLightDuration_ = maxGreenLightDuration_ / 5;
+			//minGreenLightDuration_ = maxGreenLightDuration_; // decomentat in caz de testat fara optimizers
+			greenLightDuration_ = minGreenLightDuration_;
+
+			redLightDuration_ = greenLightDuration_ * 3;
+			minRedLightDuration_ = redLightDuration_;
+
 			missingLane_ = boost::none;
 			if (config.missingLane.has_value())
 				missingLane_ = config.missingLane.value();
@@ -29,7 +35,7 @@ namespace model
 				common::utile::LANE lane = (common::utile::LANE)laneNr;
 				if (!isLaneMissing(lane))
 				{
-					auto timer = std::make_shared<Timer>(regLightDuration_);
+					auto timer = std::make_shared<Timer>(redLightDuration_);
 					timer->unfreezeTimer();
 					laneToTimerMap_[lane] = timer;
 				}
@@ -276,7 +282,7 @@ namespace model
 					continue;
 
 				if (auto timer = laneToTimerMap_.find(lane.value()); timer != laneToTimerMap_.end() && (timer->second))
-					(timer->second)->resetTimer(regLightDuration_);
+					(timer->second)->resetTimer(redLightDuration_);
 			}
 		}
 
@@ -293,7 +299,7 @@ namespace model
 
 		void TrafficLightStateMachine::updateTimersDuration()
 		{
-			// return; // uncomment only for removing improvements for testing comparison
+			//return; // uncomment only for removing improvements for testing comparison
 			std::scoped_lock lock(mutexClients_);
 			
 			uint8_t numberOfCarsThatPassed = 0;
@@ -303,16 +309,37 @@ namespace model
 				numberOfCarsThatPassed += pair.second;
 			}
 
+			// aici probleme cred
 			// formulas to be changed, it's just an example
 			if (numberOfCarsThatPassed >= averageWaitingCars_)
 			{
 				if (isInConflictScenario())
 				{
-					greenLightDuration_ -= static_cast<uint16_t>((numberOfCarsThatPassed - averageWaitingCars_) * jumpTransitionQueue_.size());
+					auto val = static_cast<uint16_t>((numberOfCarsThatPassed - averageWaitingCars_) * jumpTransitionQueue_.size());
+
+					if (val > greenLightDuration_)
+					{
+						greenLightDuration_ = minGreenLightDuration_;
+					}
+					else
+					{
+						greenLightDuration_ -= val;
+						greenLightDuration_ = std::max(minGreenLightDuration_, greenLightDuration_);
+					}
 				}
 				else
 				{
-					regLightDuration_ -= (numberOfCarsThatPassed - averageWaitingCars_);
+					auto val = static_cast<uint16_t>(numberOfCarsThatPassed - averageWaitingCars_);
+
+					if (val > redLightDuration_)
+					{
+						redLightDuration_ = minRedLightDuration_;
+					}
+					else
+					{
+						redLightDuration_ -= val;
+						redLightDuration_ = std::max(redLightDuration_, minRedLightDuration_);
+					}
 				}
 
 			}
@@ -320,11 +347,32 @@ namespace model
 			{
 				if (isInConflictScenario())
 				{
-					regLightDuration_ += static_cast<uint16_t>((averageWaitingCars_ - numberOfCarsThatPassed) * jumpTransitionQueue_.size());
+					auto val = static_cast<uint16_t>((averageWaitingCars_ - numberOfCarsThatPassed) * jumpTransitionQueue_.size());
+					uint16_t maxRedLight = maxGreenLightDuration_ * 3u;
+					
+					if (redLightDuration_ + val < redLightDuration_)
+					{
+						redLightDuration_ = maxRedLight;
+					}
+					else
+					{
+						redLightDuration_ += val;
+						redLightDuration_ = std::min(redLightDuration_, maxRedLight);
+					}
 				}
 				else
 				{
-					greenLightDuration_ += (averageWaitingCars_ - numberOfCarsThatPassed);
+					auto val = static_cast<uint16_t>(averageWaitingCars_ - numberOfCarsThatPassed);
+
+					if (greenLightDuration_ + val < greenLightDuration_)
+					{
+						greenLightDuration_ = maxGreenLightDuration_;
+					}
+					else
+					{
+						greenLightDuration_ += val;
+						greenLightDuration_ = std::min(greenLightDuration_, maxGreenLightDuration_);
+					}
 				}
 			}
 		}
