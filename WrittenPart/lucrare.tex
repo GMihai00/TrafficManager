@@ -153,7 +153,7 @@ neural networks model that could recognize our vehicles.
 
 \indent \indent
 Lucrarea are ca scop prezentarea unui nou sistem de semaforizare 
-ce combina mai multe idei deja in uz. Ca si o partea introductiva,
+ce combina mai multe idei deja in uz. Ca si o parte introductiva,
 se va face o prezentare asupra tehnologiilor dezvoltatea de-a lungul 
 timpului. Vom aborda in special teme precum sisteme de semnaforizare 
 pe baza detectiei de obiecte, sisteme ce folosesc senzori, sisteme ce
@@ -185,10 +185,7 @@ urmatoarul server in ruta sa sau poate fi redirectionat la alt proxy
 din calea de acoperire a celui curent. De asemnea interactiunea cu server-ul
 principal este minimizata, deoarece dupa fiecare request clientul isi stocheaza 
 si salveaza toate proxiurile vizitate de acesta, interogand mereu utlimul 
-proxy vizitat. Astfel crestem eficienta sistemului, 
-dar si minimizam daunele unui potential atac cibernetic asupra 
-proxi-ului principal. Va fi descris fiecare tip de server si de client si rolul sau 
-in buna functionare a sistemului. Vom vorbi despre serverele ce vor capta 
+proxy vizitat. Vom vorbi despre serverele ce vor capta 
 date si vor gestiona traficul, ce vor fi amplasate la fiecare intersectie 
 in parte, despre clientul stationar ce este legat la o camera si
 detecteaza masinile ce urmeaza a trece prin intersectia noastra, despre 
@@ -204,7 +201,9 @@ credem ca adaptarea dinamica a timpului de astepare si a fazelor de trafic
 este cea mai buna solutie de gestionare a traficului din punctul nostru 
 de vedere.\\
 \indent \indent
-Intr-un final, vom propune potentiale imbunatatiri ale sistemului.
+Intr-un final, vom avea o privire critica asupra sistemului conceput, 
+interpretand datele obtinute si vom propune potentiale imbunatatiri
+ale acestuia.
 \pagebreak
 
 \tableofcontents
@@ -326,9 +325,7 @@ System (TSC)\\
     (\href{https://www.semanticscholar.org/paper/A-low-cost-environment-monitoring-system-using-Pi-Deshmukh-Shinde/e05a1fb72b08803d40dc06fa202241636fb82c21}{Image Source} \textcopyright ) }
     \label{fig:PI}
 \end{figure}
-\\
-
-\indent \indent
+\indent 
 By the time writing, TSC is an active research topic that proved to be really
 challenging. Continuous work has been done on designing and developing
 intelligent traffic signal control systems that could address the issue.\\
@@ -639,7 +636,7 @@ traffic conditions. \\
 \indent 
 We also want to create an affordable system that can be improved if 
 needed because we want to launch this system on a global scale, but not 
-everyone has the money to support new infrastructural requirements. 
+everyone has the financial power to support new infrastructural requirements. 
 Along with the upgradability of the system we will also guarante that 
 if any of our components will fail, the system will be able to continue
 working and not cause drastic traffic disturbance. One thing that needs
@@ -976,6 +973,7 @@ treated as a big project and splitted into multiple submodules:
         \item Common
         \item CarDetector
         \item IPC
+        \item GUIGLFW
     \end{itemize}
     
     \item executables
@@ -1235,18 +1233,50 @@ a and variable b to the message in this specific order we would need
 to first read variable b then variable a.
 \pagebreak
 
+\section{GUIGLFW}
+\indent \indent
+To be able to visualize the actual data, a GUI module was created. 
+It is only for demonstrative/testing purposes and it can be disabled 
+using a flag. To achive this we used GLFW, to be more precise we 
+pre drawn the junction and linked to our actual timers. When it comes
+to the cars we had a queue of waiting actions and whenever a car
+was detected by the JMS, the action of drawing was queued. The action
+itself will queue another action if the car hasn't reached the end 
+of the screen. Because we also wanted the scene to act just like a 
+junction, whenever we were about to cross the junction when drawing, 
+we would stop and delay the action if the red light persisted.
+
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{running/GUI_JMS.png}
+    \caption{GUI JMS}
+    \label{fig:GUI JMS}
+\end{figure}
+
+\indent
+In figure ~\ref{fig:GUI JMS} the cars that support DRSC are marked with 
+blue and the cars detected by the TO are marked with white. For each
+lane there is an associated description of the current state with the  
+corresponding timer as well as the number of vehicles waiting to 
+pass the junction. Due to limited space, we decided to allow 
+vehicles to overlap and just add to the number of cars waiting.
+
+\pagebreak
 \section{CarDetector}
 \indent \indent
 To be able to connect to the road traffic cameras and count the number of 
 incoming/outgoing vehicles wrappers over OpenCV library were made. The whole process 
 works as follows: it starts detecting the moving objects inside a give frame, try to 
 predict their next position and once they cross a imaginary lines inside the picture
-they are accounted if they were matched to be cars. To boost performance, the 
-module runs on 4 threads: providing images from the camera, detecting moving objects,
-classifying objects as cars and displaying the bounding boxes. The last one can be 
-disable, as it is just for illustrative purposes. \\
-
-\indent \indent
+they are accounted if they were matched to be cars. To improve changes 
+of actual registering the passage of a car, we considered cars 
+punctiform objects by only taking into account the center point of the 
+bounding rect as actual cars. \\
+\indent
+To boost performance, the module runs on 4 threads: providing images
+from the camera, detecting moving objects, classifying objects as
+cars and displaying the bounding boxes. The last one can be disable,
+as it is just for illustrative purposes. \\
+\indent 
 The car classification itself is 
 not done by the given module due to current C++ Tensorflow - OpenCV outdated compatibility,
 but by the ObjectDetectionServer written in Python. The CarDetector module just acts 
@@ -1255,13 +1285,36 @@ to the server. It is important to note that if, in the near future, the compatib
 will be fixed, it would server as a great performance upgrade to move this logic
 inside the module and remove any kind of process interactions.
 
+\section{Testing}
+\indent \indent
+To be able to test our whole system we created an executable that 
+would emulate the traffic conditions and run our system. The executable 
+takes multiple config files as input and is able to run multiple 
+servers (JMS/Proxys) and mutiple clients at the same time. It is 
+highly customizable as you can chose to run any kind of combination 
+regarding the number of each client/server. To emulate the movement of 
+the moving clients we generate GPS data with the help of 
+\href{https://www.nmeagen.org/}{NMEAGEN} as for the actual camera input 
+multiple videos were collected.  \\
+\indent
+We make use of WinAPI functions for handling processes so sadly the 
+module itself can only be run on Windows platforms. The way we do it 
+is by parsing each and every config provided and spawning process 
+accordingly. For example, for VTs we have a set of files containing 
+GPS input. Every 1-3 seconds we spawn a new VT with a randomly
+picked input to emulate the passing of a car.\\
+\indent
+To be able to collect actual data we made a plugin that will 
+periodically register the number of vehicles that passed as well as 
+the average time waiting at the junction.
 
+\pagebreak
 \section{ObjectDetectionServer} 
 \indent \indent
 To be able to able to detect if cars were present we made tried using 2 different 
 architectures: one based on YOLOv8 and one using Tenserflow Object Detection API, 
 while using the same dataset for training.\\
-\indent \indent
+\indent
 YOLO, short for You Only Look Once, is a popular real-time object detection system.
 It revolutionized the field of computer vision by introducing a unified approach to
 object detection that combines object localization and classification in a single
@@ -1271,14 +1324,15 @@ based on anchor boxes, which are pre-defined bounding box shapes of different si
 and aspect ratios. YOLO predicts the offsets and sizes of anchor boxes relative to
 the grid cells, as well as the probabilities of different classes for each bounding
 box. \\
+\indent
 After training our model we achivede a precision of 75\% but the detection, proved 
 to be to slow so we further looked for another architecture that could fit our objectives. \\
+\indent
 The architecture that we settled on was the one that was provided by Tenserflow
 Object Detection API.It is a powerful framework provided by Google's TensorFlow
 library that facilitates training, evaluating, and deploying object detection
 models. It offers a collection of pre-trained models and tools for building custom
 models to detect and localize objects in images and videos. 
-
 
 Due to the fact that the model will be loaded by a microcontroller a
 \href{https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md}{SSD MobileNet model}
@@ -1309,6 +1363,28 @@ traffic related objects but it will be used just for detecting cars. The model s
 is the most important thing here beeing able to evaluate 22 frames/s, as it's
 accuracy is not that great averaging 60\%. The overcome the low accuracy any object 
 that is more then 50\% likely to be a car will be taken into account.\\
+
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={$seconds$},
+            ylabel={$cars-counted$},
+        ]
+            \addplot[color=red]table {testData/dataYOLO.txt};
+            \addplot[color=blue]table {testData/dataTensorFlow.txt};
+        \end{axis}
+    \end{tikzpicture}
+    \label{fig:Comparison Tenserflow-YOLO}
+    \caption{Comparison Tenserflow-YOLO}
+\end{figure}
+
+A comparison between the speed of the Tenserflow model and YOLO can 
+be seen in figure ~\ref{fig:Comparison Tenserflow-YOLO} the blue line
+representing the amount of cars detected during a given period of time
+for the Tenserflow model and the red line represents the same ratio
+but for YOLO. It is clear that the speed performance of the
+Tenserflow model is superior.\\
 \indent
 The model itself is loaded just once on a server, because it is a really
 time consuming operation, and used whenever a new valid message is recieved.
@@ -1440,22 +1516,36 @@ be normalized back to their initial flow definition.
 \indent \indent
 The executable is a wrapper over the client implementation that combines
 cardetection functionalities. On startup it recieves a keyword for the junction to be able
-to determine what lane provided the incoming car message. To be able to run 
-the executable itself you will need to provide a camera as well as a way to 
+to determine what lane provided the incoming car message. \\
+\indent
+To be able to run the executable itself you will need to provide a camera as well as a way to 
 connect to the network, for example a zigbee. For testing porposes a
-video was provided instead of linking directly to a camera. ~\ref{fig:Running client samples}
-
-% de adaugat nume si descris eventual
-\begin{figure}[h!]
-    \includegraphics[width=\textwidth]{TrafficDetectionRunningExample.png}
-    \label{fig:Running client sample}
-\end{figure}
+video was provided instead of linking directly to a camera. In Figure 
+~\ref{fig:Running client samples} we can see in yellow bounding boxes 
+the objects that were detected to be moving and in red bound boxes 
+the moving objects that proved to be actual vehicles.
 
 \begin{figure}[h!]
     \includegraphics[width=\textwidth]{TrafficDetectionRunningExample2.png}
-
+    \caption{Real time traffic detection examples}
     \label{fig:Running client samples}
 \end{figure}
+
+\indent
+The way it works is as follow: It starts off by loading the cardetection module and attempting to 
+connect to the object detection server. After the connection is 
+established it reads the keyword provided when starting the executable 
+so that it can connect to the JMS. For security purposes we added a 
+public private key exchange using RSA(from OpenSSL). So, before sending 
+the actual keyword over the network, the public key of the JMS is 
+requested. Only after this operation finished successfully we encrypt 
+the keyword and send it over the network to the JMS so that it can be 
+decoded on the server side and determined if the keyword matches any 
+kind of available lanes.\\
+\indent
+Once everything is setup, it will periodically
+send the number of cars that have been detected so that the traffic state
+can be updated accordingly from the JMS side.
 
 \pagebreak
 \section{VehicleTracker}
@@ -1464,7 +1554,8 @@ The executable is a wrapper over the client. On startup it tries loading a
 config file that contains an ordered list with the previous queried proxies.
 If not present, it will just interogate the main server. Once the application
 shuts down a config file will be saved with all the queried proxys, so it will
-almost always load a config file.
+almost always load a config file. It contains a list of proxys represented by
+their conneciton data.
 
 \begin{lstlisting}[language = C++][H]
 {
@@ -1496,7 +1587,7 @@ have passed a junction the whole process restarts from the last queried proxy.
     \label{fig:Proxy junction data reply}
 \end{figure}
 
-%de impartit in mai multe subcapitole "Conclusions and Further Directions"
+
 \chapter{Conclusions}
 \indent \indent
 In this paper, through an analysis of existing research,
@@ -1569,7 +1660,7 @@ detected.
         \end{axis}
     \end{tikzpicture}
     \label{fig:All Optimizer vs no timer duration update}
-    \caption{Performance comparison to regular traffic systems}
+    \caption{Performance comparison to none DSRC traffic}
 \end{figure}
 
 \indent 
