@@ -27,7 +27,7 @@ namespace model
         common::utile::IObserverPtr observer_;
         std::function<void()> observer_callback_;
         std::string keyword_;
-        std::shared_ptr<security::RSA::PublicKey> publicKey_ = nullptr;
+        security::RSAWrapperPtr m_RSAWrapper = nullptr;
         std::atomic_bool secureConnectionEstablished_ = false;
         std::mutex mutexSendCarData_;
 

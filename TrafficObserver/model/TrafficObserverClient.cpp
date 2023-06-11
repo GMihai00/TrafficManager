@@ -95,32 +95,32 @@ namespace model
 
         if (!answear.has_value()) { return false; }
 
-        
-        uint32_t power = 0;
-        uint32_t modulo = 0;
-
         auto msg = answear.value().first.msg;
 
         if (msg.header.type != ipc::VehicleDetectionMessages::ACK)
             return false;
 
-        msg >> modulo;
-        msg >> power;
+        std::string publicKey;
+        publicKey.resize(msg.header.size);
 
-        if (power == 0 || modulo == 0)
+        msg >> publicKey;
+
+        try
         {
-            LOG_ERR << "Failed to read public key data power= " << power << " modulo= " << modulo;
+            m_RSAWrapper = std::make_shared<security::RSAWrapper>(publicKey);
+        }
+        catch (const std::exception& err)
+        {
+            LOG_ERR << err.what();
             return false;
         }
-
-        publicKey_ = std::make_shared<security::RSA::PublicKey>(power, modulo);
 
         return true;
     }
 
     bool TrafficObserverClient::sendSecureConnectRequest()
     {
-        if (!connection_ || !publicKey_)
+        if (!connection_ || !m_RSAWrapper)
         {
             LOG_ERR << "Connection not established, failed to send message";
             return false;
@@ -131,9 +131,15 @@ namespace model
         message.header.id = messageIdProvider_.provideId(ipc::VehicleDetectionMessages::SECURE_CONNECT);
         message.header.hasPriority = false;
 
-        //auto encryptedKey = publicKey_->encrypt(keyword_);
-        auto encryptedKey = keyword_;
-        message << encryptedKey;
+        auto encryptedKey = m_RSAWrapper->encryptMessage(keyword_);
+        
+        if (!encryptedKey)
+        {
+            LOG_ERR << "Failed to encrypt message";
+            return false;
+        }
+
+        message << *encryptedKey;
 
         connection_->send(message);
 

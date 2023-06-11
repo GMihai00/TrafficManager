@@ -25,8 +25,7 @@ namespace model
 		controller::TrafficLightStateMachine trafficLightStateMachine_;
 		std::map<common::utile::LANE, std::string> laneToKeyword_;
 
-		// public, private
-		std::pair<security::RSA::KeyPtr, security::RSA::KeyPtr> keyPair_;
+		security::RSAWrapperPtr m_RSAWrapper;
 		LOGGER("JUNCTION-SERVER");
 
 		boost::optional<common::utile::LANE> getMessageSourceLane(

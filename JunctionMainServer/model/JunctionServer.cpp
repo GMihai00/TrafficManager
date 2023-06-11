@@ -10,7 +10,7 @@ namespace model
 	{
 		try
 		{
-			keyPair_ = security::RSA::generateKeyPair();
+			m_RSAWrapper = std::make_shared<security::RSAWrapper>();
 		}
 		catch (const std::exception& err)
 		{
@@ -140,45 +140,48 @@ namespace model
 
 	void JunctionServer::providePublicKeyToClient(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
-		auto publicKey = std::dynamic_pointer_cast<security::RSA::PublicKey>(keyPair_.first);
-
-		if (!publicKey)
+		if (!m_RSAWrapper)
 		{
 			LOG_ERR << "No key pair generate";
 			rejectMessage(client, msg);
 			return;
 		}
 
-		auto value = publicKey->getKeyNumericValues();
+		auto publicKey = m_RSAWrapper->getPublicKeyAsString();
 
 		ipc::net::Message<ipc::VehicleDetectionMessages> message;
 		message.header.id = msg.header.id;
 		message.header.type = ipc::VehicleDetectionMessages::ACK;
 
-		message << value.first;
-		message << value.second;
+		message << publicKey;
 
 		messageClient(client, message);
 	}
 
 	bool JunctionServer::verifyIfSecureConnectionCanBeEstablished(ipc::utile::ConnectionPtr client, ipc::utile::VehicleDetectionMessage& msg)
 	{
+		if (!m_RSAWrapper)
+		{
+			LOG_ERR << "No key pair generated";
+			rejectMessage(client, msg);
+			return false;
+		}
+
 		std::string keyword;
 		keyword.resize(msg.header.size);
 
 		msg >> keyword;
 
-		if (!keyPair_.second)
+		auto decryptedKeyword = m_RSAWrapper->decryptMessage(keyword);
+
+		if (!decryptedKeyword)
 		{
-			LOG_ERR << "No key pair generate";
+			LOG_ERR << "Failed to decrypt message";
 			rejectMessage(client, msg);
 			return false;
 		}
 
-		//auto decryptedKeyword = keyPair_.second->encrypt(keyword);
-		auto decryptedKeyword = keyword;
-
-		auto lane = getLaneBasedOnKeyword(decryptedKeyword);
+		auto lane = getLaneBasedOnKeyword(*decryptedKeyword);
 
 		if (!lane.has_value())
 		{
