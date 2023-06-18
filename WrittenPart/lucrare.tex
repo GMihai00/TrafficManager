@@ -103,6 +103,7 @@ BACHELOR STUDY PROGRAM:  Computer Science}}
 \normalsize{}
 
 \section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
 \indent \indent
 Effective traffic management is a vital component in ensuring
 the smooth and efficient movement of vehicles, reducing congestion,
@@ -148,9 +149,8 @@ neural networks model that could recognize our vehicles.
 
 \pagebreak
 
-% de adaugat si rezumat in romana 
-{\Large\textbf{Rezumat}} \\
-
+\section*{Rezumat}
+\addcontentsline{toc}{section}{Rezumat}
 \indent \indent
 Lucrarea are ca scop prezentarea unui nou sistem de semaforizare 
 ce combina mai multe idei deja in uz. Ca si o parte introductiva,
@@ -208,7 +208,6 @@ ale acestuia.
 
 \tableofcontents
 
-\pagebreak
 
 \listoffigures
 \pagebreak
@@ -574,7 +573,7 @@ transitioning from existing traffic control systems to  VTL systems.
 
 % de pus aici chapter cu motivatie
 \pagebreak
-\chapter{Current state of traffic and further goals}
+\chapter{Current state of traffic, further goals and objectives}
 \indent \indent
 On a global scale, traffic congestion is a prevalent issue in many
 major cities and urban areas. As urbanization and population growth
@@ -607,7 +606,7 @@ inefficient traffic management systems, and a high reliance on private
 vehicles. Additionally, accidents, road maintenance, and adverse
 weather conditions can exacerbate congestion levels. \\
 \indent 
-What determined us to  write this paper is the traffic that we 
+What determined us to  write this thesis is the traffic that we 
 experienced in Timisoara, Romania at the time writting. We believe that
 the traffic system here is based on traffic light synchronization systems 
 due to the fact the most of the time, when you are able to catch the 
@@ -642,7 +641,11 @@ if any of our components will fail, the system will be able to continue
 working and not cause drastic traffic disturbance. One thing that needs
 to be taken in consideration as well is the fact that some components 
 can single-handedly manage traffic if the traffic volume is relatively 
-low so in many scenarios you won't even need to upgrade the system.
+low so in many scenarios you won't even need to upgrade the system. \\
+\indent
+One final goal is to make the system deployable on a global basis. For 
+that we will need to develop a some kind of way to scale our system 
+horizonally.
 
 \pagebreak
 
@@ -1038,7 +1041,7 @@ was develop, while using Boost Asio for socket handling. The loggic
 itself runs on 4 threads: one for keeping the context running, one for reading,
 one for writing and one for notifying progress.
 
-\begin{lstlisting}[language = C++][H]
+\begin{lstlisting}[caption={Client template}, language = C++][H]
     template<typename T>
     class Client
     {
@@ -1047,22 +1050,20 @@ one for writing and one for notifying progress.
             incomingMessages_;
 
     protected:
-    boost::asio::io_context context_;
-    std::thread threadContext_;
-    std::mutex mutexUpdate_;
-    std::mutex mutexGet_;
-    std::shared_mutex mutexConnection_;
-    std::condition_variable condVarUpdate_;
-    std::unique_ptr<Connection<T>> connection_;
-    std::atomic<bool> shuttingDown_;
-    boost::asio::io_context::work idleWork_; 
-    std::unique_ptr<IClientDisconnectObserver<T>> 
-        observer_; 
-    LOGGER("CLIENT");
+        boost::asio::io_context context_;
+        std::thread threadContext_;
+        std::mutex mutexUpdate_;
+        std::mutex mutexGet_;
+        std::shared_mutex mutexConnection_;
+        std::condition_variable condVarUpdate_;
+        std::unique_ptr<Connection<T>> connection_;
+        std::atomic<bool> shuttingDown_;
+        boost::asio::io_context::work idleWork_; 
+        std::unique_ptr<IClientDisconnectObserver<T>> 
+            observer_; 
         LOGGER("CLIENT");
     public:
-        bool connect(const utile::IP_ADRESS& host,
-            const ipc::utile::PORT port);
+        bool connect(const IP_ADRESS& host, const PORT port);
         void disconnect();
         bool isConnected();
         void send(const Message<T>& msg);
@@ -1083,7 +1084,7 @@ The actual waiting for the messages is done trough the use of unique
 locks and condition variables so that busy waits are avoided.
 \pagebreak
 
-\begin{lstlisting}[language = C++][H]
+\begin{lstlisting}[caption={Connection template}, language = C++][H]
     template <typename T>
     class Connection
     : public std::enable_shared_from_this<Connection<T>>
@@ -1118,8 +1119,7 @@ locks and condition variables so that busy waits are avoided.
         void writeMessages();
     public:
         Owner getOwner() const;
-        bool connectToServer(
-            const ip::tcp::resolver::results_type& endpoints);
+        bool connectToServer(const results_type& endpoints);
         bool connectToClient(uint32_t id);
         void disconnect();
         bool isConnected() const;
@@ -1134,7 +1134,7 @@ any of the other to classes so that it can notify the owner that a
 new message has arrived. 
 \pagebreak
 
-\begin{lstlisting}[language = C++][H]
+\begin{lstlisting}[caption={Server template}, language = C++][H]
     template<typename T>
     class Server
     {
@@ -1185,7 +1185,7 @@ overwrite those given callbacks.
 
 \pagebreak
 
-\begin{lstlisting}[language = C++][H]
+\begin{lstlisting}[caption={Message template}, language = C++][H]
     template <typename T>
     struct MessageHeader
     {
@@ -1509,7 +1509,56 @@ for the corresponding timer.\\
 During the testing of the given module it was observed that traffic tends to keep it's 
 normal flow, there is no jumping between traffic states unless a large inflow of cars is 
 detected. Even if this happens, after the required jump transitions, traffic states will 
-be normalized back to their initial flow definition.
+be normalized back to their initial flow definition. \\
+
+\indent
+We mainly focused on the performance part to be able to provide
+the best traffic conditions that we could offer at minimal costs.
+To be able to display it, we compared it with the normal 
+flow of traffic by keeping the tracking capabilities of our system 
+and removing timers dynamic adaptations based on traffic inflow. 
+The red line (Fig ~\ref{fig:Optimizer vs no optimizers}) represents the 
+average amount of time cars had to wait when traffic was 
+calculated statically with a set waiting time and fixed traffic state 
+transitions. The blue line (Fig ~\ref{fig:Optimizer vs no optimizers}) 
+represents the average amount of time cars had to wait when the 
+waiting time was calculated dinamically and we could jump trough 
+the traffic states based on traffic inflow. We also wanted to present a 
+scenario when our sistem will not perform optimally, so in Fig 
+~\ref{fig:Optimizer vs no optimizers in rain} we presented 
+the performance differce when it's raining. As you can see,
+it's clear that cars had to wait less time when the optimiziers
+were enabled. \\
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={$average-waiting-time$},
+            ylabel={$cars-passed$},
+        ]
+            \addplot[color=red]table {testData/carTesting/noOptimizers/20230610_132908.txt};
+            \addplot[color=blue]table {testData/carTesting/Optimizers/20230610_132406.txt};
+        \end{axis}
+    \end{tikzpicture}
+    \label{fig:Optimizer vs no optimizers}
+    \caption{Performance comparison to regular traffic systems}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={$average-waiting-time$},
+            ylabel={$cars-passed$},
+        ]
+            \addplot[color=red]table {testData/carTesting/noOptimizers/20230610_132908.txt};
+            \addplot[color=blue]table {testData/carTesting/Optimizers/Rain/20230610_132407.txt};
+        \end{axis}
+    \end{tikzpicture}
+    \label{fig:Optimizer vs no optimizers in rain}
+    \caption{Performance comparison during bad weather condtions}
+\end{figure}
+
 
 \pagebreak
 \section{TrafficObserver}
@@ -1589,29 +1638,14 @@ have passed a junction the whole process restarts from the last queried proxy.
 
 
 \chapter{Conclusions}
+\section{A new way to manage traffic}
 \indent \indent
-In this paper, through an analysis of existing research,
+In this thesis, through an analysis of existing research,
 implementation examples, and emerging trends, we have gained valuable
 insights into the effectiveness and potential of traffic management
 systems. With the data collected, we have provided a new alternative 
 way of managing traffic by defining and implementing a new traffic 
 system that we believe will significantly improve traffic flow. \\
-
-\begin{figure}[h!]
-    \centering
-    \begin{tikzpicture}
-        \begin{axis}[
-            xlabel={$average-waiting-time$},
-            ylabel={$cars-passed$},
-        ]
-            \addplot[color=red]table {testData/carTesting/noOptimizers/20230610_132908.txt};
-            \addplot[color=blue]table {testData/carTesting/Optimizers/20230610_132406.txt};
-        \end{axis}
-    \end{tikzpicture}
-    \label{fig:Optimizer vs no optimizers}
-    \caption{Performance comparison to regular traffic systems}
-\end{figure}
-
 \indent
 The new system itself attempts to bennefit on already existing V2V and V2I
 communication and provides an IPC based system with multiple clients, servers
@@ -1619,28 +1653,15 @@ and proxys that can achive data car collection and processing on a global scale.
 It servers as a new economic aproach, due to the low hardware requirements,
 and acts as a bridge between current traffic flow handling and a fully 
 DSRC signal based traffic control system that we believe will be the 
-future of traffic handling systems. \\
-\indent 
-We mainly focused on the performance part to be able to provide
-the best traffic conditions that we could offer at minimal costs.
-To be able to display it, we compared it with the normal 
-flow of traffic by keeping the tracking capabilities of our system 
-and removing timers dynamic adaptations based on traffic inflow. 
-The red line (Fig ~\ref{fig:Optimizer vs no optimizers}) represents the 
-average amount of time cars had to wait when traffic was 
-calculated statically with a set waiting time and fixed traffic state 
-transitions. The blue line (Fig ~\ref{fig:Optimizer vs no optimizers}) 
-represents the average amount of time cars had to wait when the 
-waiting time was calculated dinamically and we could jump trough 
-the traffic states based on traffic inflow. As you can see,
-it's clear that cars had to wait less time when the optimiziers
-were enabled. \\
-\indent 
-One of the main disadvantages of our method is the fact the
+future of traffic handling systems.
+
+\section{System Flaws and Further Directions}
+\indent \indent
+The main disadvantage of our method is the fact the
 green/red light time duration updates only when a DSRC vechile
 passes the junction, so if there isn't any support from the infrastructure,
-then we will be left with no green light/red light time increase/decrese.
-We would just have the same waiting time, but it can be still decreased 
+then we will assume to be left with no green light/red light time increase/decrese.
+This hypothesiss is wrong, because timer will still decreased 
 based on the number of vehicles that arrive at the junction. So actually
 we would just not have any kind of timer increase. As a result we would 
 have much higher odds of encountering traffic state conflicts described in 
@@ -1664,13 +1685,6 @@ detected.
 \end{figure}
 
 \indent 
-One other disadvantage is that in bad weather condition, the camera 
-detection won't work as with any other object recognition based 
-traffic systems, but at least in our case the system is still
-backed up by the DSRC signals provision.
-
-\chapter{Further Directions}
-\indent \indent
 The first improvenet that needs to be done before using our systems is 
 improving the security layer. As for now, we did not focused on it
 that much, all that was implemented as a security measure was a 
