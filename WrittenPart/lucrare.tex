@@ -651,7 +651,7 @@ horizonally.
 
 \chapter{A new flexible economic approach}
 \indent \indent
-We belive that the future of traffic light management will be
+We believe that the future of traffic light management will be
 based on DSRC like signals. No matter if it will still be based 
 on DSRC, 5G or even 6G will take lead, we aim to provide a some kind of
 software system that would be able to handle any kind message based 
@@ -870,16 +870,16 @@ you would have to wait ages for you to be able to cross. This prevents that
 and acts just like an "aging mechanism" (Figure ~\ref{fig:UC_SendVehicleData}).
 
 \begin{figure}[h!]
-    \includegraphics[width=\textwidth]{Sketches/AvailableJunctionPhazes.png}
-    \caption{Junction Phazes}
-    \label{fig:Junction_Phazes}
+    \includegraphics[width=\textwidth]{Sketches/AvailableJunctionphases.png}
+    \caption{Junction phases}
+    \label{fig:Junction_phases}
 \end{figure}
 
-As far as the main algorithm for the traffic management goes we have 8 phazes of
-the traffic (Figure ~\ref{fig:Junction_Phazes}). The most basic scenarios is that the 
-traffic will follow that 8 phaezes going trough phaezes 1 to phaze 8 in order and cycle. That's
+As far as the main algorithm for the traffic management goes we have 8 phases of
+the traffic (Figure ~\ref{fig:Junction_phases}). The most basic scenarios is that the 
+traffic will follow that 8 phaezes going trough phaezes 1 to phase 8 in order and cycle. That's
 the implementation for the way the traffic works, but we want to also be
-able to jump from one phaze to any other at any given time, to be able to shorcut
+able to jump from one phase to any other at any given time, to be able to shorcut
 the system. For that we are basing on several things.\\
 
 \indent \indent
@@ -889,44 +889,44 @@ VT and TO and calculate an average of cars waiting.
 
 \indent \indent
 Second of all we will need to fully understand our traffic pahzes, why the are required
-and how to determine the phaze we want to switch to. For that we first described the 
-phazes based on the acting vehicles.\\
+and how to determine the phase we want to switch to. For that we first described the 
+phases based on the acting vehicles.\\
 \begin{itemize}
-    \item PHAZE I: E + W waiting vehicles
-    \item PHAZE II: N waiting vehicles
-    \item PHAZE III: S waiting vehicles
-    \item PHAZE IV: E + W waiting vehicles (same with PHAZE I)
-    \item PHAZE V: N + S waiting vehicles
-    \item PHAZE VI: E waiting vehicles=
-    \item PHAZE VII: W waiting vehicles
-    \item PHAZE VIII: N + S waiting vehicles (sane with PHAZE V)
+    \item PHASE I: E + W waiting vehicles
+    \item PHASE II: N waiting vehicles
+    \item PHASE III: S waiting vehicles
+    \item PHASE IV: E + W waiting vehicles (same with phase I)
+    \item PHASE V: N + S waiting vehicles
+    \item PHASE VI: E waiting vehicles=
+    \item PHASE VII: W waiting vehicles
+    \item PHASE VIII: N + S waiting vehicles (sane with phase V)
 \end{itemize}
 
 \indent \indent
-We want to know when to switch from one phaze to another. For that we will have
+We want to know when to switch from one phase to another. For that we will have
 timers for each direction: E, W, N and S. At first all the timers will be set to 
 a costum amount, but the waiting time will be changed dinamically based on the 
 traffic conditions as well as the green light waiting time.\\
 \indent \indent
 To start the whole mechanism we want to initiate the traffic as usual, 
-having the normal order of phazez running and for us to switch to and abnormal 
-phaze we'll just need one or more timers to expire. The check for the jump to an abnormal phaze
+having the normal order of phasez running and for us to switch to and abnormal 
+phase we'll just need one or more timers to expire. The check for the jump to an abnormal phase
 will be done ONLY when GREEN LIGHT ENDS.\\
 \indent \indent
-Last but not least we need to define the way our algorithm jumps from one phaze to 
+Last but not least we need to define the way our algorithm jumps from one phase to 
 another, for that we will use the following example
-(Figure ~\ref{fig:PhazesSwitchingExample}):
+(Figure ~\ref{fig:phasesSwitchingExample}):
 \begin{figure}[h!]
-    \includegraphics[width=\textwidth]{Sketches/SwitchingTroughPhazesExample.png}
-    \caption{Phaze switching example}
-    \label{fig:PhazesSwitchingExample}
+    \includegraphics[width=\textwidth]{Sketches/SwitchingTroughphasesExample.png}
+    \caption{phase switching example}
+    \label{fig:phasesSwitchingExample}
 \end{figure}
 \\
 \indent \indent
-At the end of every green light phaze we check the timers. If any of 
-them expired we jump to it's corresponding phaze. If, for example the following state
-coresponds to the phaze we want to jump to, we do not short circuit the normal flow of
-things. Every time we are trough green light phazes the timers corresponding to 
+At the end of every green light phase we check the timers. If any of 
+them expired we jump to it's corresponding phase. If, for example the following state
+coresponds to the phase we want to jump to, we do not short circuit the normal flow of
+things. Every time we are trough green light phases the timers corresponding to 
 each lane that has a green signal is frozen and afterwards reseted.\\
 \indent \indent
 There are also "traffic conflicts" that can occur, for example, what if 
@@ -936,13 +936,13 @@ scenarios that we want to avoid the most. The way we handle them at the given mo
 that we just use FIFO logic, take the timers that expired first and build an existing traphic 
 phase. When this happens we afterwards update the green and red light timers 
 duration accordingly to prevent any more occurances. An example of the given 
-scenario can be seen in Figure ~\ref{fig:FaultyPhazeSwitching}. 
+scenario can be seen in Figure ~\ref{fig:FaultyphaseSwitching}. 
 
 
 \begin{figure}[h!]
-    \includegraphics[width=\textwidth]{Sketches/PhazeSwitchingCaseToBeAvoided.png}
-    \caption{Faulty phaze switching}
-    \label{fig:FaultyPhazeSwitching}
+    \includegraphics[width=\textwidth]{Sketches/phaseSwitchingCaseToBeAvoided.png}
+    \caption{Faulty phase switching}
+    \label{fig:FaultyphaseSwitching}
 \end{figure}
 
 \section{Emergency states}
@@ -1008,7 +1008,7 @@ the testing module, as it is using WinAPI to spawn and handle processes.
 \pagebreak
 \section{Common}
 \indent \indent
-The main ideea of the common submodule is to act as a helper library. It provides 
+The main idea of the common submodule is to act as a helper library. It provides 
 solutions to the following commonly found problems:
 \begin{description}
     \item[Multi threaded concurency:] Thread safe structures:\\
@@ -1510,7 +1510,7 @@ During the testing of the given module it was observed that traffic tends to kee
 normal flow, there is no jumping between traffic states unless a large inflow of cars is 
 detected. Even if this happens, after the required jump transitions, traffic states will 
 be normalized back to their initial flow definition. \\
-\indent
+\indent`'
 We mainly focused on the performance part to be able to provide
 the best traffic conditions that we could offer at minimal costs.
 To be able to display it, we compared it with the normal 
