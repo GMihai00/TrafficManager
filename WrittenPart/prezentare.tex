@@ -185,18 +185,67 @@
         
     \end{frame}
 
-\section{Stadiul curent al traficului, scopuri si obiective}
-    \begin{frame}{Stadiul curent al traficului, scopuri si obiective}
+\section{Motivatie, scopuri si obiective}
+    \begin{frame}{Motivatie, scopuri si obiective}
+        Ce ne-a determinat pe noi sa concepem acest nou tip de sistem este
+        experienta in traficul Timisoara, Romania. 
+        Credem că sistemul de trafic de aici se bazează pe sisteme de sincronizare a semafoarelor,
+        deoarece de cele mai multe ori, atunci când puteți prinde semaforul
+        verde la un anumita intersecție, le veti prinde si pe restul ce urmeaza.
+        Ce este problematic si credem ca asta problema principala a soferilor 
+        sunt orele de varf, cand traficul nu este gestionat bine si de 
+        multe ori va trebuie sa astepti la acelasi semafor pana la 3 sau ba 
+        chiar 4 cicluri de rosu si verde. Problema prezentata este datorita faptului 
+        ca din cauza volumului mare de trafic, masinile nu vor mai putea circula 
+        cu o viteza constanta iar traficul in sine va fi desincronizat.
+        Acesta este doar un exemplu de trafic gestionat prost, dar 
+        acesta problema persista la nivel global, netinand cont de 
+        tipul de sistem folosit, mereu vom ajunge la ambuteiaje. 
+        Principalele noastre obiective sunt crearea unui sistem:
+
+        \begin{itemize}[<+-| alert@+>]
+            \item Performant si accesibil
+            \item Adaptabil la orice conditie de trafic
+            \item Scalabil la nivel global
+            
+        \end{itemize}
 
     \end{frame}
 
 \section{O noua varianta flexibila si economica de a gestiona traficul}
     \begin{frame}{O noua varianta flexibila si economica de a gestiona traficul}
-    
+        Credem că viitorul gestionari traficului se va baza pe semnale
+        asemanatoare cu cele DSRC. Deocamdată, infrastructura nu oferă o
+        modalitate de a implementa acest tip de sisteme, asa ca am decis
+        să dezvoltăm o nouă abordare care să combină și să preia cele mai
+        bune caracteristici din toate tehnologiile descrise mai sus și să
+        ofere o migrare ușoară. Pentru asta am conceput un sistem IPC 
+        alcatuit din 2 tipuri de servere si 2 tipuri de clienti:
+        \begin{itemize}[<+-| alert@+>]
+            \item Servere: 
+            \begin{enumerate}
+                \item  Junction Main Server(JMS) - legat de intersectie si semafoare
+                \item  Proxy - servere regionale ce asigura conectivitatea
+            \end{enumerate}
+            \item Clienti:
+            \begin{enumerate}
+                \item Traffic Observer(TO) - legat de catre o camera pe fiecare directie
+                \item Vehicle Tracker(VT) - instalat direct pe autovehicul
+            \end{enumerate}
+        \end{itemize}
+
     \end{frame}
 
     \begin{frame}{Vehicle tracker}
-    
+        Clientul respectiv se va folosi de componentele deja instalate 
+        pe o masina anume: GPS si Radio. Astfel acesta va determina 
+        pozitia geografica atat cat si directia de mers si prin
+        intermediul Proxy-ului se va conecta la urmatoarea intersectie, 
+        semnaland intentia de traversare. Odata ce clientul respectiv 
+        a trecut de intersectie, el se va deconecta si va interoga 
+        ultimul proxy cunoscut. Astfel, vom avea o metoda rapida si 
+        neperturbabila de a transmite date catre semafor, putand determina 
+        usor starea traficului in orice momemnt.
     \end{frame}
 
     \begin{frame}{Proxy}
